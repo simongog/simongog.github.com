@@ -15,6 +15,21 @@
     <link href="{{ ASSET_PATH }}/bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <link href="{{ ASSET_PATH }}/css/style.css?body=1" rel="stylesheet" type="text/css" media="all">
 
+     <script src="http://d3js.org/d3.v2.js"></script>
+	 <script src="/assets/js/sdsl2svg.js"></script>
+     <style type="text/css">
+          path { stroke: #000; stroke-width: 0.8; cursor: pointer; }
+          #breadcrumbs { display: none; }
+		  svg { font: 12px sans-serif; }
+		  svg .ticks {stroke-width:1; stroke: black; opacity: 0.8; }
+		  svg .info_text { font: 14px sans-serif;}
+		  svg .size_info_text { font: 12px sans-serif; font-weight: bold; text-align: end; text-anchor: middle;}
+		  svg .sel_rect {opacity:1.0}
+		  svg .unsel_rect {opacity: 0.5;}
+		  svg .detailLabel {font: 16px sans-serif; font-weight: bold; opacity: 0.7; }
+		  svg .overzoomrect {fill: black; opacity: 0.8;}
+		  em {font-weight:600;}
+       </style>
     <!-- Le fav and touch icons -->
   <!-- Update these with your own images
     <link rel="shortcut icon" href="images/favicon.ico">
@@ -25,7 +40,6 @@
   </head>
 
   <body>
-
     <div class="navbar">
       <div class="navbar-inner">
         <div class="container">
@@ -40,7 +54,13 @@
     </div>
 
     <div class="container">
-
+	<!-- latex definitions -->
+	<div style="display:none;">
+\( 
+\newcommand{\Order}[1]{\mathcal{O}(#1)}   
+\newcommand{\TEXT}{\mathcal{T}}   
+\)
+	</div>
       <div class="content">
         {{ content }}
       </div>
@@ -62,7 +82,6 @@
 
 
 	<script type="text/x-mathjax-config"> MathJax.Hub.Config({ TeX: { equationNumbers: {autoNumber: "all"} } });       </script>
-
 
     {% include JB/analytics %}
   </body>
