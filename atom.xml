@@ -1,28 +1,159 @@
----
-layout: nil
-title : Atom Feed
----
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
  
- <title>{{ site.title }}</title>
- <link href="{{ site.production_url }}/atom.xml" rel="self"/>
- <link href="{{ site.production_url }}"/>
- <updated>{{ site.time | date_to_xmlschema }}</updated>
- <id>{{ site.production_url }}</id>
+ <title>Succinct Data Structures</title>
+ <link href="http://simongog.github.com/atom.xml" rel="self"/>
+ <link href="http://simongog.github.com"/>
+ <updated>2012-08-26T20:38:30+10:00</updated>
+ <id>http://simongog.github.com</id>
  <author>
-   <name>{{ site.author.name }}</name>
-   <email>{{ site.author.email }}</email>
+   <name>Simon Gog</name>
+   <email>simon.gog@gmail.com</email>
  </author>
 
- {% for post in site.posts %}
+ 
  <entry>
-   <title>{{ post.title }}</title>
-   <link href="{{ site.production_url }}{{ post.url }}"/>
-   <updated>{{ post.date | date_to_xmlschema }}</updated>
-   <id>{{ site.production_url }}{{ post.id }}</id>
-   <content type="html">{{ post.content | xml_escape }}</content>
+   <title>Calculating the k-th order empirical entropy in linear time</title>
+   <link href="http://simongog.github.com/lessons/2012/08/26/Calculating_H_k_in_linear_time"/>
+   <updated>2012-08-26T00:00:00+10:00</updated>
+   <id>http://simongog.github.com/lessons/2012/08/26/Calculating_H_k_in_linear_time</id>
+   <content type="html">&lt;p&gt;In this post, I will explain how it is possible to efficiently
+calculate different measures of text compressibility -- the zeroth
+and \(k\)-th order empirical entropy -- using
+&lt;a href=&quot;http://github.com/simongog/sdsl&quot;&gt;sdsl&lt;/a&gt;. For both cases
+we use a compressed suffix tree (CST) to do the calculation.
+So step one is to build a compressed suffix tree of a
+text file. This can be easily done with the following
+code snippet:
+&lt;script src=&quot;http://gist.github.com/3355523.js&quot;&gt;&lt;/script&gt;
+You can copy this program into the examples directory and
+execute &lt;code&gt;make&lt;/code&gt; to get an executable, which will
+construct a CST for the file given by the first argument
+to the program. Lets take for example the file 
+&lt;code&gt;faust.txt&lt;/code&gt; which is located in the libraries
+test suite. A run of the program produces a CST 
+names &lt;code&gt;faust.txt.cst3&lt;/code&gt;. The CST has size 
+460 kB for the original 222 kB. &lt;/p&gt;
+
+&lt;h2 id=&quot;toc_249&quot;&gt;1 Calculating the zeroth order entropy&lt;/h2&gt;
+
+&lt;p&gt;The zeroth order empirical entropy \(H_0\) 
+of a text \(\TEXT\) of length \(n\) 
+over an alphabet \(\Sigma=\{c_0,\ldots,c_{\sigma-1}\}\) of size \(\sigma \) is a lower 
+bound for a compressor which encodes each symbol with a 
+fixed prefix code. It is defined as &lt;/p&gt;
+
+&lt;div&gt;
+\[
+H_0(\TEXT) = \sum\limits_{i=0}^{\sigma-1} \frac{n_i}{n} \log{\frac{n}{n_i}}
+\]
+&lt;/div&gt;
+
+&lt;p&gt;where \(n_i\) is the number of occurrences of character 
+\(c_i\) in \(\TEXT\). It is very easy to see that 
+\(n_i\) corresponds to the size of subtree (e.g. number of
+leaves in the subtree) rooted at the
+\(i\)-th child of the root of the CST. The length of the
+text \(n\) corresponds to the size of the whole tree.
+Therefore, the following method calculates \(H_0(\TEXT)\) 
+if &lt;code&gt;v&lt;/code&gt; is the root node of our CST: &lt;/p&gt;
+
+&lt;script src=&quot;http://gist.github.com/3355768.js&quot;&gt;&lt;/script&gt;
+
+&lt;p&gt;The code is straightforward: If the root node is a leave, then
+the tree and the text are empty and \(H_0\) should be 0.
+Otherwise we recover \(n\) by determine the size of the
+subtree of &lt;code&gt;v&lt;/code&gt; and calculate the first child. We then add for
+each child its weighted contribution to \(H_0\). Note:
+&lt;code&gt;cst.sibiling(w)&lt;/code&gt; returns the root node &lt;code&gt;cst.root()&lt;/code&gt; if there
+is no next sibling.&lt;/p&gt;
+
+&lt;h2 id=&quot;toc_250&quot;&gt;2 Calculating the k-th order entropy&lt;/h2&gt;
+
+&lt;div&gt;More advanced compressors make use of the context before 
+a symbol and choose different prefix codes dependent on the preceding
+context. Say, the length of the context is of fixed length \(k\) 
+the \(k\)-th order empirical entropy \(H_k(\TEXT)\) is a lower
+bound for compressors which encode each symbol by different
+prefix codes which depend on the \(k\)-character context before
+the symbol. Here is the formal definition:
+   
+\[
+    H_k(\TEXT) = \frac{1}{n} \sum_{\omega\in \Sigma^k} |T_\omega|H_0(T_\omega)
+\]
+
+where \(T_\omega\) is the concatenation of all characters in \(\TEXT\)
+which follow the occurrences of the substring \(\omega\) in \(\TEXT\).
+Note that a brute-force calculation of \(H_k\) is expensive, since
+there are many substrings \(\omega\) which do not
+contribute to the result, since they do not occur in \(\TEXT\) and
+therefore \(T_\omega\) is empty. Fortunately with a CST we can exactly
+inspect those substrings which occur in the text and can also easily
+calculate \(|T_\omega|\) and \(H_0(T_\omega)\). A substring of length
+\(k\) is represented as a sequence of edges of length \(k\) in the CST.
+If the substring is always followed by the same symbol \(c\) then there exists
+no corresponding node for the substring in the CST. But in this case
+\(H_0(T_\omega)=0\), since \(T_\omega\) consists only of \(c\)s. On the
+oder hand if different occurrences of \(\omega\) are followed by different characters
+then there exists a CST node \(v\) with depth \(k\). In this case  
+\(|T_\omega|\) corresponds to the size of the subtree of \(v\) and
+\(H_0(T_\omega)\) can be calculated by the algorithm from Section 1.
+Here is the complete code:
+&lt;/div&gt;
+
+&lt;script src=&quot;http://gist.github.com/3473167.js&quot;&gt;&lt;/script&gt;
+
+&lt;h1 id=&quot;toc_251&quot;&gt;Example&lt;/h1&gt;
+
+&lt;p&gt;Lets look at an example. Say our string is \(\TEXT\)=&lt;code&gt;umulmundumulmu$&lt;/code&gt; 
+and we and to calculate \(H_1(\TEXT)\).
+Then the occurrences of substrings &lt;code&gt;d&lt;/code&gt;, &lt;code&gt;l&lt;/code&gt;, and &lt;code&gt;n&lt;/code&gt; are always followed
+by the same character and so they do not contribute to the result.
+Have a look at the figure below to also note that all these substrings
+are not represented by a node in the CST. &lt;code&gt;$&lt;/code&gt; is represented by
+a node but does also not contribute since it is a leaf node and
+therefore \(T_{\$}\) empty. We can also determine from the figure
+that the substring &lt;code&gt;m&lt;/code&gt; is followed by one &lt;code&gt;$&lt;/code&gt; and four &lt;code&gt;u&lt;/code&gt; and 
+therefore adds \(5H_0(T_m)\) to the result. Note that the
+actual order of characters in \(T_m\) does not change
+the result and it is enough to know the distribution of 
+symbols. In our case \([1,4]\). Finally, we do the
+same procedure also for substring &lt;code&gt;u&lt;/code&gt;.&lt;/p&gt;
+
+&lt;div style=&quot;text-align:center;width:100%;&quot;&gt;
+&lt;img alt=&quot;k-th order entropy calculation with a suffix tree&quot; 
+     src=&quot;/assets/images/kth_order_entropy_calculation_suffix_tree.png&quot;&gt;&lt;/image&gt;
+&lt;/div&gt;
+
+&lt;h1 id=&quot;toc_252&quot;&gt;Experiment&lt;/h1&gt;
+
+&lt;p&gt;Lets take the 200 MiB test cases of the 
+&lt;a href=&quot;http://pizzachili.di.unipi.it/&quot;&gt;Pizza&amp;amp;Chili&lt;/a&gt;
+corpus build the CST with the program above and calculate
+\(H_0,\ldots,H_10 \) with this program:
+&lt;script src=&quot;http://gist.github.com/3476809.js&quot;&gt;&lt;/script&gt;&lt;/p&gt;
+
+&lt;p&gt;Voil&amp;#225;, here is the result:&lt;/p&gt;
+
+&lt;div style=&quot;text-align:center;width:100%;&quot;&gt;
+&lt;img alt=&quot;k-th order entropy calculation with a suffix tree&quot; 
+     src=&quot;/assets/images/kth_order_entropy_results_pizza_chili_200MB.png&quot;&gt;&lt;/image&gt;
+&lt;/div&gt;
+
+&lt;p&gt;In one of the next posts, I will show that we can reach about \(H_4\) 
+in practice. If we choose larger values for \(k\) then the 
+number of contexts \(CT\) is so high, that the information
+which is needed to store context information dominates the space.&lt;/p&gt;
+
+&lt;h2 id=&quot;toc_253&quot;&gt;References&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;/bibliography/manzini99soda.html&quot;&gt;Manzinis SODA article&lt;/a&gt; and &lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;/bibliography/navmak07.html&quot;&gt;the full-text index overview article of Navarro and M&amp;auml;kinen&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;The figure and algorithms were also used as an example in my &lt;a href=&quot;/bibliography/gog2011phd.html&quot;&gt;thesis&lt;/a&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+</content>
  </entry>
- {% endfor %}
+ 
  
 </feed>

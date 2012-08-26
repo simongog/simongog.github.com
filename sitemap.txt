@@ -1,8 +1,13 @@
----
-# Remember to set production_url in your _config.yml file!
-title : Sitemap
----
-{% for page in site.pages %}
-{{site.production_url}}{{ page.url }}{% endfor %}
-{% for post in site.posts %}
-{{site.production_url}}{{ post.url }}{% endfor %}
+
+http://simongog.github.com/archive.html
+http://simongog.github.com/atom.xml
+http://simongog.github.com/categories.html
+http://simongog.github.com/index.html
+http://simongog.github.com/pages.html
+http://simongog.github.com/sitemap.txt
+http://simongog.github.com/tags.html
+http://simongog.github.com/bibliography/gog2011phd.html
+http://simongog.github.com/bibliography/manzini99soda.html
+http://simongog.github.com/bibliography/navmak07.html
+
+http://simongog.github.com/lessons/2012/08/26/Calculating_H_k_in_linear_time
