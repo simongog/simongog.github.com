@@ -1,0 +1,172 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Index page</title>
+    
+    <meta name="author" content="Simon Gog">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/themes/twitter/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/assets/themes/twitter/css/style.css?body=1" rel="stylesheet" type="text/css" media="all">
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">Succinct Data Structures</a>
+          <ul class="nav">
+            
+            
+            
+
+
+  
+    
+      
+      	
+      	<li><a href="/archive.html">Archive</a></li>
+      	
+      
+    
+  
+    
+      
+    
+  
+    
+      
+      	
+      	<li><a href="/categories.html">Categories</a></li>
+      	
+      
+    
+  
+    
+      
+    
+  
+    
+      
+      	
+      	<li><a href="/pages.html">Pages</a></li>
+      	
+      
+    
+  
+    
+      
+    
+  
+    
+      
+      	
+      	<li><a href="/tags.html">Tags</a></li>
+      	
+      
+    
+  
+    
+  
+    
+  
+    
+  
+
+
+
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        
+<div class="page-header">
+  <h1>Index page </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <p>About five year ago, I have read an article about so called
+succinct data structures and was fascinated. These succinct
+data structures only use space close to the information theoretic
+lower bound of the underlaying object while providing the
+same functionality as a classical uncompressed data structure.
+For example a tree with \(n\) leaves can be represented in about 
+\(2n\) bits and still answer the operations <code>parent</code>, <code>child</code> and <code>sibling</code>
+in constant time. The uncompressed tree data structure 
+would take pointers of size \(\log n\) for each node 
+and would be therefore significantly larger in practice. </p>
+
+<p>However, in practice the classical data structures
+are often orders of magnitudes faster since operations
+in succinct data structures require often multiple
+random accesses to different sub data structures.
+Another drawback is that succinct data structures
+are not easy to implement. Each bit has to be in
+the right place and there were no libraries
+which contain basic succinct structures like
+a bit vector and rank and select structures.</p>
+
+<p>This was the motivation to design a easy to use
+(if you know the STL, it will be easy) but at
+the same time highly efficient library for
+succinct data structures. The result is simply
+called <a href="https://github.com/simongog/sdsl">sdsl</a>
+and you are only one click away.</p>
+
+<p>Blog entries: 
+<ul class="posts"></p>
+
+<p><li><span>26 Aug 2012</span> &raquo; <a href="/lessons/2012/08/26/Calculating_H_k_in_linear_time">Calculating the k-th order empirical entropy in linear time</a></li></p>
+
+<p></ul></p>
+
+  </div>
+</div>
+
+
+      </div>
+
+      <footer>
+        <p>&copy; Simon Gog 2012 
+          with help from <a href="http://jekyllbootstrap.com" target="_blank" title="The Definitive Jekyll Blogging Framework">Jekyll Bootstrap</a>
+          and <a href="http://twitter.github.com/bootstrap/" target="_blank">Twitter Bootstrap</a>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+	<script type="text/x-mathjax-config">
+	  MathJax.Hub.Config({ TeX: { extensions: ["autobold.js", "newcommand.js"] }});
+	</script>
+
+	<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+
+
+	<script type="text/x-mathjax-config"> MathJax.Hub.Config({ TeX: { equationNumbers: {autoNumber: "all"} } });       </script>
+
+
+    
+  </body>
+</html>
+

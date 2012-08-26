@@ -1,0 +1,353 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Calculating the k-th order empirical entropy in linear time</title>
+    
+    <meta name="author" content="Simon Gog">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/themes/twitter/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/assets/themes/twitter/css/style.css?body=1" rel="stylesheet" type="text/css" media="all">
+
+     <script src="http://d3js.org/d3.v2.js"></script>
+	 <script src="/assets/js/sdsl2svg.js"></script>
+     <style type="text/css">
+          path { stroke: #000; stroke-width: 0.8; cursor: pointer; }
+          #breadcrumbs { display: none; }
+		  svg { font: 12px sans-serif; }
+		  svg .ticks {stroke-width:1; stroke: black; opacity: 0.8; }
+		  svg .info_text { font: 14px sans-serif;}
+		  svg .size_info_text { font: 12px sans-serif; font-weight: bold; text-align: end; text-anchor: middle;}
+		  svg .sel_rect {opacity:1.0}
+		  svg .unsel_rect {opacity: 0.5;}
+		  svg .detailLabel {font: 16px sans-serif; font-weight: bold; opacity: 0.7; }
+		  svg .overzoomrect {fill: black; opacity: 0.8;}
+		  em {font-weight:600;}
+       </style>
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">Succinct Data Structures</a>
+          <ul class="nav">
+            
+            
+            
+
+
+  
+    
+      
+      	
+      	<li><a href="/archive.html">Archive</a></li>
+      	
+      
+    
+  
+    
+      
+    
+  
+    
+      
+      	
+      	<li><a href="/categories.html">Categories</a></li>
+      	
+      
+    
+  
+    
+      
+    
+  
+    
+      
+      	
+      	<li><a href="/pages.html">Pages</a></li>
+      	
+      
+    
+  
+    
+      
+    
+  
+    
+      
+      	
+      	<li><a href="/tags.html">Tags</a></li>
+      	
+      
+    
+  
+    
+  
+    
+  
+    
+  
+
+
+
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+	<!-- latex definitions -->
+	<div style="display:none;">
+\( 
+\newcommand{\Order}[1]{\mathcal{O}(#1)}   
+\newcommand{\TEXT}{\mathcal{T}}   
+\)
+	</div>
+      <div class="content">
+        
+<div class="page-header">
+  <h1>Calculating the k-th order empirical entropy in linear time</h1>
+</div>
+
+<div class="row">
+  <div class="span8">
+    <p>In this post, I will explain how it is possible to efficiently
+calculate different measures of text compressibility -- the zeroth
+and \(k\)-th order empirical entropy -- using
+<a href="http://github.com/simongog/sdsl">sdsl</a>. For both cases
+we use a compressed suffix tree (CST) to do the calculation.
+So step one is to build a compressed suffix tree of a
+text file. This can be easily done with the following
+code snippet:
+<script src="http://gist.github.com/3355523.js"></script>
+You can copy this program into the examples directory and
+execute <code>make</code> to get an executable, which will
+construct a CST for the file given by the first argument
+to the program. Lets take for example the file 
+<code>faust.txt</code> which is located in the libraries
+test suite. A run of the program produces a CST 
+names <code>faust.txt.cst3</code>. The CST has size 
+460 kB for the original 222 kB. </p>
+
+<h2 id="toc_249">1 Calculating the zeroth order entropy</h2>
+
+<p>The zeroth order empirical entropy \(H_0\) 
+of a text \(\TEXT\) of length \(n\) 
+over an alphabet \(\Sigma=\{c_0,\ldots,c_{\sigma-1}\}\) of size \(\sigma \) is a lower 
+bound for a compressor which encodes each symbol with a 
+fixed prefix code. It is defined as </p>
+
+<div>
+\[
+H_0(\TEXT) = \sum\limits_{i=0}^{\sigma-1} \frac{n_i}{n} \log{\frac{n}{n_i}}
+\]
+</div>
+
+<p>where \(n_i\) is the number of occurrences of character 
+\(c_i\) in \(\TEXT\). It is very easy to see that 
+\(n_i\) corresponds to the size of subtree (e.g. number of
+leaves in the subtree) rooted at the
+\(i\)-th child of the root of the CST. The length of the
+text \(n\) corresponds to the size of the whole tree.
+Therefore, the following method calculates \(H_0(\TEXT)\) 
+if <code>v</code> is the root node of our CST: </p>
+
+<script src="http://gist.github.com/3355768.js"></script>
+
+<p>The code is straightforward: If the root node is a leave, then
+the tree and the text are empty and \(H_0\) should be 0.
+Otherwise we recover \(n\) by determine the size of the
+subtree of <code>v</code> and calculate the first child. We then add for
+each child its weighted contribution to \(H_0\). Note:
+<code>cst.sibiling(w)</code> returns the root node <code>cst.root()</code> if there
+is no next sibling.</p>
+
+<h2 id="toc_250">2 Calculating the k-th order entropy</h2>
+
+<div>More advanced compressors make use of the context before 
+a symbol and choose different prefix codes dependent on the preceding
+context. Say, the length of the context is of fixed length \(k\) 
+the \(k\)-th order empirical entropy \(H_k(\TEXT)\) is a lower
+bound for compressors which encode each symbol by different
+prefix codes which depend on the \(k\)-character context before
+the symbol. Here is the formal definition:
+   
+\[
+    H_k(\TEXT) = \frac{1}{n} \sum_{\omega\in \Sigma^k} |T_\omega|H_0(T_\omega)
+\]
+
+where \(T_\omega\) is the concatenation of all characters in \(\TEXT\)
+which follow the occurrences of the substring \(\omega\) in \(\TEXT\).
+Note that a brute-force calculation of \(H_k\) is expensive, since
+there are many substrings \(\omega\) which do not
+contribute to the result, since they do not occur in \(\TEXT\) and
+therefore \(T_\omega\) is empty. Fortunately with a CST we can exactly
+inspect those substrings which occur in the text and can also easily
+calculate \(|T_\omega|\) and \(H_0(T_\omega)\). A substring of length
+\(k\) is represented as a sequence of edges of length \(k\) in the CST.
+If the substring is always followed by the same symbol \(c\) then there exists
+no corresponding node for the substring in the CST. But in this case
+\(H_0(T_\omega)=0\), since \(T_\omega\) consists only of \(c\)s. On the
+oder hand if different occurrences of \(\omega\) are followed by different characters
+then there exists a CST node \(v\) with depth \(k\). In this case  
+\(|T_\omega|\) corresponds to the size of the subtree of \(v\) and
+\(H_0(T_\omega)\) can be calculated by the algorithm from Section 1.
+Here is the complete code:
+</div>
+
+<script src="http://gist.github.com/3473167.js"></script>
+
+<h1 id="toc_251">Example</h1>
+
+<p>Lets look at an example. Say our string is \(\TEXT\)=<code>umulmundumulmu$</code> 
+and we and to calculate \(H_1(\TEXT)\).
+Then the occurrences of substrings <code>d</code>, <code>l</code>, and <code>n</code> are always followed
+by the same character and so they do not contribute to the result.
+Have a look at the figure below to also note that all these substrings
+are not represented by a node in the CST. <code>$</code> is represented by
+a node but does also not contribute since it is a leaf node and
+therefore \(T_{\$}\) empty. We can also determine from the figure
+that the substring <code>m</code> is followed by one <code>$</code> and four <code>u</code> and 
+therefore adds \(5H_0(T_m)\) to the result. Note that the
+actual order of characters in \(T_m\) does not change
+the result and it is enough to know the distribution of 
+symbols. In our case \([1,4]\). Finally, we do the
+same procedure also for substring <code>u</code>.</p>
+
+<div style="text-align:center;width:100%;">
+<img alt="k-th order entropy calculation with a suffix tree" 
+     src="/assets/images/kth_order_entropy_calculation_suffix_tree.png"></image>
+</div>
+
+<h1 id="toc_252">Experiment</h1>
+
+<p>Lets take the 200 MiB test cases of the 
+<a href="http://pizzachili.di.unipi.it/">Pizza&amp;Chili</a>
+corpus build the CST with the program above and calculate
+\(H_0,\ldots,H_10 \) with this program:
+<script src="http://gist.github.com/3476809.js"></script></p>
+
+<p>Voil&#225;, here is the result:</p>
+
+<div style="text-align:center;width:100%;">
+<img alt="k-th order entropy calculation with a suffix tree" 
+     src="/assets/images/kth_order_entropy_results_pizza_chili_200MB.png"></image>
+</div>
+
+<p>In one of the next posts, I will show that we can reach about \(H_4\) 
+in practice. If we choose larger values for \(k\) then the 
+number of contexts \(CT\) is so high, that the information
+which is needed to store context information dominates the space.</p>
+
+<h2 id="toc_253">References</h2>
+
+<ul>
+<li><a href="/bibliography/manzini99soda.html">Manzinis SODA article</a> and </li>
+<li><a href="/bibliography/navmak07.html">the full-text index overview article of Navarro and M&auml;kinen</a>.</li>
+<li>The figure and algorithms were also used as an example in my <a href="/bibliography/gog2011phd.html">thesis</a>.</li>
+</ul>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+      
+        <li class="prev disabled"><a>&larr; Previous</a></li>
+      
+        <li><a href="/archive.html">Archive</a></li>
+      
+        <li class="next disabled"><a>Next &rarr;</a>
+      
+      </ul>
+    </div>
+    <hr>
+    
+
+
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_developer = 1;
+    var disqus_shortname = 'jekyllbootstrap'; // required: replace example with your forum shortname
+    
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+
+
+  </div>
+  
+  <div class="span4">
+    <h4>Published</h4>
+    <div class="date"><span>26 August 2012</span></div>
+
+  
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+    
+
+
+  
+     
+    	<li><a href="/tags.html#sdsl-ref">sdsl <span>1</span></a></li>
+     
+    	<li><a href="/tags.html#CST-ref">CST <span>1</span></a></li>
+     
+    	<li><a href="/tags.html#entropy-ref">entropy <span>1</span></a></li>
+    
+  
+
+
+
+    </ul>
+    
+  </div>
+</div>
+
+
+      </div>
+
+      <footer>
+        <p>&copy; Simon Gog 2012 
+          with help from <a href="http://jekyllbootstrap.com" target="_blank" title="The Definitive Jekyll Blogging Framework">Jekyll Bootstrap</a>
+          and <a href="http://twitter.github.com/bootstrap/" target="_blank">Twitter Bootstrap</a>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+	<script type="text/x-mathjax-config">
+	  MathJax.Hub.Config({ TeX: { extensions: ["autobold.js", "newcommand.js"] }});
+	</script>
+
+	<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+
+
+	<script type="text/x-mathjax-config"> MathJax.Hub.Config({ TeX: { equationNumbers: {autoNumber: "all"} } });       </script>
+
+    
+  </body>
+</html>
+
