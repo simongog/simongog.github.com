@@ -102,6 +102,10 @@
   
     
   
+    
+  
+    
+  
 
 
 
@@ -144,13 +148,13 @@ test suite. A run of the program produces a CST
 names <code>faust.txt.cst3</code>. The CST has size 
 460 kB for the original 222 kB. </p>
 
-<h2 id="toc_0">1 Calculating the zeroth order entropy</h2>
+<h2 id="toc_50">1 Calculating the zeroth order entropy</h2>
 
 <p>The zeroth order empirical entropy \(H_0\) 
 of a text \(\TEXT\) of length \(n\) 
 over an alphabet \(\Sigma=\{c_0,\ldots,c_{\sigma-1}\}\) of size \(\sigma \) is a lower 
-bound for a compressor which encodes each symbol with a 
-fixed prefix code. It is defined as </p>
+bound for a compressor which encodes each symbol independently of
+any of its preceding or following symbols.</p>
 
 <div>
 \[
@@ -169,7 +173,7 @@ if <code>v</code> is the root node of our CST: </p>
 
 <script src="http://gist.github.com/3355768.js"></script>
 
-<p>The code is straightforward: If the root node is a leave, then
+<p>The code is straightforward: If the root node is a leaf, then
 the tree and the text are empty and \(H_0\) should be 0.
 Otherwise we recover \(n\) by determine the size of the
 subtree of <code>v</code> and calculate the first child. We then add for
@@ -177,15 +181,15 @@ each child its weighted contribution to \(H_0\). Note:
 <code>cst.sibiling(w)</code> returns the root node <code>cst.root()</code> if there
 is no next sibling.</p>
 
-<h2 id="toc_1">2 Calculating the k-th order entropy</h2>
+<h2 id="toc_51">2 Calculating the k-th order entropy</h2>
 
 <div>More advanced compressors make use of the context before 
-a symbol and choose different prefix codes dependent on the preceding
-context. Say, the length of the context is of fixed length \(k\) 
-the \(k\)-th order empirical entropy \(H_k(\TEXT)\) is a lower
-bound for compressors which encode each symbol by different
-prefix codes which depend on the \(k\)-character context before
-the symbol. Here is the formal definition:
+a symbol and choose different codes dependent on the preceding
+context. Say, the length of the context is of fixed length \(k\),
+then the \(k\)-th order empirical entropy \(H_k(\TEXT)\) is a lower
+bound for compressors which encode each symbol with a
+codeword that depends on the preceding \(k\) symbols.
+Here is the formal definition:
    
 \[
     H_k(\TEXT) = \frac{1}{n} \sum_{\omega\in \Sigma^k} |T_\omega|H_0(T_\omega)
@@ -212,7 +216,7 @@ Here is the complete code:
 
 <script src="http://gist.github.com/3473167.js"></script>
 
-<h1 id="toc_2">Example</h1>
+<h1 id="toc_52">Example</h1>
 
 <p>Lets look at an example. Say our string is \(\TEXT\)=<code>umulmundumulmu$</code> 
 and we and to calculate \(H_1(\TEXT)\).
@@ -234,7 +238,7 @@ same procedure also for substring <code>u</code>.</p>
      src="/assets/images/kth_order_entropy_calculation_suffix_tree.png"></image>
 </div>
 
-<h1 id="toc_3">Experiment</h1>
+<h1 id="toc_53">Experiment</h1>
 
 <p>Lets take the 200 MiB test cases of the 
 <a href="http://pizzachili.di.unipi.it/">Pizza&amp;Chili</a>
@@ -254,10 +258,10 @@ in practice. If we choose larger values for \(k\) then the
 number of contexts \(CT\) is so high, that the information
 which is needed to store context information dominates the space.</p>
 
-<h2 id="toc_4">References</h2>
+<h2 id="toc_54">References</h2>
 
 <ul>
-<li><a href="/bibliography/manzini99soda.html">Manzinis SODA article</a> and </li>
+<li><a href="/bibliography/manzini99soda.html">Manzini&#39;s SODA article</a> and </li>
 <li><a href="/bibliography/navmak07.html">the full-text index overview article of Navarro and M&auml;kinen</a>.</li>
 <li>The figure and algorithms were also used as an example in my <a href="/bibliography/gog2011phd.html">thesis</a>.</li>
 </ul>
@@ -270,7 +274,7 @@ which is needed to store context information dominates the space.</p>
       
         <li><a href="/archive.html">Archive</a></li>
       
-        <li class="next disabled"><a>Next &rarr;</a>
+        <li class="next"><a href="/lessons/2012/08/27/Visualizing_SDSL_Data_Structures" title="Visualizing data structures in sdsl">Next &rarr;</a></li>
       
       </ul>
     </div>
@@ -311,7 +315,7 @@ which is needed to store context information dominates the space.</p>
 
   
      
-    	<li><a href="/tags.html#sdsl-ref">sdsl <span>1</span></a></li>
+    	<li><a href="/tags.html#sdsl-ref">sdsl <span>2</span></a></li>
      
     	<li><a href="/tags.html#CST-ref">CST <span>1</span></a></li>
      

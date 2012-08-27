@@ -1,0 +1,304 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Visualizing data structures in sdsl</title>
+    
+    <meta name="author" content="Simon Gog">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/themes/twitter/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/assets/themes/twitter/css/style.css?body=1" rel="stylesheet" type="text/css" media="all">
+
+     <script src="http://d3js.org/d3.v2.js"></script>
+	 <script src="/assets/js/sdsl2svg.js"></script>
+     <style type="text/css">
+          path { stroke: #000; stroke-width: 0.8; cursor: pointer; }
+          #breadcrumbs { display: none; }
+		  svg { font: 12px sans-serif; }
+		  svg .ticks {stroke-width:1; stroke: black; opacity: 0.8; }
+		  svg .info_text { font: 14px sans-serif;}
+		  svg .size_info_text { font: 12px sans-serif; font-weight: bold; text-align: end; text-anchor: middle;}
+		  svg .sel_rect {opacity:1.0}
+		  svg .unsel_rect {opacity: 0.5;}
+		  svg .detailLabel {font: 16px sans-serif; font-weight: bold; opacity: 0.7; }
+		  svg .overzoomrect {fill: black; opacity: 0.8;}
+		  em {font-weight:600;}
+       </style>
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">Succinct Data Structures</a>
+          <ul class="nav">
+            
+            
+            
+
+
+  
+    
+      
+      	
+      	<li><a href="/archive.html">Archive</a></li>
+      	
+      
+    
+  
+    
+      
+    
+  
+    
+      
+      	
+      	<li><a href="/categories.html">Categories</a></li>
+      	
+      
+    
+  
+    
+      
+    
+  
+    
+      
+      	
+      	<li><a href="/pages.html">Pages</a></li>
+      	
+      
+    
+  
+    
+      
+    
+  
+    
+      
+      	
+      	<li><a href="/tags.html">Tags</a></li>
+      	
+      
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+
+
+
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+	<!-- latex definitions -->
+	<div style="display:none;">
+\( 
+\newcommand{\Order}[1]{\mathcal{O}(#1)}   
+\newcommand{\TEXT}{\mathcal{T}}   
+\)
+	</div>
+      <div class="content">
+        
+<div class="page-header">
+  <h1>Visualizing data structures in sdsl</h1>
+</div>
+
+<div class="row">
+  <div class="span8">
+    <p>In this post, I want to present a new feature of the <a href="http://github.com/simongog/sdsl">succinct 
+data structure library</a>,
+which I really like. The problem was the following. When you
+read a theory paper on succinct data structures you can
+get easily lost in all those space complexity terms.
+Often it is hard to imagine how big e.g. \(\log\frac{1}{H_k}\)
+would be or which constant is hidden in a 
+\(\Order{\cdot}\)-term. It is even worse, if the data structure is composed of
+many other succinct substructures.</p>
+
+<p>In <a href="http://github.com/simongog/sdsl">sdsl</a> you can easily determine for each
+object how many space is consumed. Say you have an object <code>X</code> then the methods
+<code>util::get_size_in_bytes</code> or <code>util::get_size_in_mega_bytes</code> will answer
+you the question. However, you do not know the breakdown to the different
+components of the data structure. We have addressed that problem and 
+now it is possible to call</p>
+<div class="highlight"><pre><code class="c++"><span class="n">write_structure</span><span class="o">&lt;</span><span class="n">JSON_FORMAT</span><span class="o">&gt;</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="p">);</span>
+</code></pre>
+</div>
+
+<p>to get a hierarchical decomposition of the space usage of a object.
+The type of the output can be specified by the template parameter.
+Right now we support output in the <a href="http://www.json.org/">JSON format</a>
+(<code>JSON_FORMAT</code>)
+and as <a href="http://www.r-project.org/">R</a> lists (<code>R_FORMAT</code>). </p>
+
+<p>Here is an example of the output of an object of a compressed
+suffix array which is based on a 
+<a href="/bibliography/maknav05cpm.html">run-length encoded wavelet tree</a> 
+which uses 
+<a href="/bibliography/okasad07alenex.html">SD arrays</a>. 
+The output contains the information we
+want to know, however it is hard to read. Therefore lets press
+to button <code>Show serialize</code> and the JSON output will be transformed
+in a nice <a href="http://www.w3.org/Graphics/SVG/">SVG</a> graphic which shows
+the information in a more accessible way.  </p>
+
+<p><textarea id="sdsl_json_input" cols="50" rows="10" style="width:100%">
+{&quot;class_name&quot;:&quot;csa_wt&quot;,&quot;name&quot;:&quot;&quot;,&quot;size&quot;:&quot;166327272&quot;,&quot;children&quot;:[{&quot;class_name&quot;:&quot;wt_rlmn&quot;,&quot;name&quot;:&quot;wavelet_tree&quot;,&quot;size&quot;:&quot;166313164&quot;,&quot;children&quot;:[{&quot;class_name&quot;:&quot;unsigned long&quot;,&quot;name&quot;:&quot;size&quot;,&quot;size&quot;:&quot;8&quot;},{&quot;class_name&quot;:&quot;sd_vector&quot;,&quot;name&quot;:&quot;bl&quot;,&quot;size&quot;:&quot;56699449&quot;,&quot;children&quot;:[{&quot;class_name&quot;:&quot;unsigned long&quot;,&quot;name&quot;:&quot;size&quot;,&quot;size&quot;:&quot;8&quot;},{&quot;class_name&quot;:&quot;unsigned char&quot;,&quot;name&quot;:&quot;wl&quot;,&quot;size&quot;:&quot;1&quot;},{&quot;class_name&quot;:&quot;int_vector&quot;,&quot;name&quot;:&quot;low&quot;,&quot;size&quot;:&quot;16107937&quot;},{&quot;class_name&quot;:&quot;bit_vector&quot;,&quot;name&quot;:&quot;high&quot;,&quot;size&quot;:&quot;32885152&quot;},{&quot;class_name&quot;:&quot;select_support_mcl&quot;,&quot;name&quot;:&quot;high_1_select&quot;,&quot;size&quot;:&quot;3696846&quot;,&quot;children&quot;:[{&quot;class_name&quot;:&quot;int_vector&quot;,&quot;name&quot;:&quot;superblock&quot;,&quot;size&quot;:&quot;110129&quot;},{&quot;class_name&quot;:&quot;bit_vector&quot;,&quot;name&quot;:&quot;mini_or_long&quot;,&quot;size&quot;:&quot;3944&quot;},{&quot;class_name&quot;:&quot;int_vector&quot;,&quot;name&quot;:&quot;longsuperblock&quot;,&quot;size&quot;:&quot;14345&quot;},{&quot;class_name&quot;:&quot;int_vector&quot;,&quot;name&quot;:&quot;minisuperblock&quot;,&quot;size&quot;:&quot;3568420&quot;}]},{&quot;class_name&quot;:&quot;select_support_mcl&quot;,&quot;name&quot;:&quot;high_0_select&quot;,&quot;size&quot;:&quot;4009505&quot;,&quot;children&quot;:[{&quot;class_name&quot;:&quot;int_vector&quot;,&quot;name&quot;:&quot;superblock&quot;,&quot;size&quot;:&quot;114697&quot;},{&quot;class_name&quot;:&quot;bit_vector&quot;,&quot;name&quot;:&quot;mini_or_long&quot;,&quot;size&quot;:&quot;4104&quot;},{&quot;class_name&quot;:&quot;int_vector&quot;,&quot;name&quot;:&quot;longsuperblock&quot;,&quot;size&quot;:&quot;0&quot;},{&quot;class_name&quot;:&quot;int_vector&quot;,&quot;name&quot;:&quot;minisuperblock&quot;,&quot;size&quot;:&quot;3890696&quot;}]}]},{&quot;class_name&quot;:&quot;sd_vector&quot;,&quot;name&quot;:&quot;bf&quot;,&quot;size&quot;:&quot;56698169&quot;,&quot;children&quot;:[{&quot;class_name&quot;:&quot;unsigned long&quot;,&quot;name&quot;:&quot;size&quot;,&quot;size&quot;:&quot;8&quot;},{&quot;class_name&quot;:&quot;unsigned char&quot;,&quot;name&quot;:&quot;wl&quot;,&quot;size&quot;:&quot;1&quot;},{&quot;class_name&quot;:&quot;int_vector&quot;,&quot;name&quot;:&quot;low&quot;,&quot;size&quot;:&quot;16107937&quot;},{&quot;class_name&quot;:&quot;bit_vector&quot;,&quot;name&quot;:&quot;high&quot;,&quot;size&quot;:&quot;32885152&quot;},{&quot;class_name&quot;:&quot;select_support_mcl&quot;,&quot;name&quot;:&quot;high_1_select&quot;,&quot;size&quot;:&quot;3702582&quot;,&quot;children&quot;:[{&quot;class_name&quot;:&quot;int_vector&quot;,&quot;name&quot;:&quot;superblock&quot;,&quot;size&quot;:&quot;110129&quot;},{&quot;class_name&quot;:&quot;bit_vector&quot;,&quot;name&quot;:&quot;mini_or_long&quot;,&quot;size&quot;:&quot;3944&quot;},{&quot;class_name&quot;:&quot;int_vector&quot;,&quot;name&quot;:&quot;longsuperblock&quot;,&quot;size&quot;:&quot;14345&quot;},{&quot;class_name&quot;:&quot;int_vector&quot;,&quot;name&quot;:&quot;minisuperblock&quot;,&quot;size&quot;:&quot;3574156&quot;}]},{&quot;class_name&quot;:&quot;select_support_mcl&quot;,&quot;name&quot;:&quot;high_0_select&quot;,&quot;size&quot;:&quot;4002489&quot;,&quot;children&quot;:[{&quot;class_name&quot;:&quot;int_vector&quot;,&quot;name&quot;:&quot;superblock&quot;,&quot;size&quot;:&quot;114697&quot;},{&quot;class_name&quot;:&quot;bit_vector&quot;,&quot;name&quot;:&quot;mini_or_long&quot;,&quot;size&quot;:&quot;4104&quot;},{&quot;class_name&quot;:&quot;int_vector&quot;,&quot;name&quot;:&quot;longsuperblock&quot;,&quot;size&quot;:&quot;0&quot;},{&quot;class_name&quot;:&quot;int_vector&quot;,&quot;name&quot;:&quot;minisuperblock&quot;,&quot;size&quot;:&quot;3883680&quot;}]}]},{&quot;class_name&quot;:&quot;wt_huff&quot;,&quot;name&quot;:&quot;wt&quot;,&quot;size&quot;:&quot;52911426&quot;,&quot;children&quot;:[{&quot;class_name&quot;:&quot;unsigned long&quot;,&quot;name&quot;:&quot;size&quot;,&quot;size&quot;:&quot;8&quot;},{&quot;class_name&quot;:&quot;unsigned long&quot;,&quot;name&quot;:&quot;sigma&quot;,&quot;size&quot;:&quot;8&quot;},{&quot;class_name&quot;:&quot;bit_vector&quot;,&quot;name&quot;:&quot;tree&quot;,&quot;size&quot;:&quot;35600832&quot;},{&quot;class_name&quot;:&quot;rank_support_v&quot;,&quot;name&quot;:&quot;tree_rank&quot;,&quot;size&quot;:&quot;8900216&quot;,&quot;children&quot;:[{&quot;class_name&quot;:&quot;int_vector&quot;,&quot;name&quot;:&quot;cumulative_counts&quot;,&quot;size&quot;:&quot;8900216&quot;}]},{&quot;class_name&quot;:&quot;select_support_mcl&quot;,&quot;name&quot;:&quot;tree_select_1&quot;,&quot;size&quot;:&quot;4824685&quot;,&quot;children&quot;:[{&quot;class_name&quot;:&quot;int_vector&quot;,&quot;name&quot;:&quot;superblock&quot;,&quot;size&quot;:&quot;146857&quot;},{&quot;class_name&quot;:&quot;bit_vector&quot;,&quot;name&quot;:&quot;mini_or_long&quot;,&quot;size&quot;:&quot;5072&quot;},{&quot;class_name&quot;:&quot;int_vector&quot;,&quot;name&quot;:&quot;longsuperblock&quot;,&quot;size&quot;:&quot;14857&quot;},{&quot;class_name&quot;:&quot;int_vector&quot;,&quot;name&quot;:&quot;minisuperblock&quot;,&quot;size&quot;:&quot;4657891&quot;}]},{&quot;class_name&quot;:&quot;select_support_mcl&quot;,&quot;name&quot;:&quot;tree_select_0&quot;,&quot;size&quot;:&quot;3571875&quot;,&quot;children&quot;:[{&quot;class_name&quot;:&quot;int_vector&quot;,&quot;name&quot;:&quot;superblock&quot;,&quot;size&quot;:&quot;105233&quot;},{&quot;class_name&quot;:&quot;bit_vector&quot;,&quot;name&quot;:&quot;mini_or_long&quot;,&quot;size&quot;:&quot;3640&quot;},{&quot;class_name&quot;:&quot;int_vector&quot;,&quot;name&quot;:&quot;longsuperblock&quot;,&quot;size&quot;:&quot;44059&quot;},{&quot;class_name&quot;:&quot;int_vector&quot;,&quot;name&quot;:&quot;minisuperblock&quot;,&quot;size&quot;:&quot;3418935&quot;}]}]},{&quot;class_name&quot;:&quot;sd_rank_support&quot;,&quot;name&quot;:&quot;bl_rank&quot;,&quot;size&quot;:&quot;0&quot;},{&quot;class_name&quot;:&quot;sd_rank_support&quot;,&quot;name&quot;:&quot;bf_rank&quot;,&quot;size&quot;:&quot;0&quot;},{&quot;class_name&quot;:&quot;sd_select_support&quot;,&quot;name&quot;:&quot;bl_select&quot;,&quot;size&quot;:&quot;0&quot;},{&quot;class_name&quot;:&quot;sd_select_support&quot;,&quot;name&quot;:&quot;bf_select&quot;,&quot;size&quot;:&quot;0&quot;},{&quot;class_name&quot;:&quot;int_vector&quot;,&quot;name&quot;:&quot;C&quot;,&quot;size&quot;:&quot;2056&quot;},{&quot;class_name&quot;:&quot;int_vector&quot;,&quot;name&quot;:&quot;C_bf_rank&quot;,&quot;size&quot;:&quot;2056&quot;}]},{&quot;class_name&quot;:&quot;int_vector&quot;,&quot;name&quot;:&quot;sa_samples&quot;,&quot;size&quot;:&quot;11481&quot;},{&quot;class_name&quot;:&quot;int_vector&quot;,&quot;name&quot;:&quot;isa_samples&quot;,&quot;size&quot;:&quot;33&quot;},{&quot;class_name&quot;:&quot;int_vector&quot;,&quot;name&quot;:&quot;char2comp&quot;,&quot;size&quot;:&quot;264&quot;},{&quot;class_name&quot;:&quot;int_vector&quot;,&quot;name&quot;:&quot;comp2char&quot;,&quot;size&quot;:&quot;264&quot;},{&quot;class_name&quot;:&quot;int_vector&quot;,&quot;name&quot;:&quot;C&quot;,&quot;size&quot;:&quot;2064&quot;},{&quot;class_name&quot;:&quot;unsigned short&quot;,&quot;name&quot;:&quot;sigma&quot;,&quot;size&quot;:&quot;2&quot;}]}
+</textarea>
+<input type="button" value="Show visualization" onclick="my2Json()"></input>
+<div id="space_chart" style="text-align: center;"></div></p>
+
+<p>The visualization was realized with Mike Bostock&#39;s superb <a href="http://d3js.org">D3.js</a>
+JavaScript library (D3 = Data-Driven Documents).
+The graphic is a mirrored 
+<a href="http://mbostock.github.com/protovis/ex/icicle.html">icicle-graph</a>.
+You can read the example the following way: The object of class
+<code>csa_wt</code> has size 158.62 MiB. It has one member named 
+<code>wavelet_tree</code> of type <code>wt_rlmn</code> and this member takes almost 
+all space; namely 158.61 MiB (click on the entry to get this information).
+The <code>wavelet_tree</code> member itself is composed of three members
+called <code>bl</code>,<code>bf</code>, and <code>wt</code>. Now you can inspect each of these members
+by clicking on it. Lets choose <code>bf</code>. The figure will show at
+the upper part the size and fraction of the selected
+member. In this example <code>bf</code> takes 54.07 MiB which corresponds to
+34.09% of the whole space. Experts will know that the
+sdsl class <code>sd_vector</code> (64bit implementation of the
+<a href="/bibliography/okasad07alenex.html">SD array</a> can be further
+decomposed into the low and high bit part of the positions
+of the set one bits and select data structure for the <code>high</code>
+<code>bit_vector</code>. Explore it if you like ;)
+To go up the hierarchy again simply click on a element in
+a higher level and the figure will zoom out again.</p>
+
+<p>And at last the best thing of this blog entry. You can use
+the form above to paste in your own output and visualize the it!</p>
+
+<script type="text/javascript">
+
+var global_id=0
+myJson = function(url, callback){
+    d3.json(url, callback);
+};
+
+my2Json = function(){
+//  console.log("Hallo")
+//  console.log( document.getElementById('sdsl_json_input').value)  
+    var myinit = initX("XXX_YYY");
+    var json_text = document.getElementById('sdsl_json_input').value;
+    myinit(json_text ? JSON.parse(json_text) : null);
+    return true;
+}
+</script>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+      
+        <li class="prev"><a href="/lessons/2012/08/26/Calculating_H_k_in_linear_time" title="Calculating the k-th order empirical entropy in linear time">&larr; Previous</a></li>
+      
+        <li><a href="/archive.html">Archive</a></li>
+      
+        <li class="next disabled"><a>Next &rarr;</a>
+      
+      </ul>
+    </div>
+    <hr>
+    
+
+
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_developer = 1;
+    var disqus_shortname = 'sdsl'; // required: replace example with your forum shortname
+    
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+
+
+  </div>
+  
+  <div class="span4">
+    <h4>Published</h4>
+    <div class="date"><span>27 August 2012</span></div>
+
+  
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+    
+
+
+  
+     
+    	<li><a href="/tags.html#sdsl-ref">sdsl <span>2</span></a></li>
+     
+    	<li><a href="/tags.html#visualization-ref">visualization <span>1</span></a></li>
+    
+  
+
+
+
+    </ul>
+    
+  </div>
+</div>
+
+
+      </div>
+
+      <footer>
+        <p>&copy; Simon Gog 2012 
+          with help from <a href="http://jekyllbootstrap.com" target="_blank" title="The Definitive Jekyll Blogging Framework">Jekyll Bootstrap</a>
+          and <a href="http://twitter.github.com/bootstrap/" target="_blank">Twitter Bootstrap</a>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+	<script type="text/x-mathjax-config">
+	  MathJax.Hub.Config({ TeX: { extensions: ["autobold.js", "newcommand.js"] }});
+	</script>
+
+	<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+
+
+	<script type="text/x-mathjax-config"> MathJax.Hub.Config({ TeX: { equationNumbers: {autoNumber: "all"} } });       </script>
+
+    
+  </body>
+</html>
+

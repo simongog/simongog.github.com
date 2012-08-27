@@ -4,13 +4,105 @@
  <title>Succinct Data Structures</title>
  <link href="http://simongog.github.com/atom.xml" rel="self"/>
  <link href="http://simongog.github.com"/>
- <updated>2012-08-27T00:07:48+10:00</updated>
+ <updated>2012-08-27T11:00:02+10:00</updated>
  <id>http://simongog.github.com</id>
  <author>
    <name>Simon Gog</name>
    <email>simon.gog@gmail.com</email>
  </author>
 
+ 
+ <entry>
+   <title>Visualizing data structures in sdsl</title>
+   <link href="http://simongog.github.com/lessons/2012/08/27/Visualizing_SDSL_Data_Structures"/>
+   <updated>2012-08-27T00:00:00+10:00</updated>
+   <id>http://simongog.github.com/lessons/2012/08/27/Visualizing_SDSL_Data_Structures</id>
+   <content type="html">&lt;p&gt;In this post, I want to present a new feature of the &lt;a href=&quot;http://github.com/simongog/sdsl&quot;&gt;succinct 
+data structure library&lt;/a&gt;,
+which I really like. The problem was the following. When you
+read a theory paper on succinct data structures you can
+get easily lost in all those space complexity terms.
+Often it is hard to imagine how big e.g. \(\log\frac{1}{H_k}\)
+would be or which constant is hidden in a 
+\(\Order{\cdot}\)-term. It is even worse, if the data structure is composed of
+many other succinct substructures.&lt;/p&gt;
+
+&lt;p&gt;In &lt;a href=&quot;http://github.com/simongog/sdsl&quot;&gt;sdsl&lt;/a&gt; you can easily determine for each
+object how many space is consumed. Say you have an object &lt;code&gt;X&lt;/code&gt; then the methods
+&lt;code&gt;util::get_size_in_bytes&lt;/code&gt; or &lt;code&gt;util::get_size_in_mega_bytes&lt;/code&gt; will answer
+you the question. However, you do not know the breakdown to the different
+components of the data structure. We have addressed that problem and 
+now it is possible to call&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;c++&quot;&gt;&lt;span class=&quot;n&quot;&gt;write_structure&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;JSON_FORMAT&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;X&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;cout&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;to get a hierarchical decomposition of the space usage of a object.
+The type of the output can be specified by the template parameter.
+Right now we support output in the &lt;a href=&quot;http://www.json.org/&quot;&gt;JSON format&lt;/a&gt;
+(&lt;code&gt;JSON_FORMAT&lt;/code&gt;)
+and as &lt;a href=&quot;http://www.r-project.org/&quot;&gt;R&lt;/a&gt; lists (&lt;code&gt;R_FORMAT&lt;/code&gt;). &lt;/p&gt;
+
+&lt;p&gt;Here is an example of the output of an object of a compressed
+suffix array which is based on a 
+&lt;a href=&quot;/bibliography/maknav05cpm.html&quot;&gt;run-length encoded wavelet tree&lt;/a&gt; 
+which uses 
+&lt;a href=&quot;/bibliography/okasad07alenex.html&quot;&gt;SD arrays&lt;/a&gt;. 
+The output contains the information we
+want to know, however it is hard to read. Therefore lets press
+to button &lt;code&gt;Show serialize&lt;/code&gt; and the JSON output will be transformed
+in a nice &lt;a href=&quot;http://www.w3.org/Graphics/SVG/&quot;&gt;SVG&lt;/a&gt; graphic which shows
+the information in a more accessible way.  &lt;/p&gt;
+
+&lt;p&gt;&lt;textarea id=&quot;sdsl_json_input&quot; cols=&quot;50&quot; rows=&quot;10&quot; style=&quot;width:100%&quot;&gt;
+{&amp;quot;class_name&amp;quot;:&amp;quot;csa_wt&amp;quot;,&amp;quot;name&amp;quot;:&amp;quot;&amp;quot;,&amp;quot;size&amp;quot;:&amp;quot;166327272&amp;quot;,&amp;quot;children&amp;quot;:[{&amp;quot;class_name&amp;quot;:&amp;quot;wt_rlmn&amp;quot;,&amp;quot;name&amp;quot;:&amp;quot;wavelet_tree&amp;quot;,&amp;quot;size&amp;quot;:&amp;quot;166313164&amp;quot;,&amp;quot;children&amp;quot;:[{&amp;quot;class_name&amp;quot;:&amp;quot;unsigned long&amp;quot;,&amp;quot;name&amp;quot;:&amp;quot;size&amp;quot;,&amp;quot;size&amp;quot;:&amp;quot;8&amp;quot;},{&amp;quot;class_name&amp;quot;:&amp;quot;sd_vector&amp;quot;,&amp;quot;name&amp;quot;:&amp;quot;bl&amp;quot;,&amp;quot;size&amp;quot;:&amp;quot;56699449&amp;quot;,&amp;quot;children&amp;quot;:[{&amp;quot;class_name&amp;quot;:&amp;quot;unsigned long&amp;quot;,&amp;quot;name&amp;quot;:&amp;quot;size&amp;quot;,&amp;quot;size&amp;quot;:&amp;quot;8&amp;quot;},{&amp;quot;class_name&amp;quot;:&amp;quot;unsigned char&amp;quot;,&amp;quot;name&amp;quot;:&amp;quot;wl&amp;quot;,&amp;quot;size&amp;quot;:&amp;quot;1&amp;quot;},{&amp;quot;class_name&amp;quot;:&amp;quot;int_vector&amp;quot;,&amp;quot;name&amp;quot;:&amp;quot;low&amp;quot;,&amp;quot;size&amp;quot;:&amp;quot;16107937&amp;quot;},{&amp;quot;class_name&amp;quot;:&amp;quot;bit_vector&amp;quot;,&amp;quot;name&amp;quot;:&amp;quot;high&amp;quot;,&amp;quot;size&amp;quot;:&amp;quot;32885152&amp;quot;},{&amp;quot;class_name&amp;quot;:&amp;quot;select_support_mcl&amp;quot;,&amp;quot;name&amp;quot;:&amp;quot;high_1_select&amp;quot;,&amp;quot;size&amp;quot;:&amp;quot;3696846&amp;quot;,&amp;quot;children&amp;quot;:[{&amp;quot;class_name&amp;quot;:&amp;quot;int_vector&amp;quot;,&amp;quot;name&amp;quot;:&amp;quot;superblock&amp;quot;,&amp;quot;size&amp;quot;:&amp;quot;110129&amp;quot;},{&amp;quot;class_name&amp;quot;:&amp;quot;bit_vector&amp;quot;,&amp;quot;name&amp;quot;:&amp;quot;mini_or_long&amp;quot;,&amp;quot;size&amp;quot;:&amp;quot;3944&amp;quot;},{&amp;quot;class_name&amp;quot;:&amp;quot;int_vector&amp;quot;,&amp;quot;name&amp;quot;:&amp;quot;longsuperblock&amp;quot;,&amp;quot;size&amp;quot;:&amp;quot;14345&amp;quot;},{&amp;quot;class_name&amp;quot;:&amp;quot;int_vector&amp;quot;,&amp;quot;name&amp;quot;:&amp;quot;minisuperblock&amp;quot;,&amp;quot;size&amp;quot;:&amp;quot;3568420&amp;quot;}]},{&amp;quot;class_name&amp;quot;:&amp;quot;select_support_mcl&amp;quot;,&amp;quot;name&amp;quot;:&amp;quot;high_0_select&amp;quot;,&amp;quot;size&amp;quot;:&amp;quot;4009505&amp;quot;,&amp;quot;children&amp;quot;:[{&amp;quot;class_name&amp;quot;:&amp;quot;int_vector&amp;quot;,&amp;quot;name&amp;quot;:&amp;quot;superblock&amp;quot;,&amp;quot;size&amp;quot;:&amp;quot;114697&amp;quot;},{&amp;quot;class_name&amp;quot;:&amp;quot;bit_vector&amp;quot;,&amp;quot;name&amp;quot;:&amp;quot;mini_or_long&amp;quot;,&amp;quot;size&amp;quot;:&amp;quot;4104&amp;quot;},{&amp;quot;class_name&amp;quot;:&amp;quot;int_vector&amp;quot;,&amp;quot;name&amp;quot;:&amp;quot;longsuperblock&amp;quot;,&amp;quot;size&amp;quot;:&amp;quot;0&amp;quot;},{&amp;quot;class_name&amp;quot;:&amp;quot;int_vector&amp;quot;,&amp;quot;name&amp;quot;:&amp;quot;minisuperblock&amp;quot;,&amp;quot;size&amp;quot;:&amp;quot;3890696&amp;quot;}]}]},{&amp;quot;class_name&amp;quot;:&amp;quot;sd_vector&amp;quot;,&amp;quot;name&amp;quot;:&amp;quot;bf&amp;quot;,&amp;quot;size&amp;quot;:&amp;quot;56698169&amp;quot;,&amp;quot;children&amp;quot;:[{&amp;quot;class_name&amp;quot;:&amp;quot;unsigned long&amp;quot;,&amp;quot;name&amp;quot;:&amp;quot;size&amp;quot;,&amp;quot;size&amp;quot;:&amp;quot;8&amp;quot;},{&amp;quot;class_name&amp;quot;:&amp;quot;unsigned char&amp;quot;,&amp;quot;name&amp;quot;:&amp;quot;wl&amp;quot;,&amp;quot;size&amp;quot;:&amp;quot;1&amp;quot;},{&amp;quot;class_name&amp;quot;:&amp;quot;int_vector&amp;quot;,&amp;quot;name&amp;quot;:&amp;quot;low&amp;quot;,&amp;quot;size&amp;quot;:&amp;quot;16107937&amp;quot;},{&amp;quot;class_name&amp;quot;:&amp;quot;bit_vector&amp;quot;,&amp;quot;name&amp;quot;:&amp;quot;high&amp;quot;,&amp;quot;size&amp;quot;:&amp;quot;32885152&amp;quot;},{&amp;quot;class_name&amp;quot;:&amp;quot;select_support_mcl&amp;quot;,&amp;quot;name&amp;quot;:&amp;quot;high_1_select&amp;quot;,&amp;quot;size&amp;quot;:&amp;quot;3702582&amp;quot;,&amp;quot;children&amp;quot;:[{&amp;quot;class_name&amp;quot;:&amp;quot;int_vector&amp;quot;,&amp;quot;name&amp;quot;:&amp;quot;superblock&amp;quot;,&amp;quot;size&amp;quot;:&amp;quot;110129&amp;quot;},{&amp;quot;class_name&amp;quot;:&amp;quot;bit_vector&amp;quot;,&amp;quot;name&amp;quot;:&amp;quot;mini_or_long&amp;quot;,&amp;quot;size&amp;quot;:&amp;quot;3944&amp;quot;},{&amp;quot;class_name&amp;quot;:&amp;quot;int_vector&amp;quot;,&amp;quot;name&amp;quot;:&amp;quot;longsuperblock&amp;quot;,&amp;quot;size&amp;quot;:&amp;quot;14345&amp;quot;},{&amp;quot;class_name&amp;quot;:&amp;quot;int_vector&amp;quot;,&amp;quot;name&amp;quot;:&amp;quot;minisuperblock&amp;quot;,&amp;quot;size&amp;quot;:&amp;quot;3574156&amp;quot;}]},{&amp;quot;class_name&amp;quot;:&amp;quot;select_support_mcl&amp;quot;,&amp;quot;name&amp;quot;:&amp;quot;high_0_select&amp;quot;,&amp;quot;size&amp;quot;:&amp;quot;4002489&amp;quot;,&amp;quot;children&amp;quot;:[{&amp;quot;class_name&amp;quot;:&amp;quot;int_vector&amp;quot;,&amp;quot;name&amp;quot;:&amp;quot;superblock&amp;quot;,&amp;quot;size&amp;quot;:&amp;quot;114697&amp;quot;},{&amp;quot;class_name&amp;quot;:&amp;quot;bit_vector&amp;quot;,&amp;quot;name&amp;quot;:&amp;quot;mini_or_long&amp;quot;,&amp;quot;size&amp;quot;:&amp;quot;4104&amp;quot;},{&amp;quot;class_name&amp;quot;:&amp;quot;int_vector&amp;quot;,&amp;quot;name&amp;quot;:&amp;quot;longsuperblock&amp;quot;,&amp;quot;size&amp;quot;:&amp;quot;0&amp;quot;},{&amp;quot;class_name&amp;quot;:&amp;quot;int_vector&amp;quot;,&amp;quot;name&amp;quot;:&amp;quot;minisuperblock&amp;quot;,&amp;quot;size&amp;quot;:&amp;quot;3883680&amp;quot;}]}]},{&amp;quot;class_name&amp;quot;:&amp;quot;wt_huff&amp;quot;,&amp;quot;name&amp;quot;:&amp;quot;wt&amp;quot;,&amp;quot;size&amp;quot;:&amp;quot;52911426&amp;quot;,&amp;quot;children&amp;quot;:[{&amp;quot;class_name&amp;quot;:&amp;quot;unsigned long&amp;quot;,&amp;quot;name&amp;quot;:&amp;quot;size&amp;quot;,&amp;quot;size&amp;quot;:&amp;quot;8&amp;quot;},{&amp;quot;class_name&amp;quot;:&amp;quot;unsigned long&amp;quot;,&amp;quot;name&amp;quot;:&amp;quot;sigma&amp;quot;,&amp;quot;size&amp;quot;:&amp;quot;8&amp;quot;},{&amp;quot;class_name&amp;quot;:&amp;quot;bit_vector&amp;quot;,&amp;quot;name&amp;quot;:&amp;quot;tree&amp;quot;,&amp;quot;size&amp;quot;:&amp;quot;35600832&amp;quot;},{&amp;quot;class_name&amp;quot;:&amp;quot;rank_support_v&amp;quot;,&amp;quot;name&amp;quot;:&amp;quot;tree_rank&amp;quot;,&amp;quot;size&amp;quot;:&amp;quot;8900216&amp;quot;,&amp;quot;children&amp;quot;:[{&amp;quot;class_name&amp;quot;:&amp;quot;int_vector&amp;quot;,&amp;quot;name&amp;quot;:&amp;quot;cumulative_counts&amp;quot;,&amp;quot;size&amp;quot;:&amp;quot;8900216&amp;quot;}]},{&amp;quot;class_name&amp;quot;:&amp;quot;select_support_mcl&amp;quot;,&amp;quot;name&amp;quot;:&amp;quot;tree_select_1&amp;quot;,&amp;quot;size&amp;quot;:&amp;quot;4824685&amp;quot;,&amp;quot;children&amp;quot;:[{&amp;quot;class_name&amp;quot;:&amp;quot;int_vector&amp;quot;,&amp;quot;name&amp;quot;:&amp;quot;superblock&amp;quot;,&amp;quot;size&amp;quot;:&amp;quot;146857&amp;quot;},{&amp;quot;class_name&amp;quot;:&amp;quot;bit_vector&amp;quot;,&amp;quot;name&amp;quot;:&amp;quot;mini_or_long&amp;quot;,&amp;quot;size&amp;quot;:&amp;quot;5072&amp;quot;},{&amp;quot;class_name&amp;quot;:&amp;quot;int_vector&amp;quot;,&amp;quot;name&amp;quot;:&amp;quot;longsuperblock&amp;quot;,&amp;quot;size&amp;quot;:&amp;quot;14857&amp;quot;},{&amp;quot;class_name&amp;quot;:&amp;quot;int_vector&amp;quot;,&amp;quot;name&amp;quot;:&amp;quot;minisuperblock&amp;quot;,&amp;quot;size&amp;quot;:&amp;quot;4657891&amp;quot;}]},{&amp;quot;class_name&amp;quot;:&amp;quot;select_support_mcl&amp;quot;,&amp;quot;name&amp;quot;:&amp;quot;tree_select_0&amp;quot;,&amp;quot;size&amp;quot;:&amp;quot;3571875&amp;quot;,&amp;quot;children&amp;quot;:[{&amp;quot;class_name&amp;quot;:&amp;quot;int_vector&amp;quot;,&amp;quot;name&amp;quot;:&amp;quot;superblock&amp;quot;,&amp;quot;size&amp;quot;:&amp;quot;105233&amp;quot;},{&amp;quot;class_name&amp;quot;:&amp;quot;bit_vector&amp;quot;,&amp;quot;name&amp;quot;:&amp;quot;mini_or_long&amp;quot;,&amp;quot;size&amp;quot;:&amp;quot;3640&amp;quot;},{&amp;quot;class_name&amp;quot;:&amp;quot;int_vector&amp;quot;,&amp;quot;name&amp;quot;:&amp;quot;longsuperblock&amp;quot;,&amp;quot;size&amp;quot;:&amp;quot;44059&amp;quot;},{&amp;quot;class_name&amp;quot;:&amp;quot;int_vector&amp;quot;,&amp;quot;name&amp;quot;:&amp;quot;minisuperblock&amp;quot;,&amp;quot;size&amp;quot;:&amp;quot;3418935&amp;quot;}]}]},{&amp;quot;class_name&amp;quot;:&amp;quot;sd_rank_support&amp;quot;,&amp;quot;name&amp;quot;:&amp;quot;bl_rank&amp;quot;,&amp;quot;size&amp;quot;:&amp;quot;0&amp;quot;},{&amp;quot;class_name&amp;quot;:&amp;quot;sd_rank_support&amp;quot;,&amp;quot;name&amp;quot;:&amp;quot;bf_rank&amp;quot;,&amp;quot;size&amp;quot;:&amp;quot;0&amp;quot;},{&amp;quot;class_name&amp;quot;:&amp;quot;sd_select_support&amp;quot;,&amp;quot;name&amp;quot;:&amp;quot;bl_select&amp;quot;,&amp;quot;size&amp;quot;:&amp;quot;0&amp;quot;},{&amp;quot;class_name&amp;quot;:&amp;quot;sd_select_support&amp;quot;,&amp;quot;name&amp;quot;:&amp;quot;bf_select&amp;quot;,&amp;quot;size&amp;quot;:&amp;quot;0&amp;quot;},{&amp;quot;class_name&amp;quot;:&amp;quot;int_vector&amp;quot;,&amp;quot;name&amp;quot;:&amp;quot;C&amp;quot;,&amp;quot;size&amp;quot;:&amp;quot;2056&amp;quot;},{&amp;quot;class_name&amp;quot;:&amp;quot;int_vector&amp;quot;,&amp;quot;name&amp;quot;:&amp;quot;C_bf_rank&amp;quot;,&amp;quot;size&amp;quot;:&amp;quot;2056&amp;quot;}]},{&amp;quot;class_name&amp;quot;:&amp;quot;int_vector&amp;quot;,&amp;quot;name&amp;quot;:&amp;quot;sa_samples&amp;quot;,&amp;quot;size&amp;quot;:&amp;quot;11481&amp;quot;},{&amp;quot;class_name&amp;quot;:&amp;quot;int_vector&amp;quot;,&amp;quot;name&amp;quot;:&amp;quot;isa_samples&amp;quot;,&amp;quot;size&amp;quot;:&amp;quot;33&amp;quot;},{&amp;quot;class_name&amp;quot;:&amp;quot;int_vector&amp;quot;,&amp;quot;name&amp;quot;:&amp;quot;char2comp&amp;quot;,&amp;quot;size&amp;quot;:&amp;quot;264&amp;quot;},{&amp;quot;class_name&amp;quot;:&amp;quot;int_vector&amp;quot;,&amp;quot;name&amp;quot;:&amp;quot;comp2char&amp;quot;,&amp;quot;size&amp;quot;:&amp;quot;264&amp;quot;},{&amp;quot;class_name&amp;quot;:&amp;quot;int_vector&amp;quot;,&amp;quot;name&amp;quot;:&amp;quot;C&amp;quot;,&amp;quot;size&amp;quot;:&amp;quot;2064&amp;quot;},{&amp;quot;class_name&amp;quot;:&amp;quot;unsigned short&amp;quot;,&amp;quot;name&amp;quot;:&amp;quot;sigma&amp;quot;,&amp;quot;size&amp;quot;:&amp;quot;2&amp;quot;}]}
+&lt;/textarea&gt;
+&lt;input type=&quot;button&quot; value=&quot;Show visualization&quot; onclick=&quot;my2Json()&quot;&gt;&lt;/input&gt;
+&lt;div id=&quot;space_chart&quot; style=&quot;text-align: center;&quot;&gt;&lt;/div&gt;&lt;/p&gt;
+
+&lt;p&gt;The visualization was realized with Mike Bostock&amp;#39;s superb &lt;a href=&quot;http://d3js.org&quot;&gt;D3.js&lt;/a&gt;
+JavaScript library (D3 = Data-Driven Documents).
+The graphic is a mirrored 
+&lt;a href=&quot;http://mbostock.github.com/protovis/ex/icicle.html&quot;&gt;icicle-graph&lt;/a&gt;.
+You can read the example the following way: The object of class
+&lt;code&gt;csa_wt&lt;/code&gt; has size 158.62 MiB. It has one member named 
+&lt;code&gt;wavelet_tree&lt;/code&gt; of type &lt;code&gt;wt_rlmn&lt;/code&gt; and this member takes almost 
+all space; namely 158.61 MiB (click on the entry to get this information).
+The &lt;code&gt;wavelet_tree&lt;/code&gt; member itself is composed of three members
+called &lt;code&gt;bl&lt;/code&gt;,&lt;code&gt;bf&lt;/code&gt;, and &lt;code&gt;wt&lt;/code&gt;. Now you can inspect each of these members
+by clicking on it. Lets choose &lt;code&gt;bf&lt;/code&gt;. The figure will show at
+the upper part the size and fraction of the selected
+member. In this example &lt;code&gt;bf&lt;/code&gt; takes 54.07 MiB which corresponds to
+34.09% of the whole space. Experts will know that the
+sdsl class &lt;code&gt;sd_vector&lt;/code&gt; (64bit implementation of the
+&lt;a href=&quot;/bibliography/okasad07alenex.html&quot;&gt;SD array&lt;/a&gt; can be further
+decomposed into the low and high bit part of the positions
+of the set one bits and select data structure for the &lt;code&gt;high&lt;/code&gt;
+&lt;code&gt;bit_vector&lt;/code&gt;. Explore it if you like ;)
+To go up the hierarchy again simply click on a element in
+a higher level and the figure will zoom out again.&lt;/p&gt;
+
+&lt;p&gt;And at last the best thing of this blog entry. You can use
+the form above to paste in your own output and visualize the it!&lt;/p&gt;
+
+&lt;script type=&quot;text/javascript&quot;&gt;
+
+var global_id=0
+myJson = function(url, callback){
+    d3.json(url, callback);
+};
+
+my2Json = function(){
+//  console.log(&quot;Hallo&quot;)
+//  console.log( document.getElementById('sdsl_json_input').value)  
+    var myinit = initX(&quot;XXX_YYY&quot;);
+    var json_text = document.getElementById('sdsl_json_input').value;
+    myinit(json_text ? JSON.parse(json_text) : null);
+    return true;
+}
+&lt;/script&gt;
+</content>
+ </entry>
  
  <entry>
    <title>Calculating the k-th order empirical entropy in linear time</title>
@@ -35,13 +127,13 @@ test suite. A run of the program produces a CST
 names &lt;code&gt;faust.txt.cst3&lt;/code&gt;. The CST has size 
 460 kB for the original 222 kB. &lt;/p&gt;
 
-&lt;h2 id=&quot;toc_0&quot;&gt;1 Calculating the zeroth order entropy&lt;/h2&gt;
+&lt;h2 id=&quot;toc_50&quot;&gt;1 Calculating the zeroth order entropy&lt;/h2&gt;
 
 &lt;p&gt;The zeroth order empirical entropy \(H_0\) 
 of a text \(\TEXT\) of length \(n\) 
 over an alphabet \(\Sigma=\{c_0,\ldots,c_{\sigma-1}\}\) of size \(\sigma \) is a lower 
-bound for a compressor which encodes each symbol with a 
-fixed prefix code. It is defined as &lt;/p&gt;
+bound for a compressor which encodes each symbol independently of
+any of its preceding or following symbols.&lt;/p&gt;
 
 &lt;div&gt;
 \[
@@ -60,7 +152,7 @@ if &lt;code&gt;v&lt;/code&gt; is the root node of our CST: &lt;/p&gt;
 
 &lt;script src=&quot;http://gist.github.com/3355768.js&quot;&gt;&lt;/script&gt;
 
-&lt;p&gt;The code is straightforward: If the root node is a leave, then
+&lt;p&gt;The code is straightforward: If the root node is a leaf, then
 the tree and the text are empty and \(H_0\) should be 0.
 Otherwise we recover \(n\) by determine the size of the
 subtree of &lt;code&gt;v&lt;/code&gt; and calculate the first child. We then add for
@@ -68,15 +160,15 @@ each child its weighted contribution to \(H_0\). Note:
 &lt;code&gt;cst.sibiling(w)&lt;/code&gt; returns the root node &lt;code&gt;cst.root()&lt;/code&gt; if there
 is no next sibling.&lt;/p&gt;
 
-&lt;h2 id=&quot;toc_1&quot;&gt;2 Calculating the k-th order entropy&lt;/h2&gt;
+&lt;h2 id=&quot;toc_51&quot;&gt;2 Calculating the k-th order entropy&lt;/h2&gt;
 
 &lt;div&gt;More advanced compressors make use of the context before 
-a symbol and choose different prefix codes dependent on the preceding
-context. Say, the length of the context is of fixed length \(k\) 
-the \(k\)-th order empirical entropy \(H_k(\TEXT)\) is a lower
-bound for compressors which encode each symbol by different
-prefix codes which depend on the \(k\)-character context before
-the symbol. Here is the formal definition:
+a symbol and choose different codes dependent on the preceding
+context. Say, the length of the context is of fixed length \(k\),
+then the \(k\)-th order empirical entropy \(H_k(\TEXT)\) is a lower
+bound for compressors which encode each symbol with a
+codeword that depends on the preceding \(k\) symbols.
+Here is the formal definition:
    
 \[
     H_k(\TEXT) = \frac{1}{n} \sum_{\omega\in \Sigma^k} |T_\omega|H_0(T_\omega)
@@ -103,7 +195,7 @@ Here is the complete code:
 
 &lt;script src=&quot;http://gist.github.com/3473167.js&quot;&gt;&lt;/script&gt;
 
-&lt;h1 id=&quot;toc_2&quot;&gt;Example&lt;/h1&gt;
+&lt;h1 id=&quot;toc_52&quot;&gt;Example&lt;/h1&gt;
 
 &lt;p&gt;Lets look at an example. Say our string is \(\TEXT\)=&lt;code&gt;umulmundumulmu$&lt;/code&gt; 
 and we and to calculate \(H_1(\TEXT)\).
@@ -125,7 +217,7 @@ same procedure also for substring &lt;code&gt;u&lt;/code&gt;.&lt;/p&gt;
      src=&quot;/assets/images/kth_order_entropy_calculation_suffix_tree.png&quot;&gt;&lt;/image&gt;
 &lt;/div&gt;
 
-&lt;h1 id=&quot;toc_3&quot;&gt;Experiment&lt;/h1&gt;
+&lt;h1 id=&quot;toc_53&quot;&gt;Experiment&lt;/h1&gt;
 
 &lt;p&gt;Lets take the 200 MiB test cases of the 
 &lt;a href=&quot;http://pizzachili.di.unipi.it/&quot;&gt;Pizza&amp;amp;Chili&lt;/a&gt;
@@ -145,10 +237,10 @@ in practice. If we choose larger values for \(k\) then the
 number of contexts \(CT\) is so high, that the information
 which is needed to store context information dominates the space.&lt;/p&gt;
 
-&lt;h2 id=&quot;toc_4&quot;&gt;References&lt;/h2&gt;
+&lt;h2 id=&quot;toc_54&quot;&gt;References&lt;/h2&gt;
 
 &lt;ul&gt;
-&lt;li&gt;&lt;a href=&quot;/bibliography/manzini99soda.html&quot;&gt;Manzinis SODA article&lt;/a&gt; and &lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;/bibliography/manzini99soda.html&quot;&gt;Manzini&amp;#39;s SODA article&lt;/a&gt; and &lt;/li&gt;
 &lt;li&gt;&lt;a href=&quot;/bibliography/navmak07.html&quot;&gt;the full-text index overview article of Navarro and M&amp;auml;kinen&lt;/a&gt;.&lt;/li&gt;
 &lt;li&gt;The figure and algorithms were also used as an example in my &lt;a href=&quot;/bibliography/gog2011phd.html&quot;&gt;thesis&lt;/a&gt;.&lt;/li&gt;
 &lt;/ul&gt;
