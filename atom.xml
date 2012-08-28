@@ -4,7 +4,7 @@
  <title>Succinct Data Structures</title>
  <link href="http://simongog.github.com/atom.xml" rel="self"/>
  <link href="http://simongog.github.com"/>
- <updated>2012-08-28T17:10:51+10:00</updated>
+ <updated>2012-08-28T17:38:25+10:00</updated>
  <id>http://simongog.github.com</id>
  <author>
    <name>Simon Gog</name>
@@ -430,7 +430,7 @@ and space as fraction of the original file size.
                  paper by &lt;a href=&quot;/bibliography/navpro12sea.html&quot;&gt;Navarro and Providel&lt;/a&gt;&lt;a href=&quot;#6&quot;&gt;&lt;sup&gt;6&lt;/sup&gt;&lt;/a&gt;.&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h3 id=&quot;toc_150&quot;&gt;Observations&lt;/h3&gt;
+&lt;h3 id=&quot;toc_157&quot;&gt;Observations&lt;/h3&gt;
 
 &lt;ul&gt;
 &lt;li&gt;The FM_HUFF implementation can answer count queries in almost half the time than
@@ -469,7 +469,7 @@ least space and its counting time is only slower by a small constant
 compared to more space-greedy solutions.&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h3 id=&quot;toc_151&quot;&gt;Conclusion&lt;/h3&gt;
+&lt;h3 id=&quot;toc_158&quot;&gt;Conclusion&lt;/h3&gt;
 
 &lt;p&gt;Using the &lt;a href=&quot;http://github.com/simongog/sdsl&quot; title=&quot;succinct data structure library&quot;&gt;sdsl&lt;/a&gt; library has several benefits:&lt;/p&gt;
 
@@ -492,7 +492,7 @@ is not implemented by a binary search.&lt;br&gt;&lt;/li&gt;
   which use fixed-block length compression boosting
   proposed by 
   &lt;a href=&quot;/bibliography/karpug11spire.html&quot;&gt;K&amp;auml;rkk&amp;auml;inen and Puglisi at SPIRE 2011&lt;/a&gt;.
-  From the data in the paper, the indexes are only slightly smaller than
+  From the data in the paper, the indexes are slightly smaller than
   SSA_RRR while the query times are equal or slightly faster than that
   of SSA.&lt;/p&gt;
 
@@ -648,7 +648,7 @@ test suite. A run of the program produces a CST
 names &lt;code&gt;faust.txt.cst3&lt;/code&gt;. The CST has size 
 460 kB for the original 222 kB. &lt;/p&gt;
 
-&lt;h2 id=&quot;toc_145&quot;&gt;1 Calculating the zeroth order entropy&lt;/h2&gt;
+&lt;h2 id=&quot;toc_152&quot;&gt;1 Calculating the zeroth order entropy&lt;/h2&gt;
 
 &lt;p&gt;The zeroth order empirical entropy \(H_0\) 
 of a text \(\TEXT\) of length \(n\) 
@@ -681,7 +681,7 @@ each child its weighted contribution to \(H_0\). Note:
 &lt;code&gt;cst.sibiling(w)&lt;/code&gt; returns the root node &lt;code&gt;cst.root()&lt;/code&gt; if there
 is no next sibling.&lt;/p&gt;
 
-&lt;h2 id=&quot;toc_146&quot;&gt;2 Calculating the k-th order entropy&lt;/h2&gt;
+&lt;h2 id=&quot;toc_153&quot;&gt;2 Calculating the k-th order entropy&lt;/h2&gt;
 
 &lt;div&gt;More advanced compressors make use of the context before 
 a symbol and choose different codes dependent on the preceding
@@ -716,7 +716,7 @@ Here is the complete code:
 
 &lt;script src=&quot;http://gist.github.com/3473167.js&quot;&gt;&lt;/script&gt;
 
-&lt;h1 id=&quot;toc_147&quot;&gt;Example&lt;/h1&gt;
+&lt;h1 id=&quot;toc_154&quot;&gt;Example&lt;/h1&gt;
 
 &lt;p&gt;Lets look at an example. Say our string is \(\TEXT\)=&lt;code&gt;umulmundumulmu$&lt;/code&gt; 
 and we and to calculate \(H_1(\TEXT)\).
@@ -738,7 +738,7 @@ same procedure also for substring &lt;code&gt;u&lt;/code&gt;.&lt;/p&gt;
      src=&quot;/assets/images/kth_order_entropy_calculation_suffix_tree.png&quot;&gt;&lt;/image&gt;
 &lt;/div&gt;
 
-&lt;h1 id=&quot;toc_148&quot;&gt;Experiment&lt;/h1&gt;
+&lt;h1 id=&quot;toc_155&quot;&gt;Experiment&lt;/h1&gt;
 
 &lt;p&gt;Lets take the 200 MiB test cases of the 
 &lt;a href=&quot;http://pizzachili.di.unipi.it/&quot;&gt;Pizza&amp;amp;Chili&lt;/a&gt;
@@ -758,7 +758,7 @@ in practice. If we choose larger values for \(k\) then the
 number of contexts \(CT\) is so high, that the information
 which is needed to store context information dominates the space.&lt;/p&gt;
 
-&lt;h2 id=&quot;toc_149&quot;&gt;References&lt;/h2&gt;
+&lt;h2 id=&quot;toc_156&quot;&gt;References&lt;/h2&gt;
 
 &lt;ul&gt;
 &lt;li&gt;&lt;a href=&quot;/bibliography/manzini99soda.html&quot;&gt;Manzini&amp;#39;s SODA article&lt;/a&gt; and &lt;/li&gt;
