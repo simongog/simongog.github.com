@@ -1,0 +1,764 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>New baselines for FM-indexes</title>
+    
+    <meta name="author" content="Simon Gog">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/themes/twitter/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/assets/themes/twitter/css/style.css?body=1" rel="stylesheet" type="text/css" media="all">
+    <link href="/assets/css/my.css" rel="stylesheet" type="text/css" media="all">
+
+     <script src="http://d3js.org/d3.v2.js"></script>
+	 <script src="/assets/js/sdsl2svg.js"></script>
+     <style type="text/css">
+          path { stroke: #000; stroke-width: 0.8; cursor: pointer; }
+          #breadcrumbs { display: none; }
+		  svg { font: 12px sans-serif; }
+		  svg .ticks {stroke-width:1; stroke: black; opacity: 0.8; }
+		  svg .info_text { font: 14px sans-serif;}
+		  svg .size_info_text { font: 12px sans-serif; font-weight: bold; text-align: end; text-anchor: middle;}
+		  svg .sel_rect {opacity:1.0}
+		  svg .unsel_rect {opacity: 0.5;}
+		  svg .detailLabel {font: 16px sans-serif; font-weight: bold; opacity: 0.7; }
+		  svg .overzoomrect {fill: black; opacity: 0.8;}
+		  em {font-weight:600;}
+       </style>
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">Succinct Data Structures</a>
+          <ul class="nav">
+            
+            
+            
+
+
+  
+    
+      
+      	
+      	<li><a href="/archive.html">Archive</a></li>
+      	
+      
+    
+  
+    
+      
+    
+  
+    
+      
+      	
+      	<li><a href="/categories.html">Categories</a></li>
+      	
+      
+    
+  
+    
+      
+    
+  
+    
+      
+      	
+      	<li><a href="/pages.html">Pages</a></li>
+      	
+      
+    
+  
+    
+      
+    
+  
+    
+      
+      	
+      	<li><a href="/tags.html">Tags</a></li>
+      	
+      
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+
+
+
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+	<!-- latex definitions -->
+	<div style="display:none;">
+\( 
+\newcommand{\Order}[1]{\mathcal{O}(#1)}   
+\newcommand{\TEXT}{\mathcal{T}}   
+\)
+	</div>
+      <div class="content">
+        
+<div class="page-header">
+  <h1>New baselines for FM-indexes</h1>
+</div>
+
+<div class="row">
+  <div class="span8">
+    <p>The <a href="http://pizzachili.dcc.uchile.cl" title="Pizza&amp;Chili">Pizza&amp;Chili website</a> provides a 
+set of highly tuned compressed index implementation which can be used through the
+same interface and a text corpus consisting of texts of different
+size origin from several application domains. 
+Ferragina et al. 
+<a href="/bibliography/pizzachili08jea.html">[JEA2008]</a>
+published a good experimental study in which 
+the indexes were evaluated. I was excited how the stated
+results change if I rerun the experiments of the paper
+on my machine and furthermore how good their results
+are compared to my own implementations. Therefore, I downloaded the
+indexes and test cases, built the programs 
+(<a href="/assets/data/fix_pizza_chili.txt">instructions to compile the indexes on a 64-bit system</a>)
+and wrote a script which reproduces Table VI
+of the JEA paper. The table lists query time and the
+space of the data structures for count queries. 
+I changed the presentation slightly. The LZ-index was not included but
+the <a href="/bibliography/maknav05cpm.html">run-length compressed FM-index</a> 
+implemented by M&auml;kinen and Gonz&#225;lez and the succinct suffix array 
+which uses the <a href="/bibliography/rrr02soda.html">RRR</a> implementation of 
+<a href="/bibliography/clanav08spire.html">Claude</a> were added. </p>
+
+<p>Before we come to the results, let us briefly revisit the experimental setup: 
+The machine was equipped with 8 Intel Xeon E5640 Dual Core Processors which share a 12MB smart cache
+and 144GB of DDR3 DRAM, only one core was used for the experiments.
+Operating system was Ubuntu Linux 11.10 and we used the gcc compiler version 4.6.1.
+Where necessary we added the compile option <code>-m32</code> and we added the compile option
+<code>-msse4.2</code> when using <a href="http://github.com/simongog/sdsl" title="succinct data structure library">sdsl</a> indexes.
+Indexes were build and \(k=50,000\) pattern each of length 
+\(m=20\) were extracted from each test file. Subsequently, each index
+was queried with the corresponding pattern set and the
+total query time was divided by \(k\cdot m\) to get the average
+time spend on matching one character of a pattern. </p>
+
+<p>The tested implementations correspond to the following approaches:</p>
+
+<ul>
+<li><em>SSA</em>: The succinct suffix array is just a Huffman-shaped<a href="#1"><sup>1</sup></a> wavelet tree of the 
+     <a href="/bibliography/burwhe94tr.html">Burrows-Wheeler transform</a> (BWT) of the text.
+     The space of the structure is about \(nH_0(\TEXT)\) bits. </li>
+<li><em>SSA_RRR</em>: The same as SSA but the bitvector is replaced by the RRR implementation
+           of Claude, which uses blocks of size \(15\) and a fast decoding method
+           of the block counts<a href="#2"><sup>2</sup></a>. Combining Huffman-shaped wavelet tree with
+           compressed bitvectors results in a \(H_k\)-compression. </li>
+<li><em>CSA</em>: Sadakane&#39;s implementation of his 
+       <a href="/bibliography/sad02soda.html">compressed suffix</a> array which is 
+       based on the \(\Psi\)-function.<br></li>
+<li><em>RLFM</em>: The FM-index based on a run-length encoded wavelet tree 
+        <a href="/bibliography/maknav04tr.html">[M&auml;kinen and Navarro, 2004]</a>.</li>
+<li><em>AF-index</em>: The alphabet-friendly FM-index (see <a href="/bibliography/fmmn07acmtoa.html">[Fer2007]</a>)
+            partitions the BWT in regions and compresses every region with
+            a SSA. The AF-index uses a partitioning such that the overall
+            space consumption is minimized.</li>
+<li><em>plain_SA</em>: The uncompressed suffix array (see <a href="/bibliography/manmye93.html">[Manber and Myers 1993]</a>
+            and <a href="/bibliography/gonbaesni92.html">[Gonnet et al. 1992]</a>); binary search is used
+            to count patterns. </li>
+</ul>
+
+<p>Here are the result of the experiments:</p>
+
+<div class="myfigure">
+<TABLE CELLPADDING=3 BORDER="1">
+<TR><TD ALIGN="LEFT">&nbsp;</TD>
+<TD ALIGN="CENTER" COLSPAN=2>SSA</TD>
+<TD ALIGN="CENTER" COLSPAN=2>SSA_RRR</TD>
+<TD ALIGN="CENTER" COLSPAN=2>CSA</TD>
+<TD ALIGN="CENTER" COLSPAN=2>RLFM</TD>
+<TD ALIGN="CENTER" COLSPAN=2>AF-index</TD>
+<TD ALIGN="CENTER" COLSPAN=2>plain SA</TD>
+</TR>
+<TR><TD ALIGN="LEFT">Text</TD>
+<TD ALIGN="CENTER">Time</TD>
+<TD ALIGN="CENTER">Space</TD>
+<TD ALIGN="CENTER">Time</TD>
+<TD ALIGN="CENTER">Space</TD>
+<TD ALIGN="CENTER">Time</TD>
+<TD ALIGN="CENTER">Space</TD>
+<TD ALIGN="CENTER">Time</TD>
+<TD ALIGN="CENTER">Space</TD>
+<TD ALIGN="CENTER">Time</TD>
+<TD ALIGN="CENTER">Space</TD>
+<TD ALIGN="CENTER">Time</TD>
+<TD ALIGN="CENTER">Space</TD>
+</TR>
+<TR><TD ALIGN="LEFT">dblp.xml.200MB</TD>
+<TD ALIGN="CENTER">1.300</TD>
+<TD ALIGN="CENTER">0.83</TD>
+<TD ALIGN="CENTER">1.776</TD>
+<TD ALIGN="CENTER">0.47</TD>
+<TD ALIGN="CENTER">2.648</TD>
+<TD ALIGN="CENTER">0.29</TD>
+<TD ALIGN="CENTER">6.108</TD>
+<TD ALIGN="CENTER">0.65</TD>
+<TD ALIGN="CENTER">0.840</TD>
+<TD ALIGN="CENTER">0.54</TD>
+<TD ALIGN="CENTER">0.436</TD>
+<TD ALIGN="CENTER">5.00</TD>
+</TR>
+<TR><TD ALIGN="LEFT">dna.200MB</TD>
+<TD ALIGN="CENTER">0.548</TD>
+<TD ALIGN="CENTER">0.42</TD>
+<TD ALIGN="CENTER">0.812</TD>
+<TD ALIGN="CENTER">0.43</TD>
+<TD ALIGN="CENTER">3.132</TD>
+<TD ALIGN="CENTER">0.46</TD>
+<TD ALIGN="CENTER">1.216</TD>
+<TD ALIGN="CENTER">0.75</TD>
+<TD ALIGN="CENTER">0.768</TD>
+<TD ALIGN="CENTER">0.48</TD>
+<TD ALIGN="CENTER">0.388</TD>
+<TD ALIGN="CENTER">5.00</TD>
+</TR>
+<TR><TD ALIGN="LEFT">english.200MB</TD>
+<TD ALIGN="CENTER">1.156</TD>
+<TD ALIGN="CENTER">0.73</TD>
+<TD ALIGN="CENTER">1.676</TD>
+<TD ALIGN="CENTER">0.53</TD>
+<TD ALIGN="CENTER">2.776</TD>
+<TD ALIGN="CENTER">0.44</TD>
+<TD ALIGN="CENTER">1.744</TD>
+<TD ALIGN="CENTER">0.80</TD>
+<TD ALIGN="CENTER">1.048</TD>
+<TD ALIGN="CENTER">0.65</TD>
+<TD ALIGN="CENTER">0.372</TD>
+<TD ALIGN="CENTER">5.00</TD>
+</TR>
+<TR><TD ALIGN="LEFT">proteins.200MB</TD>
+<TD ALIGN="CENTER">1.024</TD>
+<TD ALIGN="CENTER">0.69</TD>
+<TD ALIGN="CENTER">1.668</TD>
+<TD ALIGN="CENTER">0.69</TD>
+<TD ALIGN="CENTER">2.672</TD>
+<TD ALIGN="CENTER">0.67</TD>
+<TD ALIGN="CENTER">1.704</TD>
+<TD ALIGN="CENTER">0.89</TD>
+<TD ALIGN="CENTER">1.168</TD>
+<TD ALIGN="CENTER">0.82</TD>
+<TD ALIGN="CENTER">0.368</TD>
+<TD ALIGN="CENTER">5.00</TD>
+</TR>
+<TR><TD ALIGN="LEFT">sources.200MB</TD>
+<TD ALIGN="CENTER">1.356</TD>
+<TD ALIGN="CENTER">0.85</TD>
+<TD ALIGN="CENTER">1.960</TD>
+<TD ALIGN="CENTER">0.54</TD>
+<TD ALIGN="CENTER">2.748</TD>
+<TD ALIGN="CENTER">0.38</TD>
+<TD ALIGN="CENTER">1.864</TD>
+<TD ALIGN="CENTER">0.74</TD>
+<TD ALIGN="CENTER">1.156</TD>
+<TD ALIGN="CENTER">0.73</TD>
+<TD ALIGN="CENTER">0.364</TD>
+<TD ALIGN="CENTER">5.00</TD>
+</TR>
+</TABLE>
+<span>
+Table 1: Time and space taken by the implementations 
+on the <a href="http://pizzachili.dcc.uchile.cl">Pizza&amp;Chili</a>.
+Time in \(\mu\)secs per pattern symbol and space as fraction
+of the original file size.
+</span>
+</div>
+
+<p>When you compare this with the table in the paper, you make two
+observations:</p>
+
+<ul>
+<li><em>The runtimes are faster</em> by almost a factor of 2. This is
+due to the use of recent hardware. </li>
+<li>Surprisingly, the <em>space consumption was larger</em> than in the paper,
+despite my configuration to use a very sparse sampling for 
+information which is only needed for locating (suffix and inverse
+suffix array values). After contacting the authors it turned out, 
+that a bitvector is used to indicate which samples are stored.
+This bitvector is not removed or compressed, even if there are very few
+or no samples. </li>
+</ul>
+
+<p>So we are a little bit naughty and just subtract the space needed
+for this unnecessary part of the data structure and get the
+following table: </p>
+
+<div class="myfigure">
+<TABLE CELLPADDING=3 BORDER="1">
+<TR><TD ALIGN="LEFT">&nbsp;</TD>
+<TD ALIGN="CENTER" COLSPAN=2>SSA</TD>
+<TD ALIGN="CENTER" COLSPAN=2>SSA_RRR</TD>
+<TD ALIGN="CENTER" COLSPAN=2>CSA</TD>
+<TD ALIGN="CENTER" COLSPAN=2>RLFM</TD>
+<TD ALIGN="CENTER" COLSPAN=2>AF-index</TD>
+<TD ALIGN="CENTER" COLSPAN=2>plain SA</TD>
+</TR>
+<TR><TD ALIGN="LEFT">Text</TD>
+<TD ALIGN="CENTER">Time</TD>
+<TD ALIGN="CENTER">Space</TD>
+<TD ALIGN="CENTER">Time</TD>
+<TD ALIGN="CENTER">Space</TD>
+<TD ALIGN="CENTER">Time</TD>
+<TD ALIGN="CENTER">Space</TD>
+<TD ALIGN="CENTER">Time</TD>
+<TD ALIGN="CENTER">Space</TD>
+<TD ALIGN="CENTER">Time</TD>
+<TD ALIGN="CENTER">Space</TD>
+<TD ALIGN="CENTER">Time</TD>
+<TD ALIGN="CENTER">Space</TD>
+</TR>
+<TR><TD ALIGN="LEFT">dblp.xml.200MB</TD>
+<TD ALIGN="CENTER">1.300</TD>
+<TD ALIGN="CENTER">0.69</TD>
+<TD ALIGN="CENTER">1.776</TD>
+<TD ALIGN="CENTER">0.34</TD>
+<TD ALIGN="CENTER">2.648</TD>
+<TD ALIGN="CENTER">0.29</TD>
+<TD ALIGN="CENTER">6.108</TD>
+<TD ALIGN="CENTER">0.52</TD>
+<TD ALIGN="CENTER">0.840</TD>
+<TD ALIGN="CENTER">0.41</TD>
+<TD ALIGN="CENTER">0.436</TD>
+<TD ALIGN="CENTER">5.00</TD>
+</TR>
+<TR><TD ALIGN="LEFT">dna.200MB</TD>
+<TD ALIGN="CENTER">0.548</TD>
+<TD ALIGN="CENTER">0.29</TD>
+<TD ALIGN="CENTER">0.812</TD>
+<TD ALIGN="CENTER">0.30</TD>
+<TD ALIGN="CENTER">3.132</TD>
+<TD ALIGN="CENTER">0.46</TD>
+<TD ALIGN="CENTER">1.216</TD>
+<TD ALIGN="CENTER">0.62</TD>
+<TD ALIGN="CENTER">0.768</TD>
+<TD ALIGN="CENTER">0.35</TD>
+<TD ALIGN="CENTER">0.388</TD>
+<TD ALIGN="CENTER">5.00</TD>
+</TR>
+<TR><TD ALIGN="LEFT">english.200MB</TD>
+<TD ALIGN="CENTER">1.156</TD>
+<TD ALIGN="CENTER">0.60</TD>
+<TD ALIGN="CENTER">1.676</TD>
+<TD ALIGN="CENTER">0.40</TD>
+<TD ALIGN="CENTER">2.776</TD>
+<TD ALIGN="CENTER">0.44</TD>
+<TD ALIGN="CENTER">1.744</TD>
+<TD ALIGN="CENTER">0.67</TD>
+<TD ALIGN="CENTER">1.048</TD>
+<TD ALIGN="CENTER">0.52</TD>
+<TD ALIGN="CENTER">0.372</TD>
+<TD ALIGN="CENTER">5.00</TD>
+</TR>
+<TR><TD ALIGN="LEFT">proteins.200MB</TD>
+<TD ALIGN="CENTER">1.024</TD>
+<TD ALIGN="CENTER">0.56</TD>
+<TD ALIGN="CENTER">1.668</TD>
+<TD ALIGN="CENTER">0.55</TD>
+<TD ALIGN="CENTER">2.672</TD>
+<TD ALIGN="CENTER">0.67</TD>
+<TD ALIGN="CENTER">1.704</TD>
+<TD ALIGN="CENTER">0.76</TD>
+<TD ALIGN="CENTER">1.168</TD>
+<TD ALIGN="CENTER">0.69</TD>
+<TD ALIGN="CENTER">0.368</TD>
+<TD ALIGN="CENTER">5.00</TD>
+</TR>
+<TR><TD ALIGN="LEFT">sources.200MB</TD>
+<TD ALIGN="CENTER">1.356</TD>
+<TD ALIGN="CENTER">0.72</TD>
+<TD ALIGN="CENTER">1.960</TD>
+<TD ALIGN="CENTER">0.41</TD>
+<TD ALIGN="CENTER">2.748</TD>
+<TD ALIGN="CENTER">0.38</TD>
+<TD ALIGN="CENTER">1.864</TD>
+<TD ALIGN="CENTER">0.61</TD>
+<TD ALIGN="CENTER">1.156</TD>
+<TD ALIGN="CENTER">0.59</TD>
+<TD ALIGN="CENTER">0.364</TD>
+<TD ALIGN="CENTER">5.00</TD>
+</TR>
+</TABLE>
+<span>
+Table 2: Table 1 after subtracting the space of parts of 
+the data structure, which are not needed for answering
+count queries.
+</span>
+</div>
+
+<p>Let us now take some configuration of <a href="http://github.com/simongog/sdsl" title="succinct data structure library">sdsl</a> data
+structures, which more or less correspond to the selected structures above,
+and do exactly the same experiment again.
+Here are the results:</p>
+
+<div class="myfigure">
+<TABLE CELLPADDING=3 BORDER="1">
+<TR><TD ALIGN="LEFT">&nbsp;</TD>
+<TD ALIGN="CENTER" COLSPAN=2>FM_HUFF</TD>
+<TD ALIGN="CENTER" COLSPAN=2>FM_HUFF_RRR15</TD>
+<TD ALIGN="CENTER" COLSPAN=2>CSA_SADA</TD>
+<TD ALIGN="CENTER" COLSPAN=2>FM_RLMN</TD>
+<TD ALIGN="CENTER" COLSPAN=2>FM_HUFF_RRR63</TD>
+</TR>
+<TR><TD ALIGN="LEFT">Text</TD>
+<TD ALIGN="CENTER">Time</TD>
+<TD ALIGN="CENTER">Space</TD>
+<TD ALIGN="CENTER">Time</TD>
+<TD ALIGN="CENTER">Space</TD>
+<TD ALIGN="CENTER">Time</TD>
+<TD ALIGN="CENTER">Space</TD>
+<TD ALIGN="CENTER">Time</TD>
+<TD ALIGN="CENTER">Space</TD>
+<TD ALIGN="CENTER">Time</TD>
+<TD ALIGN="CENTER">Space</TD>
+</TR>
+<TR><TD ALIGN="LEFT">dblp.xml.200MB</TD>
+<TD ALIGN="CENTER">0.760</TD>
+<TD ALIGN="CENTER">0.70</TD>
+<TD ALIGN="CENTER">1.352</TD>
+<TD ALIGN="CENTER">0.32</TD>
+<TD ALIGN="CENTER">2.676</TD>
+<TD ALIGN="CENTER">0.29</TD>
+<TD ALIGN="CENTER">1.820</TD>
+<TD ALIGN="CENTER">0.34</TD>
+<TD ALIGN="CENTER">2.072</TD>
+<TD ALIGN="CENTER">0.17</TD>
+</TR>
+<TR><TD ALIGN="LEFT">dna.200MB</TD>
+<TD ALIGN="CENTER">0.288</TD>
+<TD ALIGN="CENTER">0.29</TD>
+<TD ALIGN="CENTER">0.720</TD>
+<TD ALIGN="CENTER">0.28</TD>
+<TD ALIGN="CENTER">3.460</TD>
+<TD ALIGN="CENTER">0.50</TD>
+<TD ALIGN="CENTER">1.228</TD>
+<TD ALIGN="CENTER">0.79</TD>
+<TD ALIGN="CENTER">1.656</TD>
+<TD ALIGN="CENTER">0.24</TD>
+</TR>
+<TR><TD ALIGN="LEFT">english.200MB</TD>
+<TD ALIGN="CENTER">0.708</TD>
+<TD ALIGN="CENTER">0.61</TD>
+<TD ALIGN="CENTER">1.480</TD>
+<TD ALIGN="CENTER">0.38</TD>
+<TD ALIGN="CENTER">3.108</TD>
+<TD ALIGN="CENTER">0.44</TD>
+<TD ALIGN="CENTER">1.892</TD>
+<TD ALIGN="CENTER">0.69</TD>
+<TD ALIGN="CENTER">2.640</TD>
+<TD ALIGN="CENTER">0.27</TD>
+</TR>
+<TR><TD ALIGN="LEFT">proteins.200MB</TD>
+<TD ALIGN="CENTER">0.632</TD>
+<TD ALIGN="CENTER">0.56</TD>
+<TD ALIGN="CENTER">1.564</TD>
+<TD ALIGN="CENTER">0.53</TD>
+<TD ALIGN="CENTER">3.360</TD>
+<TD ALIGN="CENTER">0.65</TD>
+<TD ALIGN="CENTER">1.796</TD>
+<TD ALIGN="CENTER">0.89</TD>
+<TD ALIGN="CENTER">3.288</TD>
+<TD ALIGN="CENTER">0.48</TD>
+</TR>
+<TR><TD ALIGN="LEFT">sources.200MB</TD>
+<TD ALIGN="CENTER">0.868</TD>
+<TD ALIGN="CENTER">0.73</TD>
+<TD ALIGN="CENTER">1.684</TD>
+<TD ALIGN="CENTER">0.39</TD>
+<TD ALIGN="CENTER">2.900</TD>
+<TD ALIGN="CENTER">0.37</TD>
+<TD ALIGN="CENTER">1.964</TD>
+<TD ALIGN="CENTER">0.53</TD>
+<TD ALIGN="CENTER">2.832</TD>
+<TD ALIGN="CENTER">0.26</TD>
+</TR>
+</TABLE>
+<span>
+Table 3: Time and space taken by some configurations of 
+<a href="http://github.com/simongog/sdsl ">sdsl</a> 
+data structures. Time in \(\mu\)secs per pattern symbol
+and space as fraction of the original file size.
+</span>
+</div>
+
+<p>Implementation details: </p>
+
+<ul>
+<li><em>FM_HUFF</em>: Corresponds to this type (don&#39;t be scared by the length of the definition):
+           <code>csa_wt&lt;wt_huff&lt;bit_vector,rank_support_v5&lt;&gt;,tNoSel,tNoSel&gt;,64000,64000000&gt;</code>.
+           Explanation: We take a compressed suffix array based on a wavelet tree (<code>csa_wt</code>).
+           The first template parameter specifies the used wavelet tree.
+           We take a Huffman-shaped one, i.e. <code>wt_huff</code>. This wavelet tree uses the
+           5% overhead rank structure <code>rank_support_v5</code> 
+           (<a href="/bibliography/vig08wea.html">proposed by Vigna</a>)
+           and we use a dummy class for the select functionality<a href="#3"><sup>3</sup></a>, since we don&#39;t need
+           select for counting. We set the sampling rate of suffix array values 
+           to \(64000\) and the rate for inverse suffix array values to \(64000000\).
+           So we don&#39;t waste space for unnecessary locating information.</li>
+<li><em>FM_HUFF_RRR15</em>: Corresponds to <code>csa_wt&lt;wt_huff&lt;rrr_vector&lt;15&gt; &gt;,64000,64000000&gt;</code>.
+                 The only thing we have changed is the bitvector implemenation. Now we use
+                 the <a href="http://github.com/simongog/sdsl" title="succinct data structure library">sdsl</a> class <code>rrr_vector</code> parametrized with block size \(15\)<a href="#4"><sup>4</sup></a>.
+                 We don&#39;t specify the rank and select support structures, since
+                 <code>wt_huff</code> takes the default supporting structures<a href="#5"><sup>5</sup></a>.</li>
+<li><em>CSA_SADA</em>: We use Elias-\(\delta\) code to compressed the pairwise
+            differences of the \(\Psi\)-function and sample every 128th value of the
+            \(\Psi\)-function. This translates into this type definition:
+           <code>csa_sada&lt;enc_vector&lt;coder::elias_delta,128&gt;,64000,64000000&gt;</code>. </li>
+<li><em>FM_RLMN</em>: Corresponds to csa_wt<wt_rlmn<>,64000,64000000&gt;. We use the run-length
+           compressed wavelet tree <code>csa_wt</code> which uses the class <code>sd_vector</code>
+           as default compressed bitvector representation.</li>
+<li><em>FM_HUFF_RRR63</em>: The only difference to FM_HUFF_RRR15 is 
+                 the that now we use a block size of \(63\) for the
+                 RRR structure: <code>csa_wt&lt;wt_huff&lt;rrr_vector&lt;63&gt; &gt;,64000,64000000&gt;</code>. 
+                 The decoding of block is now to done with lookup tables
+                 but with the on-the-fly decoding approach proposed by the recent SEA
+                 paper by <a href="/bibliography/navpro12sea.html">Navarro and Providel</a><a href="#6"><sup>6</sup></a>.</li>
+</ul>
+
+<h3 id="toc_150">Observations</h3>
+
+<ul>
+<li>The FM_HUFF implementation can answer count queries in almost half the time than
+SSA. This is not surprising, since the <a href="http://github.com/simongog/sdsl" title="succinct data structure library">sdsl</a> implementation uses the 
+SSE built function for <a href="http://en.wikipedia.org/wiki/SSE4#POPCNT_and_LZCNT">popcount</a> 
+on 64-bit words rather than multiple table-lookups.
+The FM_HUFF implementation now even outperforms the 
+plain suffix array on the <code>dna.200MB</code> test case, since only about 4 rank queries 
+have to be answered for each symbol of the count query. </li>
+<li>The FM_HUFF_RRR15 implementation uses slightly less space than SSA_RRR, since
+we use bit-compression to store integer sequences. The query time is also
+slightly faster since we use a more advanced decoding technique<a href="#4"><sup>4</sup></a>.</li>
+<li>CSA_SADA and CSA take about the same amount of memory but the query times
+of CSA are slightly faster than the <a href="http://github.com/simongog/sdsl" title="succinct data structure library">sdsl</a> implementation. This is due
+to some overhead produced by the coder class <code>coder::elias_delta</code>.</li>
+<li>The query times of FM_RLMN is slightly slower than that of RLFM, except 
+for the first test case of highly compressible xml data. But in this
+case the query time of RLFM is three times slower than that of FM_RLMN 
+and at the same time the <a href="http://github.com/simongog/sdsl" title="succinct data structure library">sdsl</a> implementation uses only (65%) 
+of the space of RLFM. This is a result of the used sub data structures.
+The <a href="http://pizzachili.dcc.uchile.cl" title="Pizza&amp;Chili">Pizza&amp;Chili</a> implementations uses two uncompressed bitvectors
+with a constant time rank and logarithmic time select while
+the RM_RLMN uses the <code>sd_vector</code>, which is a 64-bit implementation
+of the <a href="/bibliography/okasad07alenex.html">SD-array of Okanohara and Sadakane</a>.
+The space-consumption of <code>sd_vector</code> is better if there are only
+a few runs in the BWT and therefore RM_RLMN outperforms RLFM in the
+test cases <code>dblp.xml.200MB</code> and <code>sources.200MB</code>. Furthermore
+the runtime of rank and select is constant and therefore don&#39;t
+get a peak for the dblp file.</li>
+<li>The AF-index which is in theory the most space-efficient index
+uses more space than the indexes which use 
+<a href="/bibliography/maknav07spire.html">implicit compression boosting</a> 
+like SSA_RRR and FM_HUFF_RRR15. So here is space for more engineering.</li>
+<li>The implicit compression boosting index FM_HUFF_RRR63 uses the
+least space and its counting time is only slower by a small constant
+compared to more space-greedy solutions.</li>
+</ul>
+
+<h3 id="toc_151">Conclusion</h3>
+
+<p>Using the <a href="http://github.com/simongog/sdsl" title="succinct data structure library">sdsl</a> library has several benefits:</p>
+
+<ul>
+<li>You can specify an index which outperforms all old
+indexes in terms of runtime (e.g. FM_HUFF). Even faster
+configurations are possible (e.g. use <code>rank_support_v</code> or
+<code>bit_vector_interleaved</code> with <code>csa_wt</code>). </li>
+<li>You can specify an index which outperforms all old indexes
+in terms of space (e.g. FM_HUFF_RRR63). Even more 
+space-efficient configurations are possible (e.g. 
+use <code>rrr_vector&lt;255&gt;</code>).</li>
+<li>All <a href="http://github.com/simongog/sdsl" title="succinct data structure library">sdsl</a> indexes are 64-bit implementations and therefore can
+be used for texts larger than 512 MiB<a href="#7"><sup>7</sup></a>.</li>
+<li>The runtime is predictable, since the select data structures 
+is not implemented by a binary search.<br></li>
+</ul>
+
+<p>What was not considered in this post are indexes
+  which use fixed-block length compression boosting
+  proposed by 
+  <a href="/bibliography/karpug11spire.html">K&auml;rkk&auml;inen and Puglisi at SPIRE 2011</a>.
+  From the data in the paper, the indexes are only slightly smaller than
+  SSA_RRR while the query times are equal or slightly faster than that
+  of SSA.</p>
+
+<hr>
+
+<div>
+<ul>
+    <li><a name="1" class="myfootnote">[1] Using a Huffman-shaped wavelet tree
+         was first mention in <a href="/bibliography/maknav04tr.html">[M&auml;kinen and Navarro, 2004]</a> page 17.
+    </a></li>
+    <li> <a name="2" class="myfootnote">[2] The trick is, that only 4 bits are required to
+               store the count for one block. Claude decodes two blocks at once with
+               a lookup table, when possible. This makes the decoding significantly faster
+               in practice but is not described in his paper.
+    </a></li>
+    <li> <a name="3" class="myfootnote">[3] <code>tNoSel</code> is a typedef for <code>select_support_dummy</code>. 
+    </a></li>
+    <li> <a name="4" class="myfootnote">[4] Note that for block size \(15\), we do also 
+                                            decode two blocks at once like in the implementation
+                                            of Claude but whenever possible we decode even more blocks by calculating
+                                            the prefix sum of multiple nibbles using the same technique which
+                                            is used by <a href="/bibliography/knu08bit.html">Knuth</a> to calculate the
+                                            popcount operation.
+    </a></li>
+    <li> <a name="5" class="myfootnote">[5] Note: For each bitvector of class <code>X</code>
+                     there exists typedefs <code>X::rank_1_type</code>, <code>X::rank_0_type</code>,
+                     <code>X::select_1_type</code>, and <code>X::select_0_type</code>.
+    </a></li>
+    <li> <a name="6" class="myfootnote">[6] Note: You can use a block size up to <code>256</code>
+                                            in the <code>rrr_vector</code>. Our experiments show
+                                            that the runtime for the on-the-fly decompression
+                                            is linearly dependent on the block size.
+    </a></li>
+    <li> <a name="7" class="myfootnote">[7] The limit is not 4 GiB, since we have to address bits.
+    </a></li>
+</ul>   
+</div>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+      
+        <li class="prev"><a href="/lessons/2012/08/27/Visualizing_SDSL_Data_Structures" title="Visualizing data structures in sdsl">&larr; Previous</a></li>
+      
+        <li><a href="/archive.html">Archive</a></li>
+      
+        <li class="next disabled"><a>Next &rarr;</a>
+      
+      </ul>
+    </div>
+    <hr>
+    
+
+
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_developer = 1;
+    var disqus_shortname = 'sdsl'; // required: replace example with your forum shortname
+    
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+
+
+  </div>
+  
+  <div class="span4">
+    <h4>Published</h4>
+    <div class="date"><span>28 August 2012</span></div>
+
+  
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+    
+
+
+  
+     
+    	<li><a href="/tags.html#sdsl-ref">sdsl <span>3</span></a></li>
+     
+    	<li><a href="/tags.html#CSA-ref">CSA <span>1</span></a></li>
+     
+    	<li><a href="/tags.html#FM-index-ref">FM-index <span>1</span></a></li>
+    
+  
+
+
+
+    </ul>
+    
+  </div>
+</div>
+
+
+      </div>
+
+      <footer>
+        <p>&copy; Simon Gog 2012 
+          with help from <a href="http://jekyllbootstrap.com" target="_blank" title="The Definitive Jekyll Blogging Framework">Jekyll Bootstrap</a>
+          and <a href="http://twitter.github.com/bootstrap/" target="_blank">Twitter Bootstrap</a>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+	<script type="text/x-mathjax-config">
+	  MathJax.Hub.Config({ TeX: { extensions: ["autobold.js", "newcommand.js"] }});
+	</script>
+
+	<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+
+
+	<script type="text/x-mathjax-config"> MathJax.Hub.Config({ TeX: { equationNumbers: {autoNumber: "all"} } });       </script>
+
+    
+  </body>
+</html>
+

@@ -1,0 +1,11 @@
+div.myfigure {  text-align:center;width:100%;
+	            background-color: #EFEFEF; 
+	            padding-top: 5px;
+				padding-bottom: 5px;
+				margin-bottom: 5px;
+				border: 1px solid #DDDDDD; 
+			 }
+div.myfigure table {margin-left:auto; margin-right:auto; text-align:left; margin-bottom: 5px;}
+div.myfigure span {font-style: italic;}
+
+a.myfootnote {text-decoration: none; color: black; }

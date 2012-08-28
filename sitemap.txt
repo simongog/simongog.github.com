@@ -11,6 +11,21 @@ http://simongog.github.com/bibliography/manzini99soda.html
 http://simongog.github.com/bibliography/navmak07.html
 http://simongog.github.com/bibliography/maknav05cpm.html
 http://simongog.github.com/bibliography/okasad07alenex.html
+http://simongog.github.com/bibliography/pizzachili08jea.html
+http://simongog.github.com/bibliography/navpro12sea.html
+http://simongog.github.com/bibliography/clanav08spire.html
+http://simongog.github.com/bibliography/rrr02soda.html
+http://simongog.github.com/bibliography/maknav04tr.html
+http://simongog.github.com/bibliography/burwhe94tr.html
+http://simongog.github.com/bibliography/sad02soda.html
+http://simongog.github.com/bibliography/fmmn07acmtoa.html
+http://simongog.github.com/bibliography/manmye93.html
+http://simongog.github.com/bibliography/gonbaesni92.html
+http://simongog.github.com/bibliography/vig08wea.html
+http://simongog.github.com/bibliography/knu08bit.html
+http://simongog.github.com/bibliography/maknav07spire.html
+http://simongog.github.com/bibliography/karpug11spire.html
 
+http://simongog.github.com/lessons/2012/08/28/New-baselines-for-FM-indexes
 http://simongog.github.com/lessons/2012/08/27/Visualizing_SDSL_Data_Structures
 http://simongog.github.com/lessons/2012/08/26/Calculating_H_k_in_linear_time

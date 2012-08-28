@@ -1,0 +1,22 @@
+added stdlib.h to genpatterns.c --> otherwise malloc will not work
+SAu generates debug output --> uncommented lines 289 and 290 in SAu.c
+SSA/SSA.cpp (from V3.1 of SSA) --> uncomented line 292
+SSA/Makefile --> added bitrankw32int.o to the library, without it you can not use the index!
+AFFM/af-index.cpp does not compile (from af-index_v2.1.tgz) --> uncommented line 501.
+
+*/ds/suftest2.c --> replaced CLK_TCK by CLOCKS_PER_SEC
+
+In general: add compile option -m32 to every Makefile so that the code will
+also work on 64-bit machines
+
+run_queries.c --> moved include of "interface.h" from line 5 to 6, since
+                  we get a duplicate declaration of uint,... otherwise.
+build_index.c --> moved include of "interface.h" from line 1 to line 3,
+                  for the same reason.	
+
+
+Advices on a 64-bit Ubuntu version (for -m32 option):
+ sudo apt-get install libc6-dev-i386
+ sudo apt-get install gcc-multilib
+ sudo apt-get install ia32-libs	
+

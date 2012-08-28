@@ -4,13 +4,534 @@
  <title>Succinct Data Structures</title>
  <link href="http://simongog.github.com/atom.xml" rel="self"/>
  <link href="http://simongog.github.com"/>
- <updated>2012-08-27T11:00:02+10:00</updated>
+ <updated>2012-08-28T17:10:51+10:00</updated>
  <id>http://simongog.github.com</id>
  <author>
    <name>Simon Gog</name>
    <email>simon.gog@gmail.com</email>
  </author>
 
+ 
+ <entry>
+   <title>New baselines for FM-indexes</title>
+   <link href="http://simongog.github.com/lessons/2012/08/28/New-baselines-for-FM-indexes"/>
+   <updated>2012-08-28T00:00:00+10:00</updated>
+   <id>http://simongog.github.com/lessons/2012/08/28/New-baselines-for-FM-indexes</id>
+   <content type="html">&lt;p&gt;The &lt;a href=&quot;http://pizzachili.dcc.uchile.cl&quot; title=&quot;Pizza&amp;amp;Chili&quot;&gt;Pizza&amp;amp;Chili website&lt;/a&gt; provides a 
+set of highly tuned compressed index implementation which can be used through the
+same interface and a text corpus consisting of texts of different
+size origin from several application domains. 
+Ferragina et al. 
+&lt;a href=&quot;/bibliography/pizzachili08jea.html&quot;&gt;[JEA2008]&lt;/a&gt;
+published a good experimental study in which 
+the indexes were evaluated. I was excited how the stated
+results change if I rerun the experiments of the paper
+on my machine and furthermore how good their results
+are compared to my own implementations. Therefore, I downloaded the
+indexes and test cases, built the programs 
+(&lt;a href=&quot;/assets/data/fix_pizza_chili.txt&quot;&gt;instructions to compile the indexes on a 64-bit system&lt;/a&gt;)
+and wrote a script which reproduces Table VI
+of the JEA paper. The table lists query time and the
+space of the data structures for count queries. 
+I changed the presentation slightly. The LZ-index was not included but
+the &lt;a href=&quot;/bibliography/maknav05cpm.html&quot;&gt;run-length compressed FM-index&lt;/a&gt; 
+implemented by M&amp;auml;kinen and Gonz&amp;#225;lez and the succinct suffix array 
+which uses the &lt;a href=&quot;/bibliography/rrr02soda.html&quot;&gt;RRR&lt;/a&gt; implementation of 
+&lt;a href=&quot;/bibliography/clanav08spire.html&quot;&gt;Claude&lt;/a&gt; were added. &lt;/p&gt;
+
+&lt;p&gt;Before we come to the results, let us briefly revisit the experimental setup: 
+The machine was equipped with 8 Intel Xeon E5640 Dual Core Processors which share a 12MB smart cache
+and 144GB of DDR3 DRAM, only one core was used for the experiments.
+Operating system was Ubuntu Linux 11.10 and we used the gcc compiler version 4.6.1.
+Where necessary we added the compile option &lt;code&gt;-m32&lt;/code&gt; and we added the compile option
+&lt;code&gt;-msse4.2&lt;/code&gt; when using &lt;a href=&quot;http://github.com/simongog/sdsl&quot; title=&quot;succinct data structure library&quot;&gt;sdsl&lt;/a&gt; indexes.
+Indexes were build and \(k=50,000\) pattern each of length 
+\(m=20\) were extracted from each test file. Subsequently, each index
+was queried with the corresponding pattern set and the
+total query time was divided by \(k\cdot m\) to get the average
+time spend on matching one character of a pattern. &lt;/p&gt;
+
+&lt;p&gt;The tested implementations correspond to the following approaches:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;em&gt;SSA&lt;/em&gt;: The succinct suffix array is just a Huffman-shaped&lt;a href=&quot;#1&quot;&gt;&lt;sup&gt;1&lt;/sup&gt;&lt;/a&gt; wavelet tree of the 
+     &lt;a href=&quot;/bibliography/burwhe94tr.html&quot;&gt;Burrows-Wheeler transform&lt;/a&gt; (BWT) of the text.
+     The space of the structure is about \(nH_0(\TEXT)\) bits. &lt;/li&gt;
+&lt;li&gt;&lt;em&gt;SSA_RRR&lt;/em&gt;: The same as SSA but the bitvector is replaced by the RRR implementation
+           of Claude, which uses blocks of size \(15\) and a fast decoding method
+           of the block counts&lt;a href=&quot;#2&quot;&gt;&lt;sup&gt;2&lt;/sup&gt;&lt;/a&gt;. Combining Huffman-shaped wavelet tree with
+           compressed bitvectors results in a \(H_k\)-compression. &lt;/li&gt;
+&lt;li&gt;&lt;em&gt;CSA&lt;/em&gt;: Sadakane&amp;#39;s implementation of his 
+       &lt;a href=&quot;/bibliography/sad02soda.html&quot;&gt;compressed suffix&lt;/a&gt; array which is 
+       based on the \(\Psi\)-function.&lt;br&gt;&lt;/li&gt;
+&lt;li&gt;&lt;em&gt;RLFM&lt;/em&gt;: The FM-index based on a run-length encoded wavelet tree 
+        &lt;a href=&quot;/bibliography/maknav04tr.html&quot;&gt;[M&amp;auml;kinen and Navarro, 2004]&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;em&gt;AF-index&lt;/em&gt;: The alphabet-friendly FM-index (see &lt;a href=&quot;/bibliography/fmmn07acmtoa.html&quot;&gt;[Fer2007]&lt;/a&gt;)
+            partitions the BWT in regions and compresses every region with
+            a SSA. The AF-index uses a partitioning such that the overall
+            space consumption is minimized.&lt;/li&gt;
+&lt;li&gt;&lt;em&gt;plain_SA&lt;/em&gt;: The uncompressed suffix array (see &lt;a href=&quot;/bibliography/manmye93.html&quot;&gt;[Manber and Myers 1993]&lt;/a&gt;
+            and &lt;a href=&quot;/bibliography/gonbaesni92.html&quot;&gt;[Gonnet et al. 1992]&lt;/a&gt;); binary search is used
+            to count patterns. &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Here are the result of the experiments:&lt;/p&gt;
+
+&lt;div class=&quot;myfigure&quot;&gt;
+&lt;TABLE CELLPADDING=3 BORDER=&quot;1&quot;&gt;
+&lt;TR&gt;&lt;TD ALIGN=&quot;LEFT&quot;&gt;&amp;nbsp;&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot; COLSPAN=2&gt;SSA&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot; COLSPAN=2&gt;SSA_RRR&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot; COLSPAN=2&gt;CSA&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot; COLSPAN=2&gt;RLFM&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot; COLSPAN=2&gt;AF-index&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot; COLSPAN=2&gt;plain SA&lt;/TD&gt;
+&lt;/TR&gt;
+&lt;TR&gt;&lt;TD ALIGN=&quot;LEFT&quot;&gt;Text&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;Time&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;Space&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;Time&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;Space&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;Time&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;Space&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;Time&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;Space&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;Time&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;Space&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;Time&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;Space&lt;/TD&gt;
+&lt;/TR&gt;
+&lt;TR&gt;&lt;TD ALIGN=&quot;LEFT&quot;&gt;dblp.xml.200MB&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;1.300&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.83&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;1.776&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.47&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;2.648&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.29&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;6.108&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.65&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.840&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.54&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.436&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;5.00&lt;/TD&gt;
+&lt;/TR&gt;
+&lt;TR&gt;&lt;TD ALIGN=&quot;LEFT&quot;&gt;dna.200MB&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.548&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.42&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.812&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.43&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;3.132&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.46&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;1.216&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.75&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.768&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.48&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.388&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;5.00&lt;/TD&gt;
+&lt;/TR&gt;
+&lt;TR&gt;&lt;TD ALIGN=&quot;LEFT&quot;&gt;english.200MB&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;1.156&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.73&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;1.676&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.53&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;2.776&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.44&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;1.744&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.80&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;1.048&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.65&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.372&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;5.00&lt;/TD&gt;
+&lt;/TR&gt;
+&lt;TR&gt;&lt;TD ALIGN=&quot;LEFT&quot;&gt;proteins.200MB&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;1.024&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.69&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;1.668&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.69&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;2.672&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.67&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;1.704&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.89&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;1.168&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.82&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.368&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;5.00&lt;/TD&gt;
+&lt;/TR&gt;
+&lt;TR&gt;&lt;TD ALIGN=&quot;LEFT&quot;&gt;sources.200MB&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;1.356&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.85&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;1.960&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.54&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;2.748&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.38&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;1.864&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.74&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;1.156&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.73&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.364&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;5.00&lt;/TD&gt;
+&lt;/TR&gt;
+&lt;/TABLE&gt;
+&lt;span&gt;
+Table 1: Time and space taken by the implementations 
+on the &lt;a href=&quot;http://pizzachili.dcc.uchile.cl&quot;&gt;Pizza&amp;amp;Chili&lt;/a&gt;.
+Time in \(\mu\)secs per pattern symbol and space as fraction
+of the original file size.
+&lt;/span&gt;
+&lt;/div&gt;
+
+&lt;p&gt;When you compare this with the table in the paper, you make two
+observations:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;em&gt;The runtimes are faster&lt;/em&gt; by almost a factor of 2. This is
+due to the use of recent hardware. &lt;/li&gt;
+&lt;li&gt;Surprisingly, the &lt;em&gt;space consumption was larger&lt;/em&gt; than in the paper,
+despite my configuration to use a very sparse sampling for 
+information which is only needed for locating (suffix and inverse
+suffix array values). After contacting the authors it turned out, 
+that a bitvector is used to indicate which samples are stored.
+This bitvector is not removed or compressed, even if there are very few
+or no samples. &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;So we are a little bit naughty and just subtract the space needed
+for this unnecessary part of the data structure and get the
+following table: &lt;/p&gt;
+
+&lt;div class=&quot;myfigure&quot;&gt;
+&lt;TABLE CELLPADDING=3 BORDER=&quot;1&quot;&gt;
+&lt;TR&gt;&lt;TD ALIGN=&quot;LEFT&quot;&gt;&amp;nbsp;&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot; COLSPAN=2&gt;SSA&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot; COLSPAN=2&gt;SSA_RRR&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot; COLSPAN=2&gt;CSA&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot; COLSPAN=2&gt;RLFM&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot; COLSPAN=2&gt;AF-index&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot; COLSPAN=2&gt;plain SA&lt;/TD&gt;
+&lt;/TR&gt;
+&lt;TR&gt;&lt;TD ALIGN=&quot;LEFT&quot;&gt;Text&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;Time&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;Space&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;Time&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;Space&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;Time&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;Space&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;Time&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;Space&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;Time&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;Space&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;Time&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;Space&lt;/TD&gt;
+&lt;/TR&gt;
+&lt;TR&gt;&lt;TD ALIGN=&quot;LEFT&quot;&gt;dblp.xml.200MB&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;1.300&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.69&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;1.776&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.34&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;2.648&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.29&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;6.108&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.52&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.840&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.41&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.436&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;5.00&lt;/TD&gt;
+&lt;/TR&gt;
+&lt;TR&gt;&lt;TD ALIGN=&quot;LEFT&quot;&gt;dna.200MB&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.548&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.29&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.812&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.30&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;3.132&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.46&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;1.216&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.62&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.768&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.35&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.388&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;5.00&lt;/TD&gt;
+&lt;/TR&gt;
+&lt;TR&gt;&lt;TD ALIGN=&quot;LEFT&quot;&gt;english.200MB&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;1.156&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.60&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;1.676&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.40&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;2.776&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.44&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;1.744&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.67&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;1.048&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.52&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.372&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;5.00&lt;/TD&gt;
+&lt;/TR&gt;
+&lt;TR&gt;&lt;TD ALIGN=&quot;LEFT&quot;&gt;proteins.200MB&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;1.024&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.56&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;1.668&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.55&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;2.672&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.67&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;1.704&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.76&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;1.168&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.69&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.368&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;5.00&lt;/TD&gt;
+&lt;/TR&gt;
+&lt;TR&gt;&lt;TD ALIGN=&quot;LEFT&quot;&gt;sources.200MB&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;1.356&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.72&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;1.960&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.41&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;2.748&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.38&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;1.864&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.61&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;1.156&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.59&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.364&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;5.00&lt;/TD&gt;
+&lt;/TR&gt;
+&lt;/TABLE&gt;
+&lt;span&gt;
+Table 2: Table 1 after subtracting the space of parts of 
+the data structure, which are not needed for answering
+count queries.
+&lt;/span&gt;
+&lt;/div&gt;
+
+&lt;p&gt;Let us now take some configuration of &lt;a href=&quot;http://github.com/simongog/sdsl&quot; title=&quot;succinct data structure library&quot;&gt;sdsl&lt;/a&gt; data
+structures, which more or less correspond to the selected structures above,
+and do exactly the same experiment again.
+Here are the results:&lt;/p&gt;
+
+&lt;div class=&quot;myfigure&quot;&gt;
+&lt;TABLE CELLPADDING=3 BORDER=&quot;1&quot;&gt;
+&lt;TR&gt;&lt;TD ALIGN=&quot;LEFT&quot;&gt;&amp;nbsp;&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot; COLSPAN=2&gt;FM_HUFF&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot; COLSPAN=2&gt;FM_HUFF_RRR15&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot; COLSPAN=2&gt;CSA_SADA&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot; COLSPAN=2&gt;FM_RLMN&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot; COLSPAN=2&gt;FM_HUFF_RRR63&lt;/TD&gt;
+&lt;/TR&gt;
+&lt;TR&gt;&lt;TD ALIGN=&quot;LEFT&quot;&gt;Text&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;Time&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;Space&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;Time&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;Space&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;Time&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;Space&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;Time&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;Space&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;Time&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;Space&lt;/TD&gt;
+&lt;/TR&gt;
+&lt;TR&gt;&lt;TD ALIGN=&quot;LEFT&quot;&gt;dblp.xml.200MB&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.760&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.70&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;1.352&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.32&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;2.676&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.29&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;1.820&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.34&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;2.072&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.17&lt;/TD&gt;
+&lt;/TR&gt;
+&lt;TR&gt;&lt;TD ALIGN=&quot;LEFT&quot;&gt;dna.200MB&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.288&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.29&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.720&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.28&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;3.460&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.50&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;1.228&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.79&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;1.656&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.24&lt;/TD&gt;
+&lt;/TR&gt;
+&lt;TR&gt;&lt;TD ALIGN=&quot;LEFT&quot;&gt;english.200MB&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.708&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.61&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;1.480&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.38&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;3.108&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.44&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;1.892&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.69&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;2.640&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.27&lt;/TD&gt;
+&lt;/TR&gt;
+&lt;TR&gt;&lt;TD ALIGN=&quot;LEFT&quot;&gt;proteins.200MB&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.632&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.56&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;1.564&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.53&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;3.360&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.65&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;1.796&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.89&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;3.288&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.48&lt;/TD&gt;
+&lt;/TR&gt;
+&lt;TR&gt;&lt;TD ALIGN=&quot;LEFT&quot;&gt;sources.200MB&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.868&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.73&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;1.684&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.39&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;2.900&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.37&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;1.964&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.53&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;2.832&lt;/TD&gt;
+&lt;TD ALIGN=&quot;CENTER&quot;&gt;0.26&lt;/TD&gt;
+&lt;/TR&gt;
+&lt;/TABLE&gt;
+&lt;span&gt;
+Table 3: Time and space taken by some configurations of 
+&lt;a href=&quot;http://github.com/simongog/sdsl &quot;&gt;sdsl&lt;/a&gt; 
+data structures. Time in \(\mu\)secs per pattern symbol
+and space as fraction of the original file size.
+&lt;/span&gt;
+&lt;/div&gt;
+
+&lt;p&gt;Implementation details: &lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;em&gt;FM_HUFF&lt;/em&gt;: Corresponds to this type (don&amp;#39;t be scared by the length of the definition):
+           &lt;code&gt;csa_wt&amp;lt;wt_huff&amp;lt;bit_vector,rank_support_v5&amp;lt;&amp;gt;,tNoSel,tNoSel&amp;gt;,64000,64000000&amp;gt;&lt;/code&gt;.
+           Explanation: We take a compressed suffix array based on a wavelet tree (&lt;code&gt;csa_wt&lt;/code&gt;).
+           The first template parameter specifies the used wavelet tree.
+           We take a Huffman-shaped one, i.e. &lt;code&gt;wt_huff&lt;/code&gt;. This wavelet tree uses the
+           5% overhead rank structure &lt;code&gt;rank_support_v5&lt;/code&gt; 
+           (&lt;a href=&quot;/bibliography/vig08wea.html&quot;&gt;proposed by Vigna&lt;/a&gt;)
+           and we use a dummy class for the select functionality&lt;a href=&quot;#3&quot;&gt;&lt;sup&gt;3&lt;/sup&gt;&lt;/a&gt;, since we don&amp;#39;t need
+           select for counting. We set the sampling rate of suffix array values 
+           to \(64000\) and the rate for inverse suffix array values to \(64000000\).
+           So we don&amp;#39;t waste space for unnecessary locating information.&lt;/li&gt;
+&lt;li&gt;&lt;em&gt;FM_HUFF_RRR15&lt;/em&gt;: Corresponds to &lt;code&gt;csa_wt&amp;lt;wt_huff&amp;lt;rrr_vector&amp;lt;15&amp;gt; &amp;gt;,64000,64000000&amp;gt;&lt;/code&gt;.
+                 The only thing we have changed is the bitvector implemenation. Now we use
+                 the &lt;a href=&quot;http://github.com/simongog/sdsl&quot; title=&quot;succinct data structure library&quot;&gt;sdsl&lt;/a&gt; class &lt;code&gt;rrr_vector&lt;/code&gt; parametrized with block size \(15\)&lt;a href=&quot;#4&quot;&gt;&lt;sup&gt;4&lt;/sup&gt;&lt;/a&gt;.
+                 We don&amp;#39;t specify the rank and select support structures, since
+                 &lt;code&gt;wt_huff&lt;/code&gt; takes the default supporting structures&lt;a href=&quot;#5&quot;&gt;&lt;sup&gt;5&lt;/sup&gt;&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;em&gt;CSA_SADA&lt;/em&gt;: We use Elias-\(\delta\) code to compressed the pairwise
+            differences of the \(\Psi\)-function and sample every 128th value of the
+            \(\Psi\)-function. This translates into this type definition:
+           &lt;code&gt;csa_sada&amp;lt;enc_vector&amp;lt;coder::elias_delta,128&amp;gt;,64000,64000000&amp;gt;&lt;/code&gt;. &lt;/li&gt;
+&lt;li&gt;&lt;em&gt;FM_RLMN&lt;/em&gt;: Corresponds to csa_wt&lt;wt_rlmn&lt;&gt;,64000,64000000&amp;gt;. We use the run-length
+           compressed wavelet tree &lt;code&gt;csa_wt&lt;/code&gt; which uses the class &lt;code&gt;sd_vector&lt;/code&gt;
+           as default compressed bitvector representation.&lt;/li&gt;
+&lt;li&gt;&lt;em&gt;FM_HUFF_RRR63&lt;/em&gt;: The only difference to FM_HUFF_RRR15 is 
+                 the that now we use a block size of \(63\) for the
+                 RRR structure: &lt;code&gt;csa_wt&amp;lt;wt_huff&amp;lt;rrr_vector&amp;lt;63&amp;gt; &amp;gt;,64000,64000000&amp;gt;&lt;/code&gt;. 
+                 The decoding of block is now to done with lookup tables
+                 but with the on-the-fly decoding approach proposed by the recent SEA
+                 paper by &lt;a href=&quot;/bibliography/navpro12sea.html&quot;&gt;Navarro and Providel&lt;/a&gt;&lt;a href=&quot;#6&quot;&gt;&lt;sup&gt;6&lt;/sup&gt;&lt;/a&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;toc_150&quot;&gt;Observations&lt;/h3&gt;
+
+&lt;ul&gt;
+&lt;li&gt;The FM_HUFF implementation can answer count queries in almost half the time than
+SSA. This is not surprising, since the &lt;a href=&quot;http://github.com/simongog/sdsl&quot; title=&quot;succinct data structure library&quot;&gt;sdsl&lt;/a&gt; implementation uses the 
+SSE built function for &lt;a href=&quot;http://en.wikipedia.org/wiki/SSE4#POPCNT_and_LZCNT&quot;&gt;popcount&lt;/a&gt; 
+on 64-bit words rather than multiple table-lookups.
+The FM_HUFF implementation now even outperforms the 
+plain suffix array on the &lt;code&gt;dna.200MB&lt;/code&gt; test case, since only about 4 rank queries 
+have to be answered for each symbol of the count query. &lt;/li&gt;
+&lt;li&gt;The FM_HUFF_RRR15 implementation uses slightly less space than SSA_RRR, since
+we use bit-compression to store integer sequences. The query time is also
+slightly faster since we use a more advanced decoding technique&lt;a href=&quot;#4&quot;&gt;&lt;sup&gt;4&lt;/sup&gt;&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;CSA_SADA and CSA take about the same amount of memory but the query times
+of CSA are slightly faster than the &lt;a href=&quot;http://github.com/simongog/sdsl&quot; title=&quot;succinct data structure library&quot;&gt;sdsl&lt;/a&gt; implementation. This is due
+to some overhead produced by the coder class &lt;code&gt;coder::elias_delta&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;The query times of FM_RLMN is slightly slower than that of RLFM, except 
+for the first test case of highly compressible xml data. But in this
+case the query time of RLFM is three times slower than that of FM_RLMN 
+and at the same time the &lt;a href=&quot;http://github.com/simongog/sdsl&quot; title=&quot;succinct data structure library&quot;&gt;sdsl&lt;/a&gt; implementation uses only (65%) 
+of the space of RLFM. This is a result of the used sub data structures.
+The &lt;a href=&quot;http://pizzachili.dcc.uchile.cl&quot; title=&quot;Pizza&amp;amp;Chili&quot;&gt;Pizza&amp;amp;Chili&lt;/a&gt; implementations uses two uncompressed bitvectors
+with a constant time rank and logarithmic time select while
+the RM_RLMN uses the &lt;code&gt;sd_vector&lt;/code&gt;, which is a 64-bit implementation
+of the &lt;a href=&quot;/bibliography/okasad07alenex.html&quot;&gt;SD-array of Okanohara and Sadakane&lt;/a&gt;.
+The space-consumption of &lt;code&gt;sd_vector&lt;/code&gt; is better if there are only
+a few runs in the BWT and therefore RM_RLMN outperforms RLFM in the
+test cases &lt;code&gt;dblp.xml.200MB&lt;/code&gt; and &lt;code&gt;sources.200MB&lt;/code&gt;. Furthermore
+the runtime of rank and select is constant and therefore don&amp;#39;t
+get a peak for the dblp file.&lt;/li&gt;
+&lt;li&gt;The AF-index which is in theory the most space-efficient index
+uses more space than the indexes which use 
+&lt;a href=&quot;/bibliography/maknav07spire.html&quot;&gt;implicit compression boosting&lt;/a&gt; 
+like SSA_RRR and FM_HUFF_RRR15. So here is space for more engineering.&lt;/li&gt;
+&lt;li&gt;The implicit compression boosting index FM_HUFF_RRR63 uses the
+least space and its counting time is only slower by a small constant
+compared to more space-greedy solutions.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;toc_151&quot;&gt;Conclusion&lt;/h3&gt;
+
+&lt;p&gt;Using the &lt;a href=&quot;http://github.com/simongog/sdsl&quot; title=&quot;succinct data structure library&quot;&gt;sdsl&lt;/a&gt; library has several benefits:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;You can specify an index which outperforms all old
+indexes in terms of runtime (e.g. FM_HUFF). Even faster
+configurations are possible (e.g. use &lt;code&gt;rank_support_v&lt;/code&gt; or
+&lt;code&gt;bit_vector_interleaved&lt;/code&gt; with &lt;code&gt;csa_wt&lt;/code&gt;). &lt;/li&gt;
+&lt;li&gt;You can specify an index which outperforms all old indexes
+in terms of space (e.g. FM_HUFF_RRR63). Even more 
+space-efficient configurations are possible (e.g. 
+use &lt;code&gt;rrr_vector&amp;lt;255&amp;gt;&lt;/code&gt;).&lt;/li&gt;
+&lt;li&gt;All &lt;a href=&quot;http://github.com/simongog/sdsl&quot; title=&quot;succinct data structure library&quot;&gt;sdsl&lt;/a&gt; indexes are 64-bit implementations and therefore can
+be used for texts larger than 512 MiB&lt;a href=&quot;#7&quot;&gt;&lt;sup&gt;7&lt;/sup&gt;&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;The runtime is predictable, since the select data structures 
+is not implemented by a binary search.&lt;br&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;What was not considered in this post are indexes
+  which use fixed-block length compression boosting
+  proposed by 
+  &lt;a href=&quot;/bibliography/karpug11spire.html&quot;&gt;K&amp;auml;rkk&amp;auml;inen and Puglisi at SPIRE 2011&lt;/a&gt;.
+  From the data in the paper, the indexes are only slightly smaller than
+  SSA_RRR while the query times are equal or slightly faster than that
+  of SSA.&lt;/p&gt;
+
+&lt;hr&gt;
+
+&lt;div&gt;
+&lt;ul&gt;
+    &lt;li&gt;&lt;a name=&quot;1&quot; class=&quot;myfootnote&quot;&gt;[1] Using a Huffman-shaped wavelet tree
+         was first mention in &lt;a href=&quot;/bibliography/maknav04tr.html&quot;&gt;[M&amp;auml;kinen and Navarro, 2004]&lt;/a&gt; page 17.
+    &lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt; &lt;a name=&quot;2&quot; class=&quot;myfootnote&quot;&gt;[2] The trick is, that only 4 bits are required to
+               store the count for one block. Claude decodes two blocks at once with
+               a lookup table, when possible. This makes the decoding significantly faster
+               in practice but is not described in his paper.
+    &lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt; &lt;a name=&quot;3&quot; class=&quot;myfootnote&quot;&gt;[3] &lt;code&gt;tNoSel&lt;/code&gt; is a typedef for &lt;code&gt;select_support_dummy&lt;/code&gt;. 
+    &lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt; &lt;a name=&quot;4&quot; class=&quot;myfootnote&quot;&gt;[4] Note that for block size \(15\), we do also 
+                                            decode two blocks at once like in the implementation
+                                            of Claude but whenever possible we decode even more blocks by calculating
+                                            the prefix sum of multiple nibbles using the same technique which
+                                            is used by &lt;a href=&quot;/bibliography/knu08bit.html&quot;&gt;Knuth&lt;/a&gt; to calculate the
+                                            popcount operation.
+    &lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt; &lt;a name=&quot;5&quot; class=&quot;myfootnote&quot;&gt;[5] Note: For each bitvector of class &lt;code&gt;X&lt;/code&gt;
+                     there exists typedefs &lt;code&gt;X::rank_1_type&lt;/code&gt;, &lt;code&gt;X::rank_0_type&lt;/code&gt;,
+                     &lt;code&gt;X::select_1_type&lt;/code&gt;, and &lt;code&gt;X::select_0_type&lt;/code&gt;.
+    &lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt; &lt;a name=&quot;6&quot; class=&quot;myfootnote&quot;&gt;[6] Note: You can use a block size up to &lt;code&gt;256&lt;/code&gt;
+                                            in the &lt;code&gt;rrr_vector&lt;/code&gt;. Our experiments show
+                                            that the runtime for the on-the-fly decompression
+                                            is linearly dependent on the block size.
+    &lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt; &lt;a name=&quot;7&quot; class=&quot;myfootnote&quot;&gt;[7] The limit is not 4 GiB, since we have to address bits.
+    &lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;   
+&lt;/div&gt;
+</content>
+ </entry>
  
  <entry>
    <title>Visualizing data structures in sdsl</title>
@@ -127,7 +648,7 @@ test suite. A run of the program produces a CST
 names &lt;code&gt;faust.txt.cst3&lt;/code&gt;. The CST has size 
 460 kB for the original 222 kB. &lt;/p&gt;
 
-&lt;h2 id=&quot;toc_50&quot;&gt;1 Calculating the zeroth order entropy&lt;/h2&gt;
+&lt;h2 id=&quot;toc_145&quot;&gt;1 Calculating the zeroth order entropy&lt;/h2&gt;
 
 &lt;p&gt;The zeroth order empirical entropy \(H_0\) 
 of a text \(\TEXT\) of length \(n\) 
@@ -160,7 +681,7 @@ each child its weighted contribution to \(H_0\). Note:
 &lt;code&gt;cst.sibiling(w)&lt;/code&gt; returns the root node &lt;code&gt;cst.root()&lt;/code&gt; if there
 is no next sibling.&lt;/p&gt;
 
-&lt;h2 id=&quot;toc_51&quot;&gt;2 Calculating the k-th order entropy&lt;/h2&gt;
+&lt;h2 id=&quot;toc_146&quot;&gt;2 Calculating the k-th order entropy&lt;/h2&gt;
 
 &lt;div&gt;More advanced compressors make use of the context before 
 a symbol and choose different codes dependent on the preceding
@@ -195,7 +716,7 @@ Here is the complete code:
 
 &lt;script src=&quot;http://gist.github.com/3473167.js&quot;&gt;&lt;/script&gt;
 
-&lt;h1 id=&quot;toc_52&quot;&gt;Example&lt;/h1&gt;
+&lt;h1 id=&quot;toc_147&quot;&gt;Example&lt;/h1&gt;
 
 &lt;p&gt;Lets look at an example. Say our string is \(\TEXT\)=&lt;code&gt;umulmundumulmu$&lt;/code&gt; 
 and we and to calculate \(H_1(\TEXT)\).
@@ -217,7 +738,7 @@ same procedure also for substring &lt;code&gt;u&lt;/code&gt;.&lt;/p&gt;
      src=&quot;/assets/images/kth_order_entropy_calculation_suffix_tree.png&quot;&gt;&lt;/image&gt;
 &lt;/div&gt;
 
-&lt;h1 id=&quot;toc_53&quot;&gt;Experiment&lt;/h1&gt;
+&lt;h1 id=&quot;toc_148&quot;&gt;Experiment&lt;/h1&gt;
 
 &lt;p&gt;Lets take the 200 MiB test cases of the 
 &lt;a href=&quot;http://pizzachili.di.unipi.it/&quot;&gt;Pizza&amp;amp;Chili&lt;/a&gt;
@@ -237,7 +758,7 @@ in practice. If we choose larger values for \(k\) then the
 number of contexts \(CT\) is so high, that the information
 which is needed to store context information dominates the space.&lt;/p&gt;
 
-&lt;h2 id=&quot;toc_54&quot;&gt;References&lt;/h2&gt;
+&lt;h2 id=&quot;toc_149&quot;&gt;References&lt;/h2&gt;
 
 &lt;ul&gt;
 &lt;li&gt;&lt;a href=&quot;/bibliography/manzini99soda.html&quot;&gt;Manzini&amp;#39;s SODA article&lt;/a&gt; and &lt;/li&gt;
