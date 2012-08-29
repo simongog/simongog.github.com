@@ -138,11 +138,11 @@
 
 <div class="row">
   <div class="span12">
-    <p>About five year ago, I have read an article about so called
-succinct data structures and was fascinated. These succinct
-data structures only use space close to the information theoretic
-lower bound of the underlaying object while providing the
-same functionality as a classical uncompressed data structure.
+    <p>Welcome to my blog about practical succinct data structures.
+A data structure is called succinct, if it uses space close to 
+the information theoretic lower bound of the underlaying object 
+while it provides the same functionality as a classical 
+uncompressed data structure.
 For example a tree with \(n\) leaves can be represented in about 
 \(2n\) bits and still answer the operations <code>parent</code>, <code>child</code> and <code>sibling</code>
 in constant time. The uncompressed tree data structure 
@@ -159,12 +159,15 @@ the right place and there were no libraries
 which contain basic succinct structures like
 a bit vector and rank and select structures.</p>
 
-<p>This was the motivation to design a easy to use
+<p>This was the motivation to design an easy to use
 (if you know the STL, it will be easy) but at
 the same time highly efficient library for
 succinct data structures. The result is simply
 called <a href="https://github.com/simongog/sdsl">sdsl</a>
-and you are only one click away.</p>
+and you are only one click away. The goal of this
+blog is to explain succinct data structure and to
+show how the library can be used. I have already
+added some posts:</p>
 
 <p>Blog entries: 
 <ul class="posts"></p>
@@ -203,6 +206,23 @@ and you are only one click away.</p>
 
 
     
+
+
+  <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-34340677-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
   </body>
 </html>
 
