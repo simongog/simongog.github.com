@@ -4,7 +4,7 @@
  <title>Succinct Data Structures</title>
  <link href="http://simongog.github.com/atom.xml" rel="self"/>
  <link href="http://simongog.github.com"/>
- <updated>2012-08-29T13:56:05+10:00</updated>
+ <updated>2012-08-29T14:09:36+10:00</updated>
  <id>http://simongog.github.com</id>
  <author>
    <name>Simon Gog</name>
@@ -439,7 +439,7 @@ and space as fraction of the original file size.
                  paper by &lt;a href=&quot;/bibliography/navpro12sea.html&quot;&gt;Navarro and Providel&lt;/a&gt;&lt;a href=&quot;#6&quot;&gt;&lt;sup&gt;6&lt;/sup&gt;&lt;/a&gt;.&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h3 id=&quot;toc_26&quot;&gt;Observations&lt;/h3&gt;
+&lt;h3 id=&quot;toc_80&quot;&gt;Observations&lt;/h3&gt;
 
 &lt;ul&gt;
 &lt;li&gt;The FM_HUFF implementation can answer count queries in almost half the time than
@@ -478,7 +478,7 @@ least space and its counting time is only slower by a small constant
 compared to more space-greedy solutions.&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h3 id=&quot;toc_27&quot;&gt;Conclusion&lt;/h3&gt;
+&lt;h3 id=&quot;toc_81&quot;&gt;Conclusion&lt;/h3&gt;
 
 &lt;p&gt;Using the &lt;a href=&quot;http://github.com/simongog/sdsl&quot; title=&quot;succinct data structure library&quot;&gt;sdsl&lt;/a&gt; library has several benefits:&lt;/p&gt;
 
@@ -490,7 +490,8 @@ configurations are possible (e.g. use &lt;code&gt;rank_support_v&lt;/code&gt; or
 &lt;li&gt;You can specify an index which outperforms all old indexes
 in terms of space (e.g. FM_HUFF_RRR63). Even more 
 space-efficient configurations are possible (e.g. 
-use &lt;code&gt;rrr_vector&amp;lt;255&amp;gt;&lt;/code&gt;).&lt;/li&gt;
+use &lt;code&gt;rrr_vector&amp;lt;255&amp;gt;&lt;/code&gt;, this reduces the space for 
+&lt;code&gt;dblp.xml.200MB&lt;/code&gt; to \(14 \%\) and increases the query time to \(13.8 \mu\)secs ).&lt;/li&gt;
 &lt;li&gt;All &lt;a href=&quot;http://github.com/simongog/sdsl&quot; title=&quot;succinct data structure library&quot;&gt;sdsl&lt;/a&gt; indexes are 64-bit implementations and therefore can
 be used for texts larger than 512 MiB&lt;a href=&quot;#7&quot;&gt;&lt;sup&gt;7&lt;/sup&gt;&lt;/a&gt;.&lt;/li&gt;
 &lt;li&gt;The runtime is predictable, since the select data structures 
@@ -710,7 +711,7 @@ test suite. A run of the program produces a CST
 names &lt;code&gt;faust.txt.cst3&lt;/code&gt;. The CST has size 
 460 kB for the original 222 kB. &lt;/p&gt;
 
-&lt;h2 id=&quot;toc_21&quot;&gt;1 Calculating the zeroth order entropy&lt;/h2&gt;
+&lt;h2 id=&quot;toc_75&quot;&gt;1 Calculating the zeroth order entropy&lt;/h2&gt;
 
 &lt;p&gt;The zeroth order empirical entropy \(H_0\) 
 of a text \(\TEXT\) of length \(n\) 
@@ -743,7 +744,7 @@ each child its weighted contribution to \(H_0\). Note:
 &lt;code&gt;cst.sibiling(w)&lt;/code&gt; returns the root node &lt;code&gt;cst.root()&lt;/code&gt; if there
 is no next sibling.&lt;/p&gt;
 
-&lt;h2 id=&quot;toc_22&quot;&gt;2 Calculating the k-th order entropy&lt;/h2&gt;
+&lt;h2 id=&quot;toc_76&quot;&gt;2 Calculating the k-th order entropy&lt;/h2&gt;
 
 &lt;div&gt;More advanced compressors make use of the context before 
 a symbol and choose different codes dependent on the preceding
@@ -778,7 +779,7 @@ Here is the complete code:
 
 &lt;script src=&quot;http://gist.github.com/3473167.js&quot;&gt;&lt;/script&gt;
 
-&lt;h1 id=&quot;toc_23&quot;&gt;Example&lt;/h1&gt;
+&lt;h1 id=&quot;toc_77&quot;&gt;Example&lt;/h1&gt;
 
 &lt;p&gt;Lets look at an example. Say our string is \(\TEXT\)=&lt;code&gt;umulmundumulmu$&lt;/code&gt; 
 and we and to calculate \(H_1(\TEXT)\).
@@ -800,7 +801,7 @@ same procedure also for substring &lt;code&gt;u&lt;/code&gt;.&lt;/p&gt;
      src=&quot;/assets/images/kth_order_entropy_calculation_suffix_tree.png&quot;&gt;&lt;/image&gt;
 &lt;/div&gt;
 
-&lt;h1 id=&quot;toc_24&quot;&gt;Experiment&lt;/h1&gt;
+&lt;h1 id=&quot;toc_78&quot;&gt;Experiment&lt;/h1&gt;
 
 &lt;p&gt;Lets take the 200 MiB test cases of the 
 &lt;a href=&quot;http://pizzachili.di.unipi.it/&quot;&gt;Pizza&amp;amp;Chili&lt;/a&gt;
@@ -820,7 +821,7 @@ in practice. If we choose larger values for \(k\) then the
 number of contexts \(CT\) is so high, that the information
 which is needed to store context information dominates the space.&lt;/p&gt;
 
-&lt;h2 id=&quot;toc_25&quot;&gt;References&lt;/h2&gt;
+&lt;h2 id=&quot;toc_79&quot;&gt;References&lt;/h2&gt;
 
 &lt;ul&gt;
 &lt;li&gt;&lt;a href=&quot;/bibliography/manzini99soda.html&quot;&gt;Manzini&amp;#39;s SODA article&lt;/a&gt; and &lt;/li&gt;

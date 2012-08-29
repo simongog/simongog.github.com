@@ -581,7 +581,7 @@ and space as fraction of the original file size.
                  paper by <a href="/bibliography/navpro12sea.html">Navarro and Providel</a><a href="#6"><sup>6</sup></a>.</li>
 </ul>
 
-<h3 id="toc_26">Observations</h3>
+<h3 id="toc_80">Observations</h3>
 
 <ul>
 <li>The FM_HUFF implementation can answer count queries in almost half the time than
@@ -620,7 +620,7 @@ least space and its counting time is only slower by a small constant
 compared to more space-greedy solutions.</li>
 </ul>
 
-<h3 id="toc_27">Conclusion</h3>
+<h3 id="toc_81">Conclusion</h3>
 
 <p>Using the <a href="http://github.com/simongog/sdsl" title="succinct data structure library">sdsl</a> library has several benefits:</p>
 
@@ -632,7 +632,8 @@ configurations are possible (e.g. use <code>rank_support_v</code> or
 <li>You can specify an index which outperforms all old indexes
 in terms of space (e.g. FM_HUFF_RRR63). Even more 
 space-efficient configurations are possible (e.g. 
-use <code>rrr_vector&lt;255&gt;</code>).</li>
+use <code>rrr_vector&lt;255&gt;</code>, this reduces the space for 
+<code>dblp.xml.200MB</code> to \(14 \%\) and increases the query time to \(13.8 \mu\)secs ).</li>
 <li>All <a href="http://github.com/simongog/sdsl" title="succinct data structure library">sdsl</a> indexes are 64-bit implementations and therefore can
 be used for texts larger than 512 MiB<a href="#7"><sup>7</sup></a>.</li>
 <li>The runtime is predictable, since the select data structures 
