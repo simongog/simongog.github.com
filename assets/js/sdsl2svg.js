@@ -1,6 +1,10 @@
 function initX(url){
-global_id = global_id+1	
-var id=global_id;
+var id= 0
+if(typeof global_id === "undefined"){
+} else {
+	global_id = global_id+1	
+	id= global_id;
+}
 console.log("id = "+id)
 return function init(json){
 //name = url.replace(' for ','_');	

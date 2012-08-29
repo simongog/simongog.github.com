@@ -212,7 +212,7 @@ time spend on matching one character of a pattern. </p>
             partitions the BWT in regions and compresses every region with
             a SSA. The AF-index uses a partitioning such that the overall
             space consumption is minimized.</li>
-<li><em>plain_SA</em>: The uncompressed suffix array (see <a href="/bibliography/manmye93.html">[Manber and Myers 1993]</a>
+<li><em>plain SA</em>: The uncompressed suffix array (see <a href="/bibliography/manmye93.html">[Manber and Myers 1993]</a>
             and <a href="/bibliography/gonbaesni92.html">[Gonnet et al. 1992]</a>); binary search is used
             to count patterns. </li>
 </ul>
@@ -449,7 +449,7 @@ and do exactly the same experiment again.
 Here are the results:</p>
 
 <div class="myfigure">
-<TABLE CELLPADDING=3 BORDER="1">
+<TABLE CELLPADDING=3 BORDER="1" id="sdsl_count_table">
 <TR><TD ALIGN="LEFT">&nbsp;</TD>
 <TD ALIGN="CENTER" COLSPAN=2>FM_HUFF</TD>
 <TD ALIGN="CENTER" COLSPAN=2>FM_HUFF_RRR15</TD>
@@ -538,6 +538,15 @@ and space as fraction of the original file size.
 </span>
 </div>
 
+<div id="figure1" class="myfigure" style="display:none;">
+<div style="width:100%;text-align:right;"><div id="close_figure1" title="Close Figure 1">X&nbsp;&nbsp;</div></div>
+<div id="space_chart" style="text-align: center;"></div>
+<span> Figure 1: Detailed space consumption of index 
+       <span id="detail_index"></span> on text 
+       <span id="detail_test_case"></span>
+</span>
+</div>
+
 <p>Implementation details: </p>
 
 <ul>
@@ -572,7 +581,7 @@ and space as fraction of the original file size.
                  paper by <a href="/bibliography/navpro12sea.html">Navarro and Providel</a><a href="#6"><sup>6</sup></a>.</li>
 </ul>
 
-<h3 id="toc_157">Observations</h3>
+<h3 id="toc_19">Observations</h3>
 
 <ul>
 <li>The FM_HUFF implementation can answer count queries in almost half the time than
@@ -611,7 +620,7 @@ least space and its counting time is only slower by a small constant
 compared to more space-greedy solutions.</li>
 </ul>
 
-<h3 id="toc_158">Conclusion</h3>
+<h3 id="toc_20">Conclusion</h3>
 
 <p>Using the <a href="http://github.com/simongog/sdsl" title="succinct data structure library">sdsl</a> library has several benefits:</p>
 
@@ -672,6 +681,59 @@ is not implemented by a binary search.<br></li>
     </a></li>
 </ul>   
 </div>
+
+<script type="text/javascript">
+// Wait for the page to load first
+var m = null;
+//window.onload = function() {
+    sdsl_count_table = d3.select("#sdsl_count_table");
+    // get index names form column headings
+    var index_names = [];
+    sdsl_count_table.select("tr").selectAll("td").filter(function(d,i){return i>0;})
+                    .each(function(){ index_names.push( d3.select(this).text() ); })
+    // get test case names from first row
+    var test_case_names = [];
+    sdsl_count_table.selectAll("tr")
+                    .each(function(d,i){ 
+                            if(i>1){
+                                test_case_names.push(d3.select(this).select("td").text());
+                            }
+                          }
+                    )
+    // insert onclick method to space cells
+    space_cell = sdsl_count_table
+          .selectAll("tr").filter(function(d,i){return i>1;})
+          .selectAll("td").filter(function(d,i){return i>0 && (i+1)&1;});
+//  space_cell.style("background-color", "red");
+    space_cell.style("cursor","pointer");
+    space_cell.style("color","#08C"); // see bootsrap.min.css for link color
+    var structure_folder="/assets/data/NewBaselinesForFMIndexes/structure"
+    space_cell.on("click", function(d,i,j){ 
+                    d3.json(structure_folder+"/"+index_names[i]+"_"+test_case_names[j]+".json",
+                            function(json){      // callback function, for handling of json-data
+//                              console.log(json)   
+                                var global_id=0;
+                                var myinit = initX("XXX_YYY")
+                                // possible improvement: if json==null, write in the div that
+                                // the data was not available
+                                myinit(json)
+                                d3.select("#detail_index").text(index_names[i]); 
+                                d3.select("#detail_test_case").text(test_case_names[j]); 
+                                d3.select("#figure1").style("display","block")
+                                  .transition().duration(500).style("opacity",1);
+                            }); 
+                   }
+            );
+
+    close_figure1 = d3.select("#close_figure1");
+    close_figure1.style("cursor","pointer").style("color","#08C");
+    var hide_figure1 = function(){
+        d3.select("#figure1").transition().duration(300).style("display","none").style("opacity",0);
+    }
+    close_figure1.on("click", hide_figure1 )
+    
+//}
+</script>
 
     <hr>
     <div class="pagination">
@@ -753,8 +815,6 @@ is not implemented by a binary search.<br></li>
 	</script>
 
 	<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-
-
 
 	<script type="text/x-mathjax-config"> MathJax.Hub.Config({ TeX: { equationNumbers: {autoNumber: "all"} } });       </script>
 
