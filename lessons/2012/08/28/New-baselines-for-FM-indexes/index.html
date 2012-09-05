@@ -181,17 +181,17 @@ implemented by M&auml;kinen and Gonz&#225;lez and the succinct suffix array
 which uses the <a href="/bibliography/rrr02soda.html">RRR</a> implementation of 
 <a href="/bibliography/clanav08spire.html">Claude</a> were added. </p>
 
-<p>Before we come to the results, let us briefly revisit the experimental setup: 
+<p>Before we come to the results, let us briefly revisit the experimental setup. 
 The machine was equipped with 8 Intel Xeon E5640 Dual Core Processors which share a 12MB smart cache
 and 144GB of DDR3 DRAM, only one core was used for the experiments.
 Operating system was Ubuntu Linux 11.10 and we used the gcc compiler version 4.6.1.
 Where necessary we added the compile option <code>-m32</code> and we added the compile option
 <code>-msse4.2</code> when using <a href="http://github.com/simongog/sdsl" title="succinct data structure library">sdsl</a> indexes.
-Indexes were build and \(k=50,000\) pattern each of length 
+Indexes were built and \(k=50,000\) pattern each of length 
 \(m=20\) were extracted from each test file. Subsequently, each index
 was queried with the corresponding pattern set and the
 total query time was divided by \(k\cdot m\) to get the average
-time spend on matching one character of a pattern. </p>
+time spent on matching one character of a pattern. </p>
 
 <p>The tested implementations correspond to the following approaches:</p>
 
@@ -201,14 +201,14 @@ time spend on matching one character of a pattern. </p>
      The space of the structure is about \(nH_0(\TEXT)\) bits. </li>
 <li><em>SSA_RRR</em>: The same as SSA but the bitvector is replaced by the RRR implementation
            of Claude, which uses blocks of size \(15\) and a fast decoding method
-           of the block counts<a href="#2"><sup>2</sup></a>. Combining Huffman-shaped wavelet tree with
-           compressed bitvectors results in a \(H_k\)-compression. </li>
+           of the block counts<a href="#2"><sup>2</sup></a>. Combining Huffman-shaped the wavelet tree with
+           compressed bitvectors results in a \(H_k\)-compression scheme. </li>
 <li><em>CSA</em>: Sadakane&#39;s implementation of his 
        <a href="/bibliography/sad02soda.html">compressed suffix</a> array which is 
        based on the \(\Psi\)-function.<br></li>
 <li><em>RLFM</em>: The FM-index based on a run-length encoded wavelet tree 
         <a href="/bibliography/maknav04tr.html">[M&auml;kinen and Navarro, 2004]</a>.</li>
-<li><em>AF-index</em>: The alphabet-friendly FM-index (see <a href="/bibliography/fmmn07acmtoa.html">[Fer2007]</a>)
+<li><em>AF-index</em>: The alphabet-friendly FM-index (see <a href="/bibliography/fmmn07acmtoa.html">[Fer2007]</a>) which 
             partitions the BWT in regions and compresses every region with
             a SSA. The AF-index uses a partitioning such that the overall
             space consumption is minimized.</li>
@@ -316,13 +316,14 @@ time spend on matching one character of a pattern. </p>
 </TABLE>
 <span>
 Table 1: Time and space taken by the implementations 
-on the <a href="http://pizzachili.dcc.uchile.cl">Pizza&amp;Chili</a>.
+from the <a href="http://pizzachili.dcc.uchile.cl">Pizza&amp;Chili</a> website.
 Time in \(\mu\)secs per pattern symbol and space as fraction
 of the original file size.
 </span>
 </div>
 
-<p>When you compare this with the table in the paper, you make two
+<p>When you compare this with the table in the 
+<a href="/bibliography/pizzachili08jea.html">paper</a>, you can make two
 observations:</p>
 
 <ul>
@@ -534,7 +535,9 @@ Here are the results:</p>
 Table 3: Time and space taken by some configurations of 
 <a href="http://github.com/simongog/sdsl ">sdsl</a> 
 data structures. Time in \(\mu\)secs per pattern symbol
-and space as fraction of the original file size.
+and space as fraction of the original file size. Click
+on the space values to get details on the 
+space breakdown of the corresponding indexes. 
 </span>
 </div>
 
@@ -578,12 +581,12 @@ and space as fraction of the original file size.
 <li><em>FM_HUFF_RRR63</em>: The only difference to FM_HUFF_RRR15 is 
                  the that now we use a block size of \(63\) for the
                  RRR structure: <code>csa_wt&lt;wt_huff&lt;rrr_vector&lt;63&gt; &gt;,64000,64000000&gt;</code>. 
-                 The decoding of block is now to done with lookup tables
-                 but with the on-the-fly decoding approach proposed by the recent SEA
+                 The decoding of block is now not done with lookup tables
+                 but with the on-the-fly decoding approach proposed in the recent SEA
                  paper by <a href="/bibliography/navpro12sea.html">Navarro and Providel</a><a href="#6"><sup>6</sup></a>.</li>
 </ul>
 
-<h3 id="toc_94">Observations</h3>
+<h3 id="toc_277">Observations</h3>
 
 <ul>
 <li>The FM_HUFF implementation can answer count queries in almost half the time than
@@ -603,8 +606,8 @@ to some overhead produced by the coder class <code>coder::elias_delta</code>.</l
 for the first test case of highly compressible xml data. But in this
 case the query time of RLFM is three times slower than that of FM_RLMN 
 and at the same time the <a href="http://github.com/simongog/sdsl" title="succinct data structure library">sdsl</a> implementation uses only (65%) 
-of the space of RLFM. This is a result of the used sub data structures.
-The <a href="http://pizzachili.dcc.uchile.cl" title="Pizza&amp;Chili">Pizza&amp;Chili</a> implementations uses two uncompressed bitvectors
+of the space of RLFM. This is a result of the sub data structures used.
+The <a href="http://pizzachili.dcc.uchile.cl" title="Pizza&amp;Chili">Pizza&amp;Chili</a> implementation uses two uncompressed bitvectors
 with a constant time rank and logarithmic time select while
 the RM_RLMN uses the <code>sd_vector</code>, which is a 64-bit implementation
 of the <a href="/bibliography/okasad07alenex.html">SD-array of Okanohara and Sadakane</a>.
@@ -622,7 +625,7 @@ least space and its counting time is only slower by a small constant
 compared to more space-greedy solutions.</li>
 </ul>
 
-<h3 id="toc_95">Conclusion</h3>
+<h3 id="toc_278">Conclusion</h3>
 
 <p>Using the <a href="http://github.com/simongog/sdsl" title="succinct data structure library">sdsl</a> library has several benefits:</p>
 
@@ -639,14 +642,14 @@ use <code>rrr_vector&lt;255&gt;</code>, this reduces the space for
 <li>All <a href="http://github.com/simongog/sdsl" title="succinct data structure library">sdsl</a> indexes are 64-bit implementations and therefore can
 be used for texts larger than 512 MiB<a href="#7"><sup>7</sup></a>.</li>
 <li>The runtime is predictable, since the select data structures 
-is not implemented by a binary search.<br></li>
+are not implemented using a binary search.<br></li>
 </ul>
 
 <p>What was not considered in this post are indexes
   which use fixed-block length compression boosting
   proposed by 
   <a href="/bibliography/karpug11spire.html">K&auml;rkk&auml;inen and Puglisi at SPIRE 2011</a>.
-  From the data in the paper, the indexes are slightly smaller than
+  From the data in their paper, the indexes are slightly smaller than
   SSA_RRR while the query times are equal or slightly faster than that
   of SSA.</p>
 

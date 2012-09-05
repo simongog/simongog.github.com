@@ -4,7 +4,7 @@
  <title>Succinct Data Structures</title>
  <link href="http://simongog.github.com/atom.xml" rel="self"/>
  <link href="http://simongog.github.com"/>
- <updated>2012-08-29T14:21:56+10:00</updated>
+ <updated>2012-09-05T23:49:04+10:00</updated>
  <id>http://simongog.github.com</id>
  <author>
    <name>Simon Gog</name>
@@ -39,17 +39,17 @@ implemented by M&amp;auml;kinen and Gonz&amp;#225;lez and the succinct suffix ar
 which uses the &lt;a href=&quot;/bibliography/rrr02soda.html&quot;&gt;RRR&lt;/a&gt; implementation of 
 &lt;a href=&quot;/bibliography/clanav08spire.html&quot;&gt;Claude&lt;/a&gt; were added. &lt;/p&gt;
 
-&lt;p&gt;Before we come to the results, let us briefly revisit the experimental setup: 
+&lt;p&gt;Before we come to the results, let us briefly revisit the experimental setup. 
 The machine was equipped with 8 Intel Xeon E5640 Dual Core Processors which share a 12MB smart cache
 and 144GB of DDR3 DRAM, only one core was used for the experiments.
 Operating system was Ubuntu Linux 11.10 and we used the gcc compiler version 4.6.1.
 Where necessary we added the compile option &lt;code&gt;-m32&lt;/code&gt; and we added the compile option
 &lt;code&gt;-msse4.2&lt;/code&gt; when using &lt;a href=&quot;http://github.com/simongog/sdsl&quot; title=&quot;succinct data structure library&quot;&gt;sdsl&lt;/a&gt; indexes.
-Indexes were build and \(k=50,000\) pattern each of length 
+Indexes were built and \(k=50,000\) pattern each of length 
 \(m=20\) were extracted from each test file. Subsequently, each index
 was queried with the corresponding pattern set and the
 total query time was divided by \(k\cdot m\) to get the average
-time spend on matching one character of a pattern. &lt;/p&gt;
+time spent on matching one character of a pattern. &lt;/p&gt;
 
 &lt;p&gt;The tested implementations correspond to the following approaches:&lt;/p&gt;
 
@@ -59,14 +59,14 @@ time spend on matching one character of a pattern. &lt;/p&gt;
      The space of the structure is about \(nH_0(\TEXT)\) bits. &lt;/li&gt;
 &lt;li&gt;&lt;em&gt;SSA_RRR&lt;/em&gt;: The same as SSA but the bitvector is replaced by the RRR implementation
            of Claude, which uses blocks of size \(15\) and a fast decoding method
-           of the block counts&lt;a href=&quot;#2&quot;&gt;&lt;sup&gt;2&lt;/sup&gt;&lt;/a&gt;. Combining Huffman-shaped wavelet tree with
-           compressed bitvectors results in a \(H_k\)-compression. &lt;/li&gt;
+           of the block counts&lt;a href=&quot;#2&quot;&gt;&lt;sup&gt;2&lt;/sup&gt;&lt;/a&gt;. Combining Huffman-shaped the wavelet tree with
+           compressed bitvectors results in a \(H_k\)-compression scheme. &lt;/li&gt;
 &lt;li&gt;&lt;em&gt;CSA&lt;/em&gt;: Sadakane&amp;#39;s implementation of his 
        &lt;a href=&quot;/bibliography/sad02soda.html&quot;&gt;compressed suffix&lt;/a&gt; array which is 
        based on the \(\Psi\)-function.&lt;br&gt;&lt;/li&gt;
 &lt;li&gt;&lt;em&gt;RLFM&lt;/em&gt;: The FM-index based on a run-length encoded wavelet tree 
         &lt;a href=&quot;/bibliography/maknav04tr.html&quot;&gt;[M&amp;auml;kinen and Navarro, 2004]&lt;/a&gt;.&lt;/li&gt;
-&lt;li&gt;&lt;em&gt;AF-index&lt;/em&gt;: The alphabet-friendly FM-index (see &lt;a href=&quot;/bibliography/fmmn07acmtoa.html&quot;&gt;[Fer2007]&lt;/a&gt;)
+&lt;li&gt;&lt;em&gt;AF-index&lt;/em&gt;: The alphabet-friendly FM-index (see &lt;a href=&quot;/bibliography/fmmn07acmtoa.html&quot;&gt;[Fer2007]&lt;/a&gt;) which 
             partitions the BWT in regions and compresses every region with
             a SSA. The AF-index uses a partitioning such that the overall
             space consumption is minimized.&lt;/li&gt;
@@ -174,13 +174,14 @@ time spend on matching one character of a pattern. &lt;/p&gt;
 &lt;/TABLE&gt;
 &lt;span&gt;
 Table 1: Time and space taken by the implementations 
-on the &lt;a href=&quot;http://pizzachili.dcc.uchile.cl&quot;&gt;Pizza&amp;amp;Chili&lt;/a&gt;.
+from the &lt;a href=&quot;http://pizzachili.dcc.uchile.cl&quot;&gt;Pizza&amp;amp;Chili&lt;/a&gt; website.
 Time in \(\mu\)secs per pattern symbol and space as fraction
 of the original file size.
 &lt;/span&gt;
 &lt;/div&gt;
 
-&lt;p&gt;When you compare this with the table in the paper, you make two
+&lt;p&gt;When you compare this with the table in the 
+&lt;a href=&quot;/bibliography/pizzachili08jea.html&quot;&gt;paper&lt;/a&gt;, you can make two
 observations:&lt;/p&gt;
 
 &lt;ul&gt;
@@ -392,7 +393,9 @@ Here are the results:&lt;/p&gt;
 Table 3: Time and space taken by some configurations of 
 &lt;a href=&quot;http://github.com/simongog/sdsl &quot;&gt;sdsl&lt;/a&gt; 
 data structures. Time in \(\mu\)secs per pattern symbol
-and space as fraction of the original file size.
+and space as fraction of the original file size. Click
+on the space values to get details on the 
+space breakdown of the corresponding indexes. 
 &lt;/span&gt;
 &lt;/div&gt;
 
@@ -436,12 +439,12 @@ and space as fraction of the original file size.
 &lt;li&gt;&lt;em&gt;FM_HUFF_RRR63&lt;/em&gt;: The only difference to FM_HUFF_RRR15 is 
                  the that now we use a block size of \(63\) for the
                  RRR structure: &lt;code&gt;csa_wt&amp;lt;wt_huff&amp;lt;rrr_vector&amp;lt;63&amp;gt; &amp;gt;,64000,64000000&amp;gt;&lt;/code&gt;. 
-                 The decoding of block is now to done with lookup tables
-                 but with the on-the-fly decoding approach proposed by the recent SEA
+                 The decoding of block is now not done with lookup tables
+                 but with the on-the-fly decoding approach proposed in the recent SEA
                  paper by &lt;a href=&quot;/bibliography/navpro12sea.html&quot;&gt;Navarro and Providel&lt;/a&gt;&lt;a href=&quot;#6&quot;&gt;&lt;sup&gt;6&lt;/sup&gt;&lt;/a&gt;.&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h3 id=&quot;toc_94&quot;&gt;Observations&lt;/h3&gt;
+&lt;h3 id=&quot;toc_277&quot;&gt;Observations&lt;/h3&gt;
 
 &lt;ul&gt;
 &lt;li&gt;The FM_HUFF implementation can answer count queries in almost half the time than
@@ -461,8 +464,8 @@ to some overhead produced by the coder class &lt;code&gt;coder::elias_delta&lt;/
 for the first test case of highly compressible xml data. But in this
 case the query time of RLFM is three times slower than that of FM_RLMN 
 and at the same time the &lt;a href=&quot;http://github.com/simongog/sdsl&quot; title=&quot;succinct data structure library&quot;&gt;sdsl&lt;/a&gt; implementation uses only (65%) 
-of the space of RLFM. This is a result of the used sub data structures.
-The &lt;a href=&quot;http://pizzachili.dcc.uchile.cl&quot; title=&quot;Pizza&amp;amp;Chili&quot;&gt;Pizza&amp;amp;Chili&lt;/a&gt; implementations uses two uncompressed bitvectors
+of the space of RLFM. This is a result of the sub data structures used.
+The &lt;a href=&quot;http://pizzachili.dcc.uchile.cl&quot; title=&quot;Pizza&amp;amp;Chili&quot;&gt;Pizza&amp;amp;Chili&lt;/a&gt; implementation uses two uncompressed bitvectors
 with a constant time rank and logarithmic time select while
 the RM_RLMN uses the &lt;code&gt;sd_vector&lt;/code&gt;, which is a 64-bit implementation
 of the &lt;a href=&quot;/bibliography/okasad07alenex.html&quot;&gt;SD-array of Okanohara and Sadakane&lt;/a&gt;.
@@ -480,7 +483,7 @@ least space and its counting time is only slower by a small constant
 compared to more space-greedy solutions.&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h3 id=&quot;toc_95&quot;&gt;Conclusion&lt;/h3&gt;
+&lt;h3 id=&quot;toc_278&quot;&gt;Conclusion&lt;/h3&gt;
 
 &lt;p&gt;Using the &lt;a href=&quot;http://github.com/simongog/sdsl&quot; title=&quot;succinct data structure library&quot;&gt;sdsl&lt;/a&gt; library has several benefits:&lt;/p&gt;
 
@@ -497,14 +500,14 @@ use &lt;code&gt;rrr_vector&amp;lt;255&amp;gt;&lt;/code&gt;, this reduces the spa
 &lt;li&gt;All &lt;a href=&quot;http://github.com/simongog/sdsl&quot; title=&quot;succinct data structure library&quot;&gt;sdsl&lt;/a&gt; indexes are 64-bit implementations and therefore can
 be used for texts larger than 512 MiB&lt;a href=&quot;#7&quot;&gt;&lt;sup&gt;7&lt;/sup&gt;&lt;/a&gt;.&lt;/li&gt;
 &lt;li&gt;The runtime is predictable, since the select data structures 
-is not implemented by a binary search.&lt;br&gt;&lt;/li&gt;
+are not implemented using a binary search.&lt;br&gt;&lt;/li&gt;
 &lt;/ul&gt;
 
 &lt;p&gt;What was not considered in this post are indexes
   which use fixed-block length compression boosting
   proposed by 
   &lt;a href=&quot;/bibliography/karpug11spire.html&quot;&gt;K&amp;auml;rkk&amp;auml;inen and Puglisi at SPIRE 2011&lt;/a&gt;.
-  From the data in the paper, the indexes are slightly smaller than
+  From the data in their paper, the indexes are slightly smaller than
   SSA_RRR while the query times are equal or slightly faster than that
   of SSA.&lt;/p&gt;
 
@@ -713,7 +716,7 @@ test suite. A run of the program produces a CST
 names &lt;code&gt;faust.txt.cst3&lt;/code&gt;. The CST has size 
 460 kB for the original 222 kB. &lt;/p&gt;
 
-&lt;h2 id=&quot;toc_89&quot;&gt;1 Calculating the zeroth order entropy&lt;/h2&gt;
+&lt;h2 id=&quot;toc_272&quot;&gt;1 Calculating the zeroth order entropy&lt;/h2&gt;
 
 &lt;p&gt;The zeroth order empirical entropy \(H_0\) 
 of a text \(\TEXT\) of length \(n\) 
@@ -746,7 +749,7 @@ each child its weighted contribution to \(H_0\). Note:
 &lt;code&gt;cst.sibiling(w)&lt;/code&gt; returns the root node &lt;code&gt;cst.root()&lt;/code&gt; if there
 is no next sibling.&lt;/p&gt;
 
-&lt;h2 id=&quot;toc_90&quot;&gt;2 Calculating the k-th order entropy&lt;/h2&gt;
+&lt;h2 id=&quot;toc_273&quot;&gt;2 Calculating the k-th order entropy&lt;/h2&gt;
 
 &lt;div&gt;More advanced compressors make use of the context before 
 a symbol and choose different codes dependent on the preceding
@@ -781,7 +784,7 @@ Here is the complete code:
 
 &lt;script src=&quot;http://gist.github.com/3473167.js&quot;&gt;&lt;/script&gt;
 
-&lt;h1 id=&quot;toc_91&quot;&gt;Example&lt;/h1&gt;
+&lt;h1 id=&quot;toc_274&quot;&gt;Example&lt;/h1&gt;
 
 &lt;p&gt;Lets look at an example. Say our string is \(\TEXT\)=&lt;code&gt;umulmundumulmu$&lt;/code&gt; 
 and we and to calculate \(H_1(\TEXT)\).
@@ -803,7 +806,7 @@ same procedure also for substring &lt;code&gt;u&lt;/code&gt;.&lt;/p&gt;
      src=&quot;/assets/images/kth_order_entropy_calculation_suffix_tree.png&quot;&gt;&lt;/image&gt;
 &lt;/div&gt;
 
-&lt;h1 id=&quot;toc_92&quot;&gt;Experiment&lt;/h1&gt;
+&lt;h1 id=&quot;toc_275&quot;&gt;Experiment&lt;/h1&gt;
 
 &lt;p&gt;Lets take the 200 MiB test cases of the 
 &lt;a href=&quot;http://pizzachili.di.unipi.it/&quot;&gt;Pizza&amp;amp;Chili&lt;/a&gt;
@@ -823,7 +826,7 @@ in practice. If we choose larger values for \(k\) then the
 number of contexts \(CT\) is so high, that the information
 which is needed to store context information dominates the space.&lt;/p&gt;
 
-&lt;h2 id=&quot;toc_93&quot;&gt;References&lt;/h2&gt;
+&lt;h2 id=&quot;toc_276&quot;&gt;References&lt;/h2&gt;
 
 &lt;ul&gt;
 &lt;li&gt;&lt;a href=&quot;/bibliography/manzini99soda.html&quot;&gt;Manzini&amp;#39;s SODA article&lt;/a&gt; and &lt;/li&gt;
