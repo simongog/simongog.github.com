@@ -1,0 +1,2799 @@
+<!--
+Google IO 2012/2013 HTML5 Slide Template
+
+Authors: Eric Bidelman <ebidel@gmail.com>
+         Luke Mahé <lukem@google.com>
+
+URL: https://code.google.com/p/io-2012-slides
+-->
+<!DOCTYPE html>
+<html>
+<head>
+  <title></title>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="chrome=1">
+  <!--<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">-->
+  <!--<meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+  <!--This one seems to work all the time, but really small on ipad-->
+  <!--<meta name="viewport" content="initial-scale=0.4">-->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <link rel="stylesheet" media="all" href="theme/css/default.css">
+  <link rel="stylesheet" media="only screen and (max-device-width: 480px)" href="theme/css/phone.css">
+  <base target="_blank"> <!-- This amazingness opens all links in a new tab. -->
+  <script data-main="js/slides" src="js/require-1.0.8.min.js"></script>
+  <script src="./d3.js"></script>
+  <script src="./sdsl2svg.js"></script>
+<style type="text/css">
+
+.rule { height: 90%; position: absolute; border-right: 1px dotted #000; text-align: right; }
+
+path { stroke: #000; stroke-width: 0.8; cursor: pointer; }
+#breadcrumbs { display: none; }
+svg { font: 16px sans-serif; }
+svg .ticks {stroke-width:1; stroke: black; opacity: 0.8; }
+svg .info_text { font: 18px sans-serif;}
+svg .size_info_text { font: 28px sans-serif; font-weight: bold; text-align: end; text-anchor: middle;}
+svg .sel_rect {opacity:1.0}
+svg .unsel_rect {opacity: 0.5;}
+svg .detailLabel {font: 28px sans-serif; font-weight: bold; opacity: 0.7; }
+svg .overzoomrect {fill: black; opacity: 0.8;}
+em {font-weight:600;}
+span.tnr {font-family:Times New Roman;}
+span.tnrb {font-family:Times New Roman;color:black;}
+</style>
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    extensions: ["tex2jax.js"],
+    jax: ["input/TeX","output/HTML-CSS"],
+    tex2jax: {inlineMath: [["$","$"],["\\(","\\)"]]}
+  });
+</script>
+<script type="text/javascript" src="mathjax/MathJax.js"></script>
+
+
+
+</head>
+<body style="opacity: 0">
+
+<slides class="layout-widescreen">
+
+  <!--slide class="logoslide nobackground">
+    <article class="flexbox vcenter">
+      <span><img src="images/google_developers_logo.png"></span>
+    </article>
+  </slide-->
+
+  <slide class="title-slide segue nobackground">
+    <!--aside class="gdbar"><img src="images/google_developers_icon_128.png"></aside-->
+    <!-- The content of this hgroup is replaced programmatically through the slide_config.json. -->
+    <hgroup class="auto-fadein">
+      <h1 data-config-title><!-- populated from slide_config.json --></h1>
+      <h2 data-config-subtitle><!-- populated from slide_config.json --></h2>
+      <p data-config-presenter><!-- populated from slide_config.json --></p>
+    </hgroup>
+  </slide>
+
+  <!--slide>
+    <hgroup>
+      <h2>Succinct/Compact Data Structure</h2>
+    </hgroup>
+    <article>
+      <ul>
+        <li>Represent objects (e.g. trees) with as few bits
+            as possible, while still providing time-efficient 
+            operations (e.g. parent, child, ...)</li>
+        <li>There exist many structures which 
+            provide the same runtime as their
+            fat classical counterparts in O-Notation</li>    
+        <li>However, classical structures are often
+            orders of magnitudes faster (if they fit in memory)</li>
+      </ul>
+    </article>
+  </slide-->
+<!--
+bibtool literature.bib -#
+    STRING              0 read      0 written
+    PREAMBLE            0 read      0 written
+    COMMENT             0 read      0 written
+    ALIAS               0 read      0 written
+    MODIFY              0 read      0 written
+    INCLUDE             0 read      0 written
+    Article            13 read     13 written
+    Book                1 read      1 written
+    Booklet             0 read      0 written
+    Conference          0 read      0 written
+    InBook              0 read      0 written
+    InCollection        0 read      0 written
+    InProceedings      23 read     23 written
+    Manual              0 read      0 written
+    MastersThesis       0 read      0 written
+    Misc                0 read      0 written
+    PhDThesis           1 read      1 written
+    Proceedings         0 read      0 written
+    TechReport          1 read      1 written
+    Unpublished         0 read      0 written
+-->
+<slide>
+  <hgroup>
+    <h2>About the project</h2>
+  </hgroup>
+<article>
+<p>Goal: Provide an
+<b>easy-to-use</b>, 
+<b>highly-efficient</b>,
+<b>configurable</b>, and 
+<b>extensible</b> 
+library of succinct data structures
+for researchers and practitioners</p>
+
+<p>It is/was a challenge to meet all this goals. Here is the current state:</p>
+<ul>
+<li>C++ is used (great for resource-constraint programming).</li>
+<li>Templates are used to make it configurable.</li>
+<li>STL concepts are used to make it easy-to-use.</li>
+<li>Space and time efficient construction using the semi-external approach.</li>
+<li>Construction is configurable between in-memory and semi-external.</li>
+<li>All indexes support byte and integer sequences.</li>
+<li>Implements highlights of <b>40</b> research articles.</li>
+</ul>
+<p>
+Development by
+<a href="https://github.com/tb38">Timo Beller</a>, 
+<a href="https://github.com/mpetri">Matthias Petri</a>, 
+<a href="https://github.com/simongog">me</a>,  and 
+<a href="https://github.com/simongog/sdsl-lite/graphs/contributors">others</a>. 
+</p>
+</article>
+    <aside class="note">
+      <section>
+        <ul>
+          <li>Great tool for prototyping</li>
+          <li>Provides a myriad of structures: from bitvectors to compressed suffix trees</li>
+          <li>C++ is the choice for resource constraint programming</li>
+          <li>Application domains: Bioinformatics, Information Retrieval,... </li>
+        </ul>
+      </section>
+    </aside>
+
+</slide>
+
+<slide>
+  <hgroup>
+    <h2>On the shoulders of giants...</h2>
+  </hgroup>
+<svg width="960" height="600" version="1.1" xmlns="http://www.w3.org/2000/svg"><g></g><g transform="translate(480,300)scale(1.7647058963775635,1.7647058963775635)"><text text-anchor="middle" transform="translate(-85,81)rotate(9.333333015441895)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #d6616b;">Johannes</text><text text-anchor="middle" transform="translate(56,-11)rotate(-32.88888931274414)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #d6616b;">Travis</text><text text-anchor="middle" transform="translate(108,30)rotate(-11.777777671813965)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #ce6dbd;">Puglisi</text><text text-anchor="middle" transform="translate(-140,124)rotate(-43.444442749023445)scale(1,1)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #393b79;">Geary</text><text text-anchor="middle" transform="translate(75,106)rotate(-1.2222222089767456)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #e7969c;">Shane</text><text text-anchor="middle" transform="translate(-54,41)rotate(-1.2222222089767456)scale(1,1)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #e7ba52;">Gonzalo</text><text text-anchor="middle" transform="translate(64,71)rotate(-53.99999999999999)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #843c39;">Navarro</text><text text-anchor="middle" transform="translate(-123,22)rotate(-22.33333396911621)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #637939;">Simon</text><text text-anchor="middle" transform="translate(-40,2)rotate(-1.2222222089767456)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #7b4173;">Fischer</text><text text-anchor="middle" transform="translate(171,-4)rotate(19.88888931274414)scale(1,1)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #6b6ecf;">Culpepper</text><text text-anchor="middle" transform="translate(131,-37)rotate(30.444444656372074)skewX(3.1805546814635168e-15)scale(0.9999999999999999,0.9999999999999999)" style="font-size: 10px; opacity: 0.999780512219488; font-family: Impact; fill: #e7ba52;">Andrew</text><text text-anchor="middle" transform="translate(-185,82)rotate(-32.88888931274414)" style="font-size: 10px; opacity: 0.6707488292514989; font-family: Impact; fill: #e7cb94;">Turpin</text><text text-anchor="middle" transform="translate(-240,-63)rotate(-11.777777671813965)" style="font-size: 10px; opacity: 0.03651827948268156; font-family: Impact; fill: #843c39;">Juha</text><text text-anchor="middle" transform="translate(85,-138)rotate(-1.2222222089767456)" style="font-size: 10px; opacity: 0.06789930410162565; font-family: Impact; fill: #ad494a;">Kärkkäinen</text><text text-anchor="middle" transform="translate(156,143)rotate(-11.777777671813965)scale(1,1)" style="font-size: 10px; opacity: 0.04087421112674558; font-family: Impact; fill: #637939;">Giovanni</text><text text-anchor="middle" transform="translate(195,26)rotate(-53.99999999999999)" style="font-size: 10px; opacity: 0.0796109643899537; font-family: Impact; fill: #b5cf6b;">Manzini</text><text text-anchor="middle" transform="translate(-4,-52)rotate(-53.99999999999999)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #7b4173;">Toru</text><text text-anchor="middle" transform="translate(-18,45)rotate(-53.99999999999999)" style="font-size: 10px; opacity: 0.6615822624180752; font-family: Impact; fill: #a55194;">Kasai</text><text text-anchor="middle" transform="translate(-67,128)rotate(-32.88888931274414)" style="font-size: 10px; opacity: 0.19934492865586995; font-family: Impact; fill: #ce6dbd;">Gunho</text><text text-anchor="middle" transform="translate(-139,11)rotate(30.44444465637207)skewX(3.1805546814635168e-15)scale(0.9999999999999999,0.9999999999999999)" style="font-size: 10px; opacity: 0.41529258470799846; font-family: Impact; fill: #5254a3;">Lee</text><text text-anchor="middle" transform="translate(134,-2)rotate(-11.777777671813965)scale(1,1)" style="font-size: 10px; opacity: 0.29424094175976223; font-family: Impact; fill: #6b6ecf;">Hiroki</text><text text-anchor="middle" transform="translate(-126,141)rotate(-53.99999999999999)" style="font-size: 10px; opacity: 0.9934278785721273; font-family: Impact; fill: #e7cb94;">Arimura</text><text text-anchor="middle" transform="translate(-141,-35)rotate(-32.88888931274414)" style="font-size: 10px; opacity: 0.8225527214474556; font-family: Impact; fill: #ad494a;">Setsuo</text><text text-anchor="middle" transform="translate(97,-8)rotate(19.888889312744137)" style="font-size: 10px; opacity: 0.7362432077570551; font-family: Impact; fill: #d6616b;">Arikawa</text><text text-anchor="middle" transform="translate(161,62)rotate(-32.88888931274414)" style="font-size: 10px; opacity: 0.7078617641385266; font-family: Impact; fill: #843c39;">Kunsoo</text><text text-anchor="middle" transform="translate(52,-87)rotate(-53.99999999999999)" style="font-size: 10px; opacity: 0.4677212082793227; font-family: Impact; fill: #ad494a;">Park</text><text text-anchor="middle" transform="translate(-96,-13)rotate(-53.99999999999999)" style="font-size: 10px; opacity: 0.5793842286161912; font-family: Impact; fill: #b5cf6b;">Gog</text><text text-anchor="middle" transform="translate(54,-110)rotate(9.333333015441895)" style="font-size: 10px; opacity: 0.9083748756252151; font-family: Impact; fill: #cedb9c;">Enno</text><text text-anchor="middle" transform="translate(-100,47)rotate(-1.2222222089767456)scale(1,1)" style="font-size: 10px; opacity: 0.9948198891801155; font-family: Impact; fill: #8ca252;">Ohlebusch</text><text text-anchor="middle" transform="translate(118,54)rotate(-11.777777671813965)" style="font-size: 10px; opacity: 0.9998689281310718; font-family: Impact; fill: #cedb9c;">Timo</text><text text-anchor="middle" transform="translate(217,-128)rotate(-53.99999999999999)" style="font-size: 10px; opacity: 0.9998689281310718; font-family: Impact; fill: #bd9e39;">Beller</text><text text-anchor="middle" transform="translate(-118,121)rotate(41)skewX(3.1805546814635168e-15)scale(0.9999999999999999,0.9999999999999999)" style="font-size: 10px; opacity: 0.9998689281310718; font-family: Impact; fill: #ad494a;">Thomas</text><text text-anchor="middle" transform="translate(65,-83)rotate(-53.99999999999999)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #6b6ecf;">Schnattinger</text><text text-anchor="middle" transform="translate(-170,-113)rotate(19.888889312744137)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #e7969c;">Rajeev</text><text text-anchor="middle" transform="translate(186,-66)rotate(40.99999999999999)skewX(3.1805546814635168e-15)scale(0.9999999999999999,0.9999999999999999)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #cedb9c;">Michael</text><text text-anchor="middle" transform="translate(225,82)rotate(19.888889312744137)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #e7cb94;">Raman</text><text text-anchor="middle" transform="translate(5,-12)rotate(-22.33333396911621)scale(1,1)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #a55194;">Venkatesh</text><text text-anchor="middle" transform="translate(125,17)rotate(19.888889312744137)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #de9ed6;">Srinivasa</text><text text-anchor="middle" transform="translate(6,116)rotate(-22.33333396911621)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #393b79;">Rao</text><text text-anchor="middle" transform="translate(-206,121)rotate(-22.333333969116214)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #5254a3;">Paolo</text><text text-anchor="middle" transform="translate(-8,-138)rotate(-11.777777671813968)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #9c9ede;">Jouni</text><text text-anchor="middle" transform="translate(56,63)rotate(-53.99999999999999)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #9c9ede;">Sirén</text><text text-anchor="middle" transform="translate(114,-34)rotate(40.99999999999999)skewX(3.1805546814635168e-15)scale(0.9999999999999999,0.9999999999999999)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #8ca252;">Rossano</text><text text-anchor="middle" transform="translate(215,112)rotate(-11.777777671813965)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #b5cf6b;">Venturini</text><text text-anchor="middle" transform="translate(-74,-131)rotate(9.333333015441898)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #8c6d31;">Bender</text><text text-anchor="middle" transform="translate(50,50)rotate(-22.33333396911621)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #bd9e39;">Martin</text><text text-anchor="middle" transform="translate(-137,-85)rotate(-11.777777671813965)scale(1,1)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #e7ba52;">Farach-Colton</text><text text-anchor="middle" transform="translate(-17,-151)rotate(-32.88888931274414)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #9c9ede;">Richard</text><text text-anchor="middle" transform="translate(-62,60)rotate(-11.777777671813968)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #5254a3;">Gagie</text><text text-anchor="middle" transform="translate(127,-132)rotate(-1.2222222089767456)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #de9ed6;">Naila</text><text text-anchor="middle" transform="translate(71,-55)rotate(40.999999999999986)skewX(3.1805546814635168e-15)scale(0.9999999999999999,0.9999999999999999)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #8ca252;">Rahman</text><text text-anchor="middle" transform="translate(1,80)rotate(19.888889312744137)scale(1,1)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #e7969c;">Sebastiano</text><text text-anchor="middle" transform="translate(133,46)rotate(40.99999999999999)skewX(3.1805546814635168e-15)scale(0.9999999999999999,0.9999999999999999)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #7b4173;">Vigna</text><text text-anchor="middle" transform="translate(-146,81)rotate(19.888889312744137)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #a55194;">Roberto</text><text text-anchor="middle" transform="translate(166,-30)rotate(40.999999999999986)skewX(3.1805546814635168e-15)scale(0.9999999999999999,0.9999999999999999)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #ce6dbd;">Grossi</text><text text-anchor="middle" transform="translate(164,-147)rotate(30.44444465637207)skewX(3.1805546814635168e-15)scale(0.9999999999999999,0.9999999999999999)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #de9ed6;">Ankur</text><text text-anchor="middle" transform="translate(115,-87)rotate(9.333333015441895)scale(1,1)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #393b79;">Gupta</text><text text-anchor="middle" transform="translate(210,-75)rotate(-1.2222222089767456)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #5254a3;">Jeffrey</text><text text-anchor="middle" transform="translate(-87,-114)rotate(-32.88888931274414)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #6b6ecf;">Scott</text><text text-anchor="middle" transform="translate(75,34)rotate(9.333333015441895)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #9c9ede;">Vitter</text><text text-anchor="middle" transform="translate(-183,-132)rotate(-11.777777671813965)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #637939;">Veli</text><text text-anchor="middle" transform="translate(-173,97)rotate(-54)scale(1,1)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #8ca252;">Mäkinen</text><text text-anchor="middle" transform="translate(-227,101)rotate(30.444444656372074)skewX(3.1805546814635168e-15)scale(0.9999999999999999,0.9999999999999999)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #b5cf6b;">Francisco</text><text text-anchor="middle" transform="translate(159,42)rotate(-1.2222222089767456)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #cedb9c;">Claude</text><text text-anchor="middle" transform="translate(11,-149)rotate(41)skewX(3.1805546814635168e-15)scale(0.9999999999999999,0.9999999999999999)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #8c6d31;">Nieves</text><text text-anchor="middle" transform="translate(-34,85)rotate(-1.2222222089767456)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #bd9e39;">Brisaboa</text><text text-anchor="middle" transform="translate(-122,60)rotate(19.88888931274414)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #e7ba52;">Susana</text><text text-anchor="middle" transform="translate(101,117)rotate(-22.33333396911621)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #e7cb94;">Ladra</text><text text-anchor="middle" transform="translate(97,45)rotate(-11.777777671813965)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #8c6d31;">Kunihiko</text><text text-anchor="middle" transform="translate(-24,106)rotate(-43.444442749023445)scale(1,1)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #bd9e39;">Sadakane</text><text text-anchor="middle" transform="translate(-44,134)rotate(9.333333015441898)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #d6616b;">Eliana</text><text text-anchor="middle" transform="translate(-156,-120)rotate(30.44444465637207)skewX(3.1805546814635168e-15)scale(0.9999999999999999,0.9999999999999999)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #e7969c;">Providel</text><text text-anchor="middle" transform="translate(-95,117)rotate(9.333333015441898)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #7b4173;">Jesper</text><text text-anchor="middle" transform="translate(-228,-127)rotate(-43.444442749023445)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #a55194;">Larsson</text><text text-anchor="middle" transform="translate(139,81)rotate(9.333333015441898)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #ce6dbd;">Daisuke</text><text text-anchor="middle" transform="translate(-51,99)rotate(-11.777777671813965)scale(1,1)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #de9ed6;">Okanohara</text><text text-anchor="middle" transform="translate(191,-41)rotate(-11.777777671813965)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #393b79;">Frederik</text><text text-anchor="middle" transform="translate(-6,105)rotate(-43.444442749023445)scale(1,1)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #5254a3;">Transier</text><text text-anchor="middle" transform="translate(-172,116)rotate(-43.444442749023445)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #8c6d31;">Peter</text><text text-anchor="middle" transform="translate(-11,9)rotate(-53.99999999999999)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #9c9ede;">Sers</text><text text-anchor="middle" transform="translate(223,-92)rotate(-32.88888931274414)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #637939;">Hugh</text><text text-anchor="middle" transform="translate(42,101)rotate(-22.33333396911621)scale(1,1)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #8ca252;">Williams</text><text text-anchor="middle" transform="translate(24,126)rotate(9.333333015441895)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #b5cf6b;">Justin</text><text text-anchor="middle" transform="translate(-219,-47)rotate(-43.444442749023445)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #cedb9c;">Zobel</text><text text-anchor="middle" transform="translate(-206,-27)rotate(-43.444442749023445)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #8c6d31;">Elias</text><text text-anchor="middle" transform="translate(-141,-134)rotate(-11.777777671813965)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #bd9e39;">Robert</text><text text-anchor="middle" transform="translate(-210,-138)rotate(41)skewX(3.1805546814635168e-15)scale(0.9999999999999999,0.9999999999999999)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #e7ba52;">Mario</text><text text-anchor="middle" transform="translate(-146,-66)rotate(-22.33333396911621)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #e7cb94;">Fano</text><text text-anchor="middle" transform="translate(5,63)rotate(9.333333015441895)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #843c39;">Mohamed</text><text text-anchor="middle" transform="translate(166,-54)rotate(-43.44444274902344)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #ad494a;">Ibrahim</text><text text-anchor="middle" transform="translate(-49,23)rotate(19.88888931274414)scale(1,1)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #d6616b;">Abouelhoda</text><text text-anchor="middle" transform="translate(-101,-26)rotate(-1.2222222089767456)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #e7969c;">Stefan</text><text text-anchor="middle" transform="translate(-205,11)rotate(40.99999999999999)skewX(3.1805546814635168e-15)scale(0.9999999999999999,0.9999999999999999)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #7b4173;">Kurtz</text><text text-anchor="middle" transform="translate(-112,-109)rotate(41)skewX(3.1805546814635168e-15)scale(0.9999999999999999,0.9999999999999999)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #a55194;">Rasmus</text><text text-anchor="middle" transform="translate(181,-150)rotate(40.99999999999999)skewX(3.1805546814635168e-15)scale(0.9999999999999999,0.9999999999999999)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #ce6dbd;">Pagh</text><text text-anchor="middle" transform="translate(-52,-26)rotate(40.99999999999999)skewX(3.1805546814635168e-15)scale(0.9999999999999999,0.9999999999999999)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #de9ed6;">David</text><text text-anchor="middle" transform="translate(-27,-14)rotate(-32.88888931274414)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #393b79;">Clark</text><text text-anchor="middle" transform="translate(37,-89)rotate(40.99999999999999)skewX(3.1805546814635168e-15)scale(0.9999999999999999,0.9999999999999999)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #843c39;"></text><text text-anchor="middle" transform="translate(58,23)rotate(-43.444442749023445)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #6b6ecf;">Ferragina</text></g></svg>
+</slide>
+
+
+
+<slide>
+  <hgroup>
+    <h2>Installation</h2>
+  </hgroup>
+  <article>
+<ul>
+<li>
+Get the source code <br /> &nbsp;
+<pre class="prettyprint" data-lang="bash">
+git clone https://github.com/simongog/sdsl-lite.git
+</pre>
+</li>
+<li>
+Install the include and library files into
+SDSL_INSTALL_PATH <br />(default value is $HOME)
+<br /> &nbsp;
+<pre class="prettyprint" data-lang="bash">
+cd sdsl-lite
+./install.sh SDSL_INSTALL_PATH
+</pre>
+</li>
+<li>
+Lets compile* the tutorial programs
+<br /> &nbsp;
+<pre class="prettyprint" data-lang="bash">
+cd tutorial
+make
+</pre>
+</li>
+</ul>
+* use clang &gt;=3.1 or gcc &gt;=4.7
+</article>
+</slide>
+
+
+<slide>
+  <hgroup>
+    <h2>Integer Vectors - bitcompressed &amp; mutable</h2>
+  </hgroup>
+<article>
+<pre class="prettyprint" data-lang="c++">
+#include &lt;iostream&gt;
+#include &lt;sdsl/vectors.hpp&gt;
+
+using namespace std;
+using namespace sdsl;
+
+int main(){
+    int_vector&lt;&gt; v = {3,2,1,0,2,1,3,4,1,1,1,3,2,3};
+    v[1]=0;
+    util::bit_compress(v);
+    cout &lt;&lt; v &lt;&lt; endl;
+    cout &lt;&lt; size_in_bytes(v) &lt;&lt; endl; 
+}
+</pre>
+<p>Output:</p>
+<pre class="prettyprint">
+3 0 1 0 2 1 3 4 1 1 1 3 2 3
+17
+</pre>
+</article>
+</slide>
+
+<slide>
+  <hgroup>
+    <h2>Integer Vectors - compressed &amp; immutable</h2>
+  </hgroup>
+<article>
+<p><code>enc_vector<></code> = apply self-delimiting code on deltas <br /></p>
+<pre class="prettyprint" data-lang="c++"> <!-- expl-02.cpp -->
+int_vector&lt;&gt; v(10*(1<<20));
+for (size_t i=0; i&lt;10; ++i)
+    for (size_t j=0; j&lt;1U<<20; ++j)
+        v[i*(1<<20)+j] = j;
+cout &lt;&lt; size_in_mega_bytes(v) &lt;&lt; endl;
+util::bit_compress(v);
+cout &lt;&lt; size_in_mega_bytes(v) &lt;&lt; endl;
+<b>enc_vector&lt;&gt; ev(v);</b>
+cout &lt;&lt; size_in_mega_bytes(ev) &lt;&lt; endl;
+</pre>
+<p> Output: </p>
+<pre class="prettyprint">
+80
+25
+8.59378
+</pre>
+</article>
+</slide>
+
+<slide>
+  <hgroup>
+    <h2>Integer Vectors - compressed &amp; immutable</h2>
+  </hgroup>
+<article>
+<p>
+<code>vlc_vector<></code> = apply self-delimiting code on elements
+</p>
+<pre class="prettyprint" data-lang="c++"> <!-- expl-03.cpp -->
+// initialize vector with 10,000,000 threes
+int_vector<> v(10*(1<<20), 3);
+v[0] = 1ULL<<63;
+util::bit_compress(v);
+cout << size_in_mega_bytes(v) << endl;
+<b>vlc_vector<> vv(v);</b>
+cout << size_in_mega_bytes(vv) << endl;
+</pre>
+<p> Output: </p>
+<pre class="prettyprint">
+80
+8.2813
+</pre>
+</article>
+</slide>
+
+
+<slide>
+  <hgroup>
+    <h2>Bitvectors - uncompressed &amp; mutable</h2>
+  </hgroup>
+<article>
+<pre class="prettyprint" data-lang="c++"> <!-- expl-04.cpp -->
+#include &lt;iostream&gt;
+#include &lt;sdsl/bit_vectors.hpp&gt;
+using namespace std;
+using namespace sdsl;
+
+int main(){
+    bit_vector b = {1,1,0,1,0,0,1};
+    cout << b << endl;
+    b = bit_vector(80*(1<<20), 0);
+    for (size_t i=0; i < b.size(); i+=100)
+        b[i] = 1;
+    cout << size_in_mega_bytes(b) << endl;
+}
+</pre>
+Output: <br />&nbsp;
+<pre class="prettyprint">
+1101001
+10
+</pre>
+</article>
+</slide>
+
+<slide>
+  <hgroup>
+    <h2>Bitvectors - compressed &amp; immutable</h2>
+  </hgroup>
+<article>
+<p> Use <code>rrr_vector<63></code> or <code>sd_vector<></code> to represent
+compressible bitvectors </p>
+<pre class="prettyprint" data-lang="c++"><!-- expl-05.cpp -->
+bit_vector b = bit_vector(80*(1<<20), 0);
+for (size_t i=0; i < b.size(); i+=100)
+    b[i] = 1;
+cout << size_in_mega_bytes(b) << endl;
+<b>rrr_vector<63> rrrb(b);</b>
+cout << size_in_mega_bytes(rrrb) << endl;
+<b>sd_vector<> sdb(b);</b>
+cout << size_in_mega_bytes(sdb) << endl;
+</pre>
+Output: <br />&nbsp;
+<pre class="prettyprint">
+10
+1.77071
+0.987351
+</pre>
+</article>
+</slide>
+
+<slide>
+  <hgroup>
+    <h2>Intermezzo: Inspecting structures</h2>
+  </hgroup>
+<article>
+<p><code>write_structure&lt;JSON_FORMAT&gt;</code> can be used with
+every SDSL object and writes a space-breakdown into
+a stream </p>
+<!-- expl-06.cpp -->
+<pre class="prettyprint" data-lang="c++">
+write_structure&lt;JSON_FORMAT&gt;(sdb, cout);
+</pre>
+We use <a href="http://d3js.org">d3js.org</a> 
+<a href="http://simongog.github.io/lessons/2012/08/27/Visualizing_SDSL_Data_Structures/">to visualize</a>
+the output:
+<p><div id="space_chart" style="text-align: center;"></div></p>
+<script type="text/javascript">
+var global_id=0
+myJson = function(url, callback){
+        d3.json(url, callback);
+};
+my2Json = function(){
+var myinit = initX("XXX_YYY");
+myinit(
+{ "class_name":"sd_vector", "name":"", "size":"1035313", "children":[ { "class_name":"select_support_mcl", "name":"high_0_select", "size":"30929", "children":[ { "class_name":"int_vector", "name":"minisuperblock", "size":"30200" }, { "class_name":"int_vector", "name":"longsuperblock", "size":"0" }, { "class_name":"bit_vector", "name":"mini_or_long", "size":"40" }, { "class_name":"int_vector", "name":"superblock", "size":"681" } ] }, { "class_name":"select_support_mcl", "name":"high_1_select", "size":"34414", "children":[ { "class_name":"int_vector", "name":"minisuperblock", "size":"23052" }, { "class_name":"int_vector", "name":"longsuperblock", "size":"10761" }, { "class_name":"bit_vector", "name":"mini_or_long", "size":"40" }, { "class_name":"int_vector", "name":"superblock", "size":"553" } ] }, { "class_name":"bit_vector", "name":"high", "size":"235944" }, { "class_name":"int_vector", "name":"low", "size":"734017" }, { "class_name":"unsigned char", "name":"wl", "size":"1" }, { "class_name":"unsigned long long", "name":"size", "size":"8" } ] }
+);
+return true;
+}
+my2Json();
+</script>
+
+
+</article>
+</slide>
+
+
+<slide>
+  <hgroup>
+    <h2>Intermezzo: Store and load structures</h2>
+  </hgroup>
+<article>
+<p>
+<b>Any</b> SDSL object <code>o</code> can be 
+<b>stored to</b> or <b>loaded from</b> a
+file named <code>file</code> by method
+</p>
+<p><div style="text-align: center;">
+<code>store_to_file(o, file)</code> or <code>load_from_file(o, file)</code>
+</div>
+</p>
+<p>Example:
+</p>
+<pre class="prettyprint" data-lang="c++">
+    bit_vector<> b(10000000, 0);
+    b[b.size()/2] = 1;
+    sd_vector<> sdb(b);
+    <b>store_to_file(sdb, "sdb.sdsl")</b>;
+    sdb = sd_vector<>();
+    cout << sdb.size() << endl; // 0
+    <b>load_from_file(sdb, "sdb.sdsl");</b>
+    cout << sdb.size() << endl; // 10000000 
+</pre>
+
+
+</article>
+</slide>
+
+
+<slide>
+  <hgroup>
+    <h2>Support structures: rank_support (1)</h2>
+  </hgroup>
+<article>
+<p>
+A support object holds a pointer to the
+supported object and adds functionality.
+E.g. rank_support_* structures add the
+rank operation to bitvectors. 
+</p>
+<pre class="prettyprint" data-lang="c++"><!-- expl-07.cpp -->
+bit_vector b = bit_vector(8000, 0);
+for (size_t i=0; i < b.size(); i+=100)
+    b[i] = 1;
+<b>rank_support_v<1> b_rank(&b);</b> // <- pointer to b
+for (size_t i=0; i<=b.size(); i+= b.size()/4) 
+    cout << "(" << i << ", " << <b>b_rank(i)</b> << ") ";  
+</pre>
+<p>Output:</p>
+<pre class="prettyprint">
+(0, 0) (2000, 20) (4000, 40) (6000, 60) (8000, 80)
+</pre>
+</article>
+</slide>
+
+
+<slide>
+  <hgroup>
+    <h2>Support structures: rank_support (2)</h2>
+  </hgroup>
+<article>
+<p>
+Each bitvector class provides default types
+for rank supports.
+</p>
+<pre class="prettyprint" data-lang="c++"><!-- expl-08.cpp -->
+sd_vector<> sdb(b);
+<b>sd_vector<>::rank_1_type sdb_rank(&sdb);</b>
+for (size_t i=0; i<=b.size(); i+= b.size()/4) 
+    cout << "(" << i << ", " << <b>sdb_rank(i)</b> << ") ";
+cout << endl;
+rrr_vector<> rrrb(b);
+<b>rrr_vector<>::rank_1_type rrrb_rank(&rrrb);</b>
+for (size_t i=0; i<=b.size(); i+= b.size()/4) 
+    cout << "(" << i << ", " << <b>rrrb_rank(i)</b> << ") ";
+</pre>
+<p>Output:</p>
+<pre class="prettyprint">
+(0, 0) (2000, 20) (4000, 40) (6000, 60) (8000, 80)
+(0, 0) (2000, 20) (4000, 40) (6000, 60) (8000, 80)
+</pre>
+</article>
+</slide>
+
+<slide>
+  <hgroup>
+    <h2>Support structures: rank_support (3)</h2>
+  </hgroup>
+<article>
+<p>It is possible to generate rank structures for
+bit-patterns up to length 2 for <code>bit_vector</code>.
+</p>
+<pre class="prettyprint" data-lang="c++"><!-- expl-09.cpp -->
+bit_vector b = {0,1,0,1};
+rank_support_v<1> b_r1(&b);     // <- bitpattern `1` of len 1
+rank_support_v<0> b_r0(&b);     // <- bitpattern `0` of len 1
+rank_support_v<10,2> b_r10(&b); // <- bitpattern `10` of len 2
+rank_support_v<01,2> b_r01(&b); // <- bitpattern `01` of len 2
+for (size_t i=0; i<=b.size(); ++i)
+    cout << i << ": "<< b_r1(i) << " " << b_r0(i)
+         << " " << b_r10(i) << " " << b_r01(i) << endl; 
+</pre>
+<p>Output:</p>
+<pre class="prettyprint">
+0: 0 0 0 0
+1: 0 1 0 0
+2: 1 1 0 1
+3: 1 2 1 1
+4: 2 2 1 2
+</pre>
+</article>
+</slide>
+
+<slide>
+  <hgroup>
+    <h2>Support structures: select_support (1)</h2>
+  </hgroup>
+<article>
+<p>Select structures can be used analogously. 
+</p>
+<pre class="prettyprint" data-lang="c++"><!-- expl-10.cpp -->
+bit_vector b = {0,1,0,1,1,1,0,0,0,1,1};
+size_t zeros = rank_support_v<0>(&b)(b.size());
+bit_vector::select_0_type b_sel(&b);
+
+for (size_t i=1; i <= zeros; ++i)
+   cout << b_sel(i) << " ";
+</pre>
+<p>Output:</p>
+<pre class="prettyprint">
+0 2 6 7 8 
+</pre>
+</article>
+</slide>
+
+
+<slide>
+  <hgroup>
+    <h2>Support structures: select_support (2)</h2>
+  </hgroup>
+<article>
+<p>Select on a <code>bit_vector</code> can also be
+done for bit patterns of length 2.
+</p>
+<pre class="prettyprint" data-lang="c++"><!-- expl-11.cpp -->
+bit_vector b = {0,1,0,1,1,1,0,0,0,1,1};
+size_t cnt10 = rank_support_v<10,2>(&b)(b.size());
+select_support_mcl<10,2> b_sel10(&b);
+
+for (size_t i=1; i <= cnt10; ++i)
+   cout << b_sel10(i) << " ";
+</pre>
+<p>Output:</p>
+<pre class="prettyprint">
+2 6
+</pre>
+</article>
+</slide>
+
+
+<slide>
+  <hgroup>
+    <h2>Support structures: select_support (3)</h2>
+  </hgroup>
+<article>
+<p>Selecting works also on compressed bitvectors (<code>sd_vector<></code>
+and <code>rrr_vector<></code>)
+</p>
+<pre class="prettyprint" data-lang="c++"><!-- expl-12.cpp -->
+sd_vector<> sd_b = bit_vector{1,0,1,1,1,0,1,1,0,0,1,0,0,1};
+size_t ones = sd_vector<>::rank_1_type(&sd_b)(sd_b.size()); 
+sd_vector<>::select_1_type sdb_sel(&sd_b);
+
+cout << sd_b << endl;
+
+for (size_t i=1; i <= ones; ++i)
+    cout << sdb_sel(i) << " ";
+</pre>
+<p>Output:</p>
+<pre class="prettyprint">
+10111011001001
+0 2 3 4 6 7 10 13
+</pre>
+</article>
+</slide>
+
+<slide>
+  <hgroup>
+    <h2>Intermezzo: Performance of access/rank/select</h2>
+  </hgroup>
+<article>
+<p>
+Time performance of a single access/rank/select operation
+depends on 
+</p>
+<p>
+<ul>
+<li>Basic rank operation on 64-bit word:
+    <ul>
+      <li><span class="tnrb">BW</span>: SWAR (SIMD Within A Register)</li>
+      <li><span class="tnrb">BLT</span>: use popcount CPU instruction</li>
+    </ul>
+</li> &nbsp;
+<li>Virtual address space translation:
+    <ul>
+      <li><span class="tnrb">no HP</span>: Use standard 4 kiB pages</li>
+      <li><span class="tnrb">HP</span>: Use 1GiB pages (hugepages)</li>
+    </ul>
+</li> &nbsp;
+<li>Data structure design:
+    <ul>
+      <li><span class="tnrb">RANK-V</span>: 
+          <code>rank_support_v&lt;&gt;</code> 25% overhead on top of <code>bit_vector</code>
+      </li>
+      <li><span class="tnrb">RANK-1L</span>
+          interleaving bitvector data and rank data (<code>bit_vector_il&lt;&gt;</code>)
+      </li>    
+    </ul>
+</li>
+</ul>
+</p>
+</article>
+</slide>
+
+
+<slide>
+  <hgroup>
+    <h2>Intermezzo: Performance of access/rank/select</h2>
+  </hgroup>
+<article>
+<p>
+&quot;<span class="tnrb">BV <span class="tnrb" style="font-style:italic;">access</span></span>&quot;
+is the baseline of accessing a random bit of a <code>bit_vector</code>.
+</p>
+<img src="images/rank-time-4k-page.png" alt="rank time (4kB pages)" width="100%" />
+</article>
+</slide>
+
+<slide>
+  <hgroup>
+    <h2>Intermezzo: Performance of access/rank/select</h2>
+  </hgroup>
+<article>
+<p>
+&quot;<span class="tnrb">BV <span class="tnrb" style="font-style:italic;">access</span></span>&quot;
+is the baseline of accessing a random bit of a <code>bit_vector</code>.
+</p>
+<img src="images/rank-time-1G-page.png" alt="rank time (1GiB pages)" width="100%" />
+</article>
+</slide>
+
+<slide>
+  <hgroup>
+    <h2>Intermezzo: Performance of access/rank/select</h2>
+  </hgroup>
+<article>
+<p>Performance of binary search select (<span class="tnr">SEL-BS*)</span>,
+<code>select_support_mcl&lt;&gt;</code> (<span class="tnr">SEL-C</span>)
+and <a href="http://sux.di.unimi.it/">Vigna's solutions in Sux</a> 
+<span class="tnr">SEL-V9</span> and <span class="tnr">SEL-VS</span>
+</p>
+<img src="images/select-time.png" alt="select time" width="100%" />
+</article>
+</slide>
+
+
+<slide>
+  <hgroup>
+    <h2>Intermezzo: Performance of access/rank/select</h2>
+  </hgroup>
+<article>
+<p>Space breakdown for 
+<code>rrr_vector&lt;</code><span style="font-style:italic;font-family:Times New Roman;">K</span><code>&gt;</code>
+with varying block size.
+</p>
+<img src="images/rrr-space.png" alt="rrr_vector space" width="100%" />
+</article>
+</slide>
+
+<slide>
+  <hgroup>
+    <h2>Intermezzo: Performance of access/rank/select</h2>
+  </hgroup>
+<article>
+<p>Runtime for 
+<code>rrr_vector&lt;</code><span style="font-style:italic;font-family:Times New Roman;">K</span><code>&gt;</code>
+with varying block size.
+</p>
+<img src="images/rrr-time.png" alt="rrr_vector time" width="100%" />
+</article>
+</slide>
+
+
+<slide>
+  <hgroup>
+    <h2>Wavelet trees (WTs)</h2>
+    <h3><code>#include &lt;sdsl/wavelet_trees.hpp&gt;</code></h3>
+  </hgroup>
+<article>
+<div align="center">
+<img src="images/wavelet-tree.png" alt="wavelet tree" width="65%" />
+</div>
+</article>
+</slide>
+<slide>
+  <hgroup>
+    <h2>Wavelet trees (WTs) - Overview</h2>
+  </hgroup>
+<article>
+
+<ul>
+    <li><code>wt_pc&lt;..&gt;</code>: Prefix code wavelet tree 
+        (parametrizable with shape, bitvector, rank, selects,
+         alphabet) using . Shape specializations:</li>
+    <ul>
+        <li><code>wt_blcd&lt;..&gt;</code>: Balanced-shaped WT</li>
+        <li><code>wt_huff&lt;..&gt;</code>: Huffman-shaped WT</li>
+        <li><code>wt_hutu&lt;..&gt;</code>: Hu-Tucker-shaped WT</li>
+    </ul>
+
+     <li><code>wt_int&lt;..&gt;</code>: Balanced-shaped WT for
+         large alphabets (parametrizable with bitvector, rank, selects)
+         </li>
+     <li><code>wt_rlmn&lt;..&gt;</code>: Run-length WT (parametrizable with
+          bitvector, rank, select, and the underlying WT)</li>
+</ul>
+<p>Note: 
+<ul>
+    <li> <code>wt_pc</code> and <code>wt_rlmn</code> can be
+         parametrize to work on byte or integer alphabets.
+    </li>
+    <li> <code>wt_blcd</code>, <code>wt_hutu</code> and <code>wt_int</code> 
+         are order preserving WTs.
+    </li>
+</ul>
+</p>                      
+</article>
+</slide>
+
+<slide>
+  <hgroup>
+    <h2>Wavelet Trees (WTs) - Example (1)</h2>
+  </hgroup>
+<article>
+<p>
+<b>Any</b> wavelet tree provides methods access (<code>operator[]</code>),
+<code>rank(i,c)</code>, <code>select(i,c)</code>, and
+<code>inverse_select(i)</code>. 
+Snippet of <code>expl-13.cpp</code>:
+</p>
+<pre class="prettyprint" data-lang="c++"><!-- expl-13.cpp -->
+wt_blcd<> wt;
+<b>construct(wt, "expl-13.cpp", 1);</b>
+for (size_t i=0; i < wt.size() and wt[i]!='\n'; ++i) 
+    cout << <b>wt[i]</b>;
+cout << endl;
+cout << "number of lines  : " << <b>wt.rank(wt.size(), '\n')</b> << endl;
+cout << "first '=' in line: " << wt.rank(<b>wt.select(1, '=')</b>,'\n')+1 << endl;
+</pre>
+<p>Output:</p>
+<pre class="prettyprint">
+#include &lt;sdsl/wavelet_trees.hpp&gt;
+number of lines  : 15
+first '=' in line: 10
+</pre>
+</article>
+</slide>
+
+
+<slide>
+  <hgroup>
+    <h2>Intermezzo - Construction (1)</h2>
+  </hgroup>
+<article>
+<p>
+<b>Any</b> WT-,CSA-, or CST-object <code>o</code> can be
+build for a <code>file</code> by calling <br />
+<code>construct(o, file, num_bytes=0)</code>.
+</p>
+<p>
+<code>num_bytes</code> specifies how the file should be
+interpreted:
+</p>
+<table>
+<tr>
+<th><code>num_bytes<code></th><th>Interpretation</th></tr>
+<tr><td>0</td><td>serialized <code>int_vector<></code></td></tr>
+<tr><td>1</td><td><code>uint8_t</code> sequence of length <code>util::file_size(file)</code></td></tr>
+<tr><td>2</td><td><code>uint16_t</code> sequence of length <code>util::file_size(file)/2</code></td></tr>
+<tr><td>4</td><td><code>uint32_t</code> sequence of length <code>util::file_size(file)/4</code></td></tr>
+<tr><td>8</td><td><code>uint64_t</code> sequence of length <code>util::file_size(file)/8</code></td></tr>
+<tr><td>d</td><td>Whitespace separated decimal numbers; for educational purposes ;)</td></tr>
+</table>
+
+</article>
+</slide>
+
+<slide>
+  <hgroup>
+    <h2>Intermezzo - Construction (2)</h2>
+  </hgroup>
+<article>
+<p>
+More about <code>construct(o, file, num_bytes)</code>:
+</p>
+<p>
+<ul>
+    <li>Semi-external construction (streams to and from disk)
+        is space and time-efficient</li>
+    <li>It's easy to use: <b>YGWYD</b>: 
+        <b>Y</b>ou <b>G</b>et <b>W</b>hat <b>Y</b>ou <b>D</b>eclare.
+    </li>
+</ul>
+</p>
+<p>
+For small object going to disk is a waste of time. Therefore:
+</p>
+<p>
+<b>Any</b> WT-,CSA-, or CST-object <code>o</code> can be
+build in memory for a sequence <code>data</code> by
+</p>
+<p style="text-align: center;">
+<code>construct_im(o, data, num_bytes=0)</code>.
+</p>
+</article>
+</slide>
+
+
+<slide>
+  <hgroup>
+    <h2>Wavelet Trees (WTs) - Example (2)</h2>
+  </hgroup>
+<article>
+<p>
+Build a byte-alphabet Hu-Tucker-shaped WT
+(order preserving) for a byte sequence.
+</p>
+<pre class="prettyprint" data-lang="c++"><!-- expl-14.cpp -->
+    <b>wt_hutu&lt;rrr_vector&lt;63&gt;&gt; wt</b>;
+    <b>construct_im(wt, "こんにちは世界", 1)</b>;
+    for (size_t i=0; i < wt.size(); ++i) cout << wt[i]; cout << endl;
+    <b>auto t1 = wt.lex_count(0, wt.size(), 0x80);</b>   
+    <b>auto t2 = wt.lex_count(0, wt.size(), 0xbf);</b>   
+    cout << "# of chars        : " << wt.size() << endl;
+    cout << "# of UTF-8 symbols: " << get<1>(t1)+get<2>(t2) << endl;
+</pre>
+<p>Output:</p>
+<pre class="prettyprint">
+こんにちは世界
+# of bytes        : 21
+# of UTF-8 symbols: 7
+</pre>
+<!--
+-->
+</article>
+    <aside class="note">
+      <section>
+        <ul>
+          <li><b>こんにちは世界</b> means <b>Hello World</b></li>
+          <li>Order preserving WT provide more functionality:</li>
+          <li><code>lex_count(i, j, c)</code> returns
+              <code>rank(c,i)</code>, 
+              #of symbols in [i..j-1] smaller/greater than <code>c</code>
+              </li>
+          <li><code>interval_symbols(i,j,k,cs,rank_c_i,rank_c_j)</code></li>
+          <li><code>count_lex_smaller(i,c)</code></li>
+          <li><code>count_lex_smaller(i, j, c)</code></li>
+          <li><code>range_search_2d(lb,rb,vlb,vrb,list_pairs)</code></li>
+        </ul>
+        Count UTF-8 chars: You only count 
+        the characters that have the top two bits are not set to 10
+        (i.e., everything less that 0x80 or greater than 0xbf). 
+        <a href="http://stackoverflow.com/questions/7298059/how-to-count-characters-in-a-unicode-string-in-c">
+        Source
+        </a>.
+      </section>
+    </aside>
+</slide>
+
+
+<slide>
+  <hgroup>
+    <h2>Wavelet Trees (WTs) - Example (3)</h2>
+  </hgroup>
+<article>
+<p>
+Build an integer-alphabet balanced WT
+(order preserving) for a integer sequence
+and do a range search (index range = [1..5],
+value range=[4..8]).
+</p>
+<pre class="prettyprint" data-lang="c++"><!-- expl-15.cpp -->
+    <b>wt_int&lt;rrr_vector&lt;63&gt;&gt; wt</b>;
+    construct_im(wt, "6   1000 1 4 7 3   18 6 3", <b>'d'</b>);
+    auto res = <b>wt.range_search_2d(1, 5, 4, 18)</b>;
+    for ( auto point : res.second )
+        cout << point << " ";
+    cout << endl;
+</pre>
+<p>Output (index/value pairs):</p>
+<pre class="prettyprint">
+(3,4) (4,7) 
+</pre>
+<!--
+-->
+</article>
+    <aside class="note">
+      <section>
+        <ul>
+          <li>'d' argument in <code>construct_im</code>
+               interprets data as sequence of
+               decimal numbers</li>
+        </ul>
+      </section>
+    </aside>
+</slide>
+
+
+<slide>
+  <hgroup>
+    <h2>Wavelet Trees (WTs) - Example (4)</h2>
+  </hgroup>
+<article>
+<p>
+Build an integer-alphabet Huffman-shaped WT
+for an <code>int_vector&lt;&gt;</code>
+in memory and execute <code>inverse_select</code>.
+</p>
+<pre class="prettyprint" data-lang="c++"><!-- expl-16.cpp -->
+    wt_huff_int&lt;rrr_vector&lt;63&gt;&gt; wt;
+    construct_im(wt, int_vector<>({1981, 1974, 1990, 1974, 2014, 1974}));
+    cout << "wt.sigma : " << wt.sigma << endl;
+    cout << wt << endl;
+    size_t idx = 5;
+    auto r_c = wt.inverse_select(idx);
+    cout << get<0>(r_c)+1 << " occurrence(s) of "
+         << get<1>(r_c) << " in [0.." << idx << "]" << endl;
+</pre>
+<p>Output:</p>
+<pre class="prettyprint">
+wt.sigma : 4
+1981 1974 1990 1974 2014 1974
+3 occurrence(s) of 1974 in [0..5]
+</pre>
+<!--
+-->
+</article>
+    <aside class="note">
+      <section>
+        <ul>
+          <li>The last argument of construct_im is 0 per default,
+              and expects the input as <code>int_vector&lt;&gt;</code>.
+          </li>
+          <li>
+          WT member <code>sigma</code> is part of any WT and contains
+          the effective alphabet size.
+          </li>
+          <li>
+          Like vectors and bitvectors, WT can be easily
+          outputted via an ostream.
+          </li>
+        </ul>
+      </section>
+    </aside>
+</slide>
+
+<slide>
+  <hgroup>
+    <h2>Compressed Suffix Arrays (CSAs)</h2>
+  </hgroup>
+  <hgroup>
+    <h3><code>#include &lt;sdsl/suffix_arrays.hpp&gt;</code></h3>
+  </hgroup>
+<article>
+<p>&nbsp;</p>
+<div align="center">
+<img src="images/suffix-array.png" alt="suffix array" width="80%" />
+</div>
+</article>
+</slide>
+
+<slide>
+  <hgroup>
+    <h2>Compressed Suffix Arrays (CSAs) - Overview</h2>
+  </hgroup>
+<article>
+<p><b>Any</b> CSA provides the access method (<code>operator[]</code>) and
+the following members:
+<ul>
+<li>
+<code>psi</code>, 
+<code>lf</code>, &nbsp;&nbsp;
+<code>isa</code>, 
+<code>bwt</code>, 
+<code>text</code>, &nbsp;&nbsp;
+<code>L</code>, 
+<code>F</code>, &nbsp;&nbsp;
+<code>C</code>, 
+<code>char2comp</code>, 
+<code>comp2char</code>
+</li>
+</ul>
+</p>
+<p>
+There are three CSA types:
+<table>
+<tr>
+<td><code style="font-size: 110%;">csa_bitcompressed&lt;..&gt;</code> </td>
+<td>
+Based on SA and inverse SA (ISA) stored in an <code>int_vector&lt;&gt;</code>.
+</td> 
+</tr>
+<tr>
+<td><code style="font-size: 110%;">csa_sada&lt;..&gt;</code></td><td>
+Based on $\Psi$-function. $\Psi$ is stored in an vector. The vector
+type is a template parameter and <code>enc_vector</code> per default.
+</td>
+</tr>
+<tr>
+<td><code style="font-size: 110%;">csa_wt&lt;..&gt;</code>
+</td><td>
+Based on a WT over the Burrows-Wheeler-Transform (BWT);
+aka FM-Index. WT is parametrizable, default WT is 
+<code>wt_huff</code>.
+</td>
+</tr>
+</table>
+</p>
+<p>
+<b>SA and ISA sampling density</b>, <b>alphabet strategy</b> and the <b>SA value sampling strategy</b> can 
+be specified via template arguments. 
+</p>
+</article>
+</article>
+    <aside class="note">
+      <section>
+      <p>
+      Alphabet strategy contains
+      </p>
+      <p>
+        <ul>
+          <li>
+            <code>comp2char</code> container,
+          </li>  
+          <li>
+            <code>char2comp</code> container,
+          </li>  
+          <li>
+            <code>C</code> container,
+          </li>
+          <li>
+            <code>sigma</code> (effective alphabet size).
+          </li>
+          <li>Strategies: <code>byte_alphabet</code>,
+              <code>succinct_byte_alphabet</code>,
+              <code>int_alphabet</code>
+          </li>
+        </ul>
+        </p>
+        <p>
+       SA value sampling strategies
+       <ul>
+       <li><code>sa_order_sa_sampling</code></li>
+       <li><code>text_order_sa_sampling</code></li>
+       <li><code>sa_bwt_sampling</code></li>
+       </ul>
+        </p>
+      </section>
+    </aside>
+</slide>
+
+
+<slide>
+  <hgroup>
+    <h2>Compressed Suffix Arrays (CSAs) - Example (1)</h2>
+  </hgroup>
+<article>
+<p>
+Build an byte-alphabet CSA in memory 
+(0-symbol is appended!). Output size,
+alphabet size, and extracted text in
+<code>[0..csa.size()-1]</code>.
+</p>
+<pre class="prettyprint" data-lang="c++"><!-- expl-17.cpp -->
+<b>csa_bitcompressed<> csa</b>;
+construct_im(csa, "abracadabra", 1);
+cout << "csa.size(): " << csa.size() << endl;
+cout << "csa.sigma : " << csa.sigma << endl;
+cout << csa << endl;
+cout << <b>extract(csa, 0, csa.size()-1)</b> << endl;
+</pre>
+<p>Output:</p>
+<pre class="prettyprint">
+csa.size(): 12
+csa.sigma : 6
+11 10 7 0 3 5 8 1 4 6 9 2
+abracadabra
+</pre>
+<!--
+-->
+</article>
+    <aside class="note">
+      <section>
+        <ul>
+          <li>Method <code>extract</code> is defined for
+              any CSA and CST. 
+          </li>
+        </ul>
+      </section>
+    </aside>
+</slide>
+
+
+<slide>
+  <hgroup>
+    <h2>Compressed Suffix Arrays (CSAs) - Example (2)</h2>
+  </hgroup>
+<article>
+<p>Do <code>count</code> and <code>locate</code> on a CSA constructed
+from a file. Snippet of <code>expl-18.cpp</code>:
+</p>
+<pre class="prettyprint" data-lang="c++"><!-- expl-18.cpp -->
+    csa_wt&lt;wt_huff&lt;rrr_vector&lt;63&gt;&gt;,4,8&gt; csa; // 接尾辞配列
+    construct(csa, "expl-18.cpp", 1);
+    cout &lt;&lt; "count(\"配列\") : " &lt;&lt; <b>count(csa, "配列")</b> &lt;&lt; endl;    
+    auto occs = <b>locate(csa, "\n")</b>;
+    sort(occs.begin(), occs.end());
+    auto max_line_length = occs[0];
+    for (size_t i=1; i &lt; occs.size(); ++i)
+        max_line_length = std::max(max_line_length, occs[i]-occs[i-1]+1);
+    cout &lt;&lt; "max line length : " &lt;&lt; max_line_length &lt;&lt; endl;
+</pre>
+<p>Output:</p>
+<pre class="prettyprint">
+count("配列") : 3 
+max line length : 75
+</pre>
+<!--
+-->
+</article>
+    <aside class="note">
+      <section>
+        <ul>
+          <li>Method <code>extract</code> is defined for
+              any CSA and CST. 
+          </li>
+          <li>"配列" = array, and "接尾辞配列" = suffix array</li>
+        </ul>
+      </section>
+    </aside>
+</slide>
+
+
+<slide>
+  <hgroup>
+    <h2>Compressed Suffix Arrays (CSAs) - Example (3)</h2>
+  </hgroup>
+<article>
+<p>Formatted output of CSAs/CSTs using the <code>csXprintf</code>:
+</p>
+<pre class="prettyprint" data-lang="c++"><!-- expl-19.cpp -->
+csa_wt&lt;wt_int&lt;rrr_vector&lt;63&gt;&gt;&gt; csa; 
+construct_im(csa, "1 8 15 23 1 8 23 11 8", 'd');
+cout &lt;&lt; " i SA ISA PSI LF BWT   T[SA[i]..SA[i]-1]" &lt;&lt; endl;
+csXprintf(cout, "%2I %2S %3s %3P %2p %3B   %:3T", csa); 
+</pre>
+<p>Output:</p>
+<article class="smaller">
+<pre class="prettyprint">
+ i SA ISA PSI LF BWT   T[SA[i]..SA[i]-1]
+ 0  9   1   1  3   8     0  1  8 15 23  1  8 23 11  8
+ 1  0   4   4  0   0     1  8 15 23  1  8 23 11  8  0
+ 2  4   7   5  8  23     1  8 23 11  8  0  1  8 15 23
+ 3  8   8   0  6  11     8  0  1  8 15 23  1  8 23 11
+ 4  1   2   7  1   1     8 15 23  1  8 23 11  8  0  1
+ 5  5   5   9  2   1     8 23 11  8  0  1  8 15 23  1
+ 6  7   9   3  9  23    11  8  0  1  8 15 23  1  8 23
+ 7  2   6   8  4   8    15 23  1  8 23 11  8  0  1  8
+ 8  3   3   2  7  15    23  1  8 23 11  8  0  1  8 15
+ 9  6   0   6  5   8    23 11  8  0  1  8 15 23  1  8
+</pre>
+</article>
+<!--
+-->
+</article>
+    <aside class="note">
+      <section>
+        <code>csXprintf</code> parameters:
+        <ul>
+          <li>Output stream</li>
+          <li>Format string</li>
+          <li>Index (any CSA or CST)</li>
+          <li>Sentinel character (default ='$')</li>
+        </ul>
+      </section>
+    </aside>
+</slide>
+
+
+<slide>
+  <hgroup>
+    <h2>Intermezzo: Performance of count/locate/exract</h2>
+  </hgroup>
+  <hgroup>
+    <h3>Benchmarks</h3>
+  </hgroup>
+<article>
+
+<p>
+Configurable benchmark code facilitates 
+<ul>
+    <li>reproducibility</li>
+    <li>performance measurement on your hardware</li>
+    <li>exploring different dimensions (input types,
+        index types, compile flags,...)</li>
+</ul>
+</p>
+
+<p>SDSL includes a set of configurable <a href="https://github.com/simongog/sdsl-lite/tree/master/benchmark">benchmarks</a>,
+which are very easy to execute. One example:
+</p>
+<p>
+ <pre class="prettyprint">
+ cd benchmark/indexing_locate
+ make timing
+</pre>
+The benchmark is configurable via config-files
+(inputs/indexes/sample densities). The 
+Makefile will download test inputs, compile
+the binaries, and produce a <a href="https://github.com/simongog/simongog.github.com/raw/master/assets/images/locate.pdf">report</a>.
+</p>
+<!--article>
+<iframe data-src="./locate.pdf"></iframe>
+</article-->
+<!--
+-->
+</article>
+    <aside class="note">
+      <section>
+      </section>
+    </aside>
+</slide>
+
+<slide>
+  <hgroup>
+    <h2>Compressed Suffix Arrays (CSAs) - Construction</h2>
+  </hgroup>
+<article>
+<ul>
+<li>SA is constructed in-memory. Used implementations:
+    <ul>
+        <li> Yuta Mori's <a href="https://code.google.com/p/libdivsufsort/">libdivsufsort</a> for byte alphabets</li>
+        <li> N. Jesper Larsson's <a href="http://www.larsson.dogma.net/qsufsort.c">qsufsort</a> for integer alphabets</li>
+    </ul>
+</li>
+<li>Following construction steps are implemented semi-external
+    using the <code>int_vector_buffer<..></code> to stream
+    data from and to disk.
+</li>
+</ul>
+<p>
+It is very easy to keep track of memory resources allocated during
+the construction:
+</p>
+<p>
+<pre class="prettyprint" data-lang="c++"><!-- expl-20.cpp -->
+memory_monitor::start();
+csa_wt<> csa;
+construct(csa, "english.200MB", 1);
+memory_monitor::stop();
+memory_monitor::write_memory_log<HTML_FORMAT>(cout);
+</pre>
+Output (next slide):
+</p>
+</article>
+    <aside class="note">
+      <section>
+      <li>Note: qsufsort was adapted to work on
+          <code>int_vector&lt;&gt;</code>s</li>
+      <li>Test case <code>english.200MB</code>
+      from the <a href="pizzachili.di.unipi.it">Pizza&amp;Chili corpus</a></li>    
+      </section>
+    </aside>
+</slide>
+
+<slide>
+  <hgroup>
+    <h2>Compressed Suffix Arrays (CSAs) - Construction</h2>
+  </hgroup>
+<article>
+<p>Steps for <code>csa_wt&lt;&gt;</code>: Load text, construct SA,
+construct BWT, construct WT, sample SA, sample ISA.
+</p>
+<div class="chart"><div id="visualization"></div></div>
+</article>
+<!--
+-->
+</article>
+    <aside class="note">
+      <section>
+      </section>
+    </aside>
+</slide>
+
+
+<slide>
+  <hgroup>
+    <h2>Compressed Suffix Trees (CSTs)</h2>
+  </hgroup>
+  <hgroup>
+    <h3><code>#include &lt;sdsl/suffix_trees.hpp&gt;</code></h3>
+  </hgroup>
+<article>
+<div align="center">
+<img src="images/suffix-tree.png" alt="suffix tree" width="70%" />
+</div>
+</article>
+</slide>
+
+
+
+<slide>
+  <hgroup>
+    <h2>Compressed Suffix Trees (CSTs) - Overview</h2>
+  </hgroup>
+<article>
+<p><b>Any</b> CST contains members <code>csa</code> and <code>lcp</code>
+and provides the following methods:
+<ul>
+<li> 
+<!-- cst global info -->
+<code>nodes()</code>, 
+<code>root()</code>, 
+<code>begin()</code>, 
+<code>end()</code>, 
+<code>begin_bottom_up()</code>, 
+<code>end_bottom_up()</code>
+</li>
+<!-- cst node info --> 
+<li>
+<code>size(v)</code>,
+<code>is_leaf(v)</code>,
+<code>degree(v)</code>,
+<code>depth(v)</code>,
+<code>node_depth(v)</code>,
+<code>edge(v,d)</code>,
+<code>lb(v)</code>, <code>rb(v)</code>,
+<code>id(v)</code>, <code>inv_id(i)</code>,
+<code>sn(v)</code>
+</li>
+<!-- cst global navigation-->
+<li>
+<code>select_leaf(i)</code>, 
+<code>node(lb,rb)</code>
+</li>
+<!-- cst node navigation-->
+<li>
+<code>parent(v)</code>, 
+<code>sibling(v)</code>,
+<code>lca(v,w)</code>,
+<code>select_child(v,i)</code>,
+<code>child(v,c)</code>,
+<code>sl(v)</code>,
+<code>wl(v,c)</code>,
+<code>leftmost_leaf(v)</code>,
+<code>rightmost_leaf(v)</code>
+</li>
+</ul>
+</p>
+<p>
+There are two CSA types:
+<table>
+<tr>
+<td><code style="font-size: 110%;">cst_sct3&lt;..&gt;</code> </td>
+<td>
+Interval based node representation. 
+</td> 
+</tr>
+<tr>
+<td><code style="font-size: 110%;">cst_sada&lt;..&gt;</code></td><td>
+Node represented as position in balanced parentheses sequence.
+</td>
+</tr>
+</table>
+</p>
+<p>
+<b>The underlying CSA</b>, <b>LCP array</b> and the <b>balanced parentheses structure</b> can 
+be specified via template arguments. 
+</p>
+</article>
+</article>
+    <aside class="note">
+      <section>
+      <p>As CSA, a CST contains more functionality as the uncompressed counterpart.</p>
+      <p> Alphabet is determined by the CSA.  </p>
+      </section>
+    </aside>
+</slide>
+
+
+
+<slide>
+  <hgroup>
+    <h2>Compressed Suffix Trees (CSTs) - Example (1)</h2>
+  </hgroup>
+<article>
+<p>Create the suffix tree of the overview slide, navigate
+to a node $v$ (first child of the node whose label starts with 'u'),
+and extract $v$'s node label.
+</p>
+<pre class="prettyprint" data-lang="c++"><!-- expl-21.cpp -->
+<b>cst_sct3<> cst</b>;
+construct_im(cst, "umulmundumulmum", 1);
+cout << "inner nodes : " << cst.nodes() - cst.csa.size() << endl;
+auto v = <b>cst.select_child(cst.child(cst.root(), 'u'),1)</b>;
+auto d = <b>cst.depth(v)</b>;
+cout << "v : " << d << "-[" << <b>cst.lb(v)</b> << "," << <b>cst.rb(v)</b> << "]" << endl;
+cout << "extract(cst, v) : " << <b>extract(cst, v)</b> << endl;
+</pre>
+<p> Output:</p>
+<pre class="prettyprint">
+inner nodes : 9
+v : 4-[10,11]
+extract(cst, v) : ulmu
+</pre>
+<!--
+-->
+</article>
+    <aside class="note">
+      <section>
+      </section>
+    </aside>
+</slide>
+
+
+<slide>
+  <hgroup>
+    <h2>Compressed Suffix Trees (CSTs) - Example (2)</h2>
+  </hgroup>
+<article>
+<p>Use a CSTs to calculate the $k$-th order entropy of
+a integer sequence.
+</p>
+<pre class="prettyprint" data-lang="c++"><!-- expl-22.cpp -->
+<b>cst_sct3&lt;csa_wt&lt;wt_int&lt;rrr_vector&lt;&gt;&gt;&gt;&gt; cst</b>;
+int_vector&lt;&gt; data(100000, 0, 10);
+for (size_t i=0; i &lt; data.size(); ++i)
+    data[i] = 1 + rand()%1023;
+construct_im(cst, data);
+cout &lt;&lt; "cst.csa.sigma: " &lt;&lt; cst.csa.sigma &lt;&lt; endl;
+for (size_t k=0; k&lt;3; ++k)
+    cout &lt;&lt; "H" &lt;&lt; k &lt;&lt; " : " &lt;&lt;  get&lt;0&gt;(Hk(cst, k)) &lt;&lt; endl;
+</pre>
+<p> Output:</p>
+<pre class="prettyprint">
+cst.csa.sigma: 1024
+H0(data) : 9.99038
+H1(data) : 6.52515
+H2(data) : 0.0940461
+</pre>
+<!--
+-->
+</article>
+    <aside class="note">
+      <section>
+        <li><code>data</code> should not contain symbol 0</li>
+      </section>
+    </aside>
+</slide>
+
+
+<slide>
+  <hgroup>
+    <h2>Compressed Suffix Trees (CSTs) - Example (3)</h2>
+  </hgroup>
+<article>
+<p>The size of a CST depends on heavily on the size
+of the underlying LCP array
+</p>
+<pre class="prettyprint" data-lang="c++"><!-- expl-23.cpp -->
+cst_sct3&lt;csa_wt&lt;wt_huff&lt;rrr_vector&lt;&gt;&gt;&gt;, lcp_support_sada&lt;&gt;&gt; cst1;
+construct(cst1, "english.200MB", 1);
+cout &lt;&lt; "cst1.lcp in MiB : " &lt;&lt; size_in_mega_bytes(cst1.lcp) &lt;&lt; endl;
+util::clear(cst1);
+cst_sct3&lt;csa_wt&lt;wt_huff&lt;rrr_vector&lt;&gt;&gt;&gt;, lcp_dac&lt;&gt;&gt; cst2;
+construct(cst2, "english.200MB", 1);
+cout &lt;&lt; "cst2.lcp in MiB : " &lt;&lt; size_in_mega_bytes(cst2.lcp) &lt;&lt; endl;
+</pre>
+<p> Output:</p>
+<pre class="prettyprint">
+cst1.lcp in MiB : 55.9235
+cst2.lcp in MiB : 214.979
+</pre>
+<!--
+-->
+</article>
+    <aside class="note">
+      <section>
+      </section>
+    </aside>
+</slide>
+
+
+<slide>
+  <hgroup>
+    <h2>LCP Structures (LCPs) - Overview</h2>
+  </hgroup>
+<article>
+<p>LCP structures provide the following methods:
+access (<code>operator[]</code>), <code>size()</code>,
+<code>begin()</code>,<code>end()</code>. There are
+eight types in SDSL:</p>
+<table>
+<tr>
+<td><code style="font-size: 110%;">lcp_bitcompressed&lt;..&gt;</code> </td>
+<td>Values in <code>int_vector&lt;..&gt;</code>.</td> 
+</tr>
+<tr>
+<td><code style="font-size: 110%;">lcp_dac&lt;..&gt;</code></td>
+<td>Direct accessible codes.</td>
+</tr>
+<tr>
+<td><code style="font-size: 110%;">lcp_byte&lt;..&gt;</code></td>
+<td>One byte for small values $\leq 255$ and two word for large values.</td>
+</tr>
+<tr>
+<td><code style="font-size: 110%;">lcp_wt&lt;..&gt;</code></td>
+<td>Values in a WT.</td>
+</tr>
+<tr>
+<td><code style="font-size: 110%;">lcp_vlc&lt;..&gt;</code></td>
+<td>Values in <code>vlc_vector&lt;&gt;</code>.</td>
+</tr>
+<tr>
+<td><code style="font-size: 110%;">lcp_support_sada&lt;..&gt;</code></td>
+<td>Values in SA order and unary decoded. Requires CSA and runtime
+depends on CSA's access operation.</td>
+</tr>
+<tr>
+<td><code style="font-size: 110%;">lcp_support_tree&lt;..&gt;</code></td>
+<td>Values stored in post-order DFS order of CST. Requires CST and
+runtime depends on CST operations.</td>
+</tr>
+<tr>
+<td><code style="font-size: 110%;">lcp_support_tree2&lt;..&gt;</code></td>
+<td>Store only a sample set of <code>lcp_support_tree</code> and recover
+values via the LF function.
+</td>
+</tr>
+</table>
+</article>
+    <aside class="note">
+      <section>
+      </section>
+    </aside>
+</slide>
+
+<!-- 
+        using $O(\sigma)$ pointers 
+-->
+
+<slide>
+  <hgroup>
+    <h2>LCP Structures (LCPs) - Time &amp; Space</h2>
+  </hgroup>
+<article>
+<p>Typical runtime for random accessing LCP structures 
+(using <code>csa_wt&lt;wt_huff&lt;&gt;,32,32&gt;</code> as CSA and
+ $s_{\mbox{LCP}} \in \{2,4,8,16,32\}$ for
+ <code>lcp_support_tree2</code>
+ </p>
+
+<img src="images/lcp-time2.png" alt="lcp time space trade-off" width="80%" />
+</article>
+    <aside class="note">
+      <section>
+      </section>
+    </aside>
+</slide>
+
+<slide>
+  <hgroup>
+    <h2>Balanced Parentheses Sequences (BPSs)</h2>
+    <h3><code>#include &lt;sdsl/bp_support.hpp&gt;</code></h3>
+  </hgroup>
+<article>
+<img src="images/bps.png" alt="balanced parentheses sequences" width="100%" />
+</article>
+    <aside class="note">
+      <section>
+      </section>
+    </aside>
+</slide>
+
+
+<slide>
+  <hgroup>
+    <h2>Balanced Parentheses Sequences (BPSs) - Overview</h2>
+  </hgroup>
+<article>
+<p><b>Any</b> BPS provides the following methods: 
+<ul>
+<li>
+<code>find_open(i)</code>, 
+<code>find_close(i)</code>, &nbsp;&nbsp;
+<code>enclose(i)</code>, 
+<code>rr_enclose(i,j)</code>, 
+<code>double_enclose(i)</code>, &nbsp;&nbsp;
+<code>excess(i)</code>, 
+<code>rank(i)</code>, 
+<code>select(i)</code>, 
+</li>
+</ul>
+</p>
+<p>
+There are three BPS types:
+<table>
+<tr>
+<td><code style="font-size: 110%;">bps_support_g&lt;..&gt;</code> </td>
+<td> Pioneer structure (2 levels).</td> 
+</tr>
+<tr>
+<td><code style="font-size: 110%;">bp_support_gg&lt;..&gt;</code></td>
+<td> Pioneer structure ($\log_{B} n$ levels).</td> 
+</tr>
+<tr>
+<td><code style="font-size: 110%;">bp_support_sada&lt;..&gt;</code> </td>
+<td>Min-Max-Tree approach. </td>
+</tr>
+</table>
+</p>
+<p>
+<b>Block sizes</b>, <b>rank support</b>, and <b>select support</b> can be specified via template arguments. 
+</p>
+</article>
+</article>
+    <aside class="note">
+      <section>
+      <p>
+      $i$ and $j$ are positions in the BPS
+      </p>
+      </section>
+    </aside>
+</slide>
+
+
+<slide>
+  <hgroup>
+    <h2>Balanced Parentheses Sequences (BPSs) - Example (1)</h2>
+  </hgroup>
+<article>
+<p>Bitvector is interpreted as BPS. 
+</p>
+<pre class="prettyprint" data-lang="c++"><!-- expl-24.cpp -->
+//              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9
+//              ( ( ( ) ( ) ) ( ) ( ( ( ) ( ) ) ( ) ) )
+bit_vector b = {1,1,1,0,1,0,0,1,0,1,1,1,0,1,0,0,1,0,0,0};
+bp_support_sada&lt;&gt; bps(&b); // &lt;- pointer to b
+cout &lt;&lt; bps.find_close(0) &lt;&lt; ", "
+    &lt;&lt; bps.find_open(3) &lt;&lt; ", "
+    &lt;&lt; bps.enclose(4) &lt;&lt; ", "
+    &lt;&lt; bps.double_enclose(13, 16) &lt;&lt; endl;
+</pre>
+<p> Output:</p>
+<pre class="prettyprint">
+19, 2, 1, 9
+</pre>
+<!--
+-->
+</article>
+    <aside class="note">
+      <section>
+      </section>
+    </aside>
+</slide>
+
+<slide>
+  <hgroup>
+    <h2>Balanced Parentheses Sequences (BPSs) - Example (2)</h2>
+  </hgroup>
+<article>
+<p>Bitvector is interpreted as BPS. 
+</p>
+<pre class="prettyprint" data-lang="c++"><!-- expl-25.cpp -->
+    //              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9
+    //              ( ( ( ) ( ) ) ( ) ( ( ( ) ( ) ) ( ) ) )
+    bit_vector b = {1,1,1,0,1,0,0,1,0,1,1,1,0,1,0,0,1,0,0,0};
+    bp_support_sada&lt;&gt; bps(&b); // &lt;- pointer to b
+    for (size_t i=0; i &lt; b.size(); ++i)
+        cout &lt;&lt; bps.excess(i)&lt;&lt; " ";
+    cout &lt;&lt; endl;
+    cout &lt;&lt; bps.rank(0) &lt;&lt; ", "; // inclusive rank for BPS!!!
+         &lt;&lt; bps.select(4) &lt;&lt; endl; 
+</pre>
+<p> Output:</p>
+<pre class="prettyprint">
+1 2 3 2 3 2 1 2 1 2 3 4 3 4 3 2 3 2 1 0 
+1, 4
+</pre>
+<!--
+-->
+</article>
+    <aside class="note">
+      <section>
+      </section>
+    </aside>
+</slide>
+
+<slide>
+  <hgroup>
+    <h2>Range Min/Max Supports (RMQs) - Overview</h2>
+  </hgroup>
+<article>
+<p><b>Any</b> RMQ provides <code>operator(i, j)</code> 
+which returns the min/max value in $[i..j]$
+</p>
+<p>
+There are three RMQ types:
+<table>
+<tr><th>Type</th><th>Space in bits</th><th>Details</th></tr>
+<tr>
+<td><code style="font-size: 110%;">rmq_support_sparse_table&lt;..&gt;</code> </td>
+<td> $n\log^2 n$ </td> 
+<td> Classic solution requires original container. </td> 
+</tr>
+<tr>
+<td><code style="font-size: 110%;">rmq_succint_sada&lt;..&gt;</code></td>
+<td> $4n+o(n)$ </td> 
+<td> Extended Cartesian tree. </td> 
+</tr>
+<tr>
+<td><code style="font-size: 110%;">rmq_succinct_sct&lt;..&gt;</code> </td>
+<td> $2n+o(n)$ </td> 
+<td> Super-Cartesian tree. </td> 
+<td></td>
+</tr>
+</table>
+</p>
+<p>Underlying <b>BPS</b> and <b>Min/Max</b> can be specified via template parameters.</p>
+</article>
+</article>
+    <aside class="note">
+      <section>
+      </section>
+    </aside>
+</slide>
+
+<slide>
+  <hgroup>
+    <h2>Range Min/Max Supports (RMQs) - Example</h2>
+  </hgroup>
+<article>
+<p>After construction the original sequence is not
+required any more:
+</p>
+<pre class="prettyprint" data-lang="c++"><!-- expl-26.cpp -->
+    //                0 1 2 3 4 5 6 7 8 9 0
+    int_vector&lt;&gt; v = {5,3,8,9,1,2,5,3,9,0,7};
+    rmq_succinct_sct&lt;&gt; rmq(&v); // &lt;- pointer to b
+    util::clear(v);
+    cout &lt;&lt; "v.size() = " &lt;&lt; v.size() &lt;&lt; endl;
+    cout &lt;&lt; rmq(0, 10) &lt;&lt; ", " &lt;&lt; rmq(2, 7) &lt;&lt; endl;
+</pre>
+<p> Output:</p>
+<pre class="prettyprint">
+v.size() = 0
+9, 4
+</pre>
+<!--
+-->
+</article>
+    <aside class="note">
+      <section>
+      </section>
+    </aside>
+</slide>
+
+<!--slide>
+    <hgroup>
+        <h2>Useful resources for programmers</h2>
+    </hgroup>
+    <article>
+           <ul>
+           <li> Ulrich Drepper: 
+           <a href="http://www.akkadia.org/drepper/cpumemory.pdf">What Every Programmer should Know About Memory</a>
+           </li>
+
+           <li> Colin Scott:  
+           <a href="http://www.eecs.berkeley.edu/~rcs/research/interactive_latency.html">Latency Numbers Every Programmer Should Know</a>
+           </li>
+           </ul>
+     </article>
+</slide-->
+
+<!--slide>
+    <hgroup>
+        <h2>Approximate timings on commodity hardware</h2>
+    </hgroup>
+<article class="smaller">
+<table>
+<tr>
+<th>Operation</th><th>Time in nanoseconds</th>
+</tr>
+<tr>
+<td>execute typical instruction</td><td>1</td> 
+</tr>
+<tr>
+<td>fetch from L1 cache memory</td><td>0.5</td>
+</tr>
+<tr>
+<td>branch misprediction</td><td>5</td>
+</tr>
+<tr>
+<td>fetch from L2 cache memory</td><td> 7 </td>
+</tr>
+<tr>
+<td>Mutex lock/unlock</td><td>25 </td>
+</tr>
+<tr>
+<td>fetch from main memory</td><td>100 </td>
+</tr>
+<tr>
+<td>send 2K bytes over 1Gbps network</td><td> 20,000 </td>
+</tr>
+<tr>
+<td>read 1MB sequentially from memory</td><td>250,000 </td>
+</tr>
+<tr>
+<td>fetch from new disk location (seek)</td><td>8,000,000 </td>
+</tr>
+<tr>
+<td>read 1MB sequentially from disk</td><td>20,000,000 </td>
+</tr>
+<tr>
+<td>send packet US to Europe and back</td><td>150 milliseconds = 150,000,000 </td>
+</tr>
+<tr>
+</table>
+</article>
+</slide-->
+
+<slide>
+  <hgroup>
+    <h2>More complex structures....</h2>
+  </hgroup>
+<article>
+   <ul> 
+    <li>can be easily composed of this basic data structure </li>
+    <li>Have a look into benchmarks/document_retrieval/src
+        for an example</li>
+   </ul>
+</article>
+</slide>
+    
+<slide>
+  <hgroup>
+    <h2>What is not yet implemented....</h2>
+  </hgroup>
+<article>
+   <ul> 
+    <li>Minimal monotone perfect hash functions (MMPHFs)</li>
+    <li>Sparse CSAs/CSTs</li>
+    <li>Fully-compressed SA</i>
+    <li>LZ based indexes</li>
+   </ul>
+</article>
+</slide>
+
+
+  <slide class="thank-you-slide segue nobackground">
+    <article class="flexbox vleft auto-fadein">
+      <h2>&lt;Thank You!&gt;</h2>
+      <!--p>Important contact information goes here.</p-->
+    </article>
+    <p class="auto-fadein" data-config-contact>
+      <!-- populated from slide_config.json -->
+    </p>
+  </slide>
+
+  <slide class="logoslide dark nobackground">
+  </slide>
+
+  <slide class="backdrop"></slide>
+
+</slides>
+
+<script>
+var _gaq = _gaq || [];
+_gaq.push(['_setAccount', 'UA-34340677-1']);
+_gaq.push(['_trackPageview']);
+
+(function() {
+  var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+  ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+  var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+})();
+</script>
+
+<!--[if IE]>
+  <script src="http://ajax.googleapis.com/ajax/libs/chrome-frame/1/CFInstall.min.js"></script>
+  <script>CFInstall.check({mode: 'overlay'});</script>
+<![endif]-->
+</body>
+<!--script src="http://d3js.org/d3.v3.js"></script-->
+<script>
+var events = [
+	{
+		"name" : "unknown",
+		"usage" : [
+			[0,0]
+		]
+	},
+	{
+		"name" : "parse input text",
+		"usage" : [
+			[0,209715200],
+			[183,209715200],
+			[183,209715208],
+			[748,209715208],
+			[748,0],
+			[748,0]
+		]
+	},
+	{
+		"name" : "SA",
+		"usage" : [
+			[748,209715208],
+			[862,209715208],
+			[862,943718416],
+			[1171,943718416],
+			[1171,1048576016],
+			[27496,1048576016],
+			[27496,943718416],
+			[29415,943718416],
+			[29415,209715208],
+			[29429,209715208],
+			[29429,0],
+			[29429,0]
+		]
+	},
+	{
+		"name" : "BWT",
+		"usage" : [
+			[29429,209715208],
+			[29542,209715208],
+			[29543,211715232],
+			[36849,211715232],
+			[36849,209715208],
+			[36864,209715208],
+			[36864,0],
+			[36864,0]
+		]
+	},
+	{
+		"name" : "construct csa-alpbabet",
+		"usage" : [
+			[36865,1051144],
+			[37235,1051144],
+			[37236,2304],
+			[37236,2304]
+		]
+	},
+	{
+		"name" : "construct wavelet tree",
+		"usage" : [
+			[37236,2304],
+			[37237,2304],
+			[37237,1050880],
+			[37640,1050880],
+			[37640,120591360],
+			[40147,120591360],
+			[40147,150476496],
+			[40200,150476496],
+			[40201,150923368],
+			[40201,150923368],
+			[40202,150972456],
+			[40202,150972456],
+			[40203,151036256],
+			[40203,151036256],
+			[40204,151098560],
+			[40204,151098560],
+			[40205,151158816],
+			[40205,151158816],
+			[40206,151219640],
+			[40206,151219640],
+			[40207,151284680],
+			[40207,151284680],
+			[40208,151346864],
+			[40208,151346864],
+			[40209,151408544],
+			[40209,151408544],
+			[40210,151465080],
+			[40210,151465080],
+			[40211,151520224],
+			[40211,151520224],
+			[40212,151567776],
+			[40212,151567776],
+			[40213,151620928],
+			[40213,151620928],
+			[40214,151673256],
+			[40214,151673256],
+			[40215,151744840],
+			[40215,151744840],
+			[40216,151809680],
+			[40216,151809680],
+			[40217,151870328],
+			[40217,151870328],
+			[40218,151922600],
+			[40218,151922600],
+			[40219,151976104],
+			[40219,151976104],
+			[40220,152040296],
+			[40220,152040296],
+			[40221,152119360],
+			[40221,152119360],
+			[40222,152155360],
+			[40222,152155360],
+			[40223,152210680],
+			[40223,152210680],
+			[40224,152260488],
+			[40224,152260488],
+			[40225,152322008],
+			[40225,152322008],
+			[40226,152396856],
+			[40226,152396856],
+			[40227,152466216],
+			[40227,152466216],
+			[40228,152529160],
+			[40228,152529160],
+			[40229,152588840],
+			[40229,152588840],
+			[40230,152654824],
+			[40230,152654824],
+			[40231,152719520],
+			[40231,152719520],
+			[40232,152777008],
+			[40232,152777008],
+			[40233,152831480],
+			[40233,152831480],
+			[40234,152889344],
+			[40234,152889344],
+			[40235,152941208],
+			[40241,152941208],
+			[40242,152969880],
+			[40243,152969880],
+			[40244,153026608],
+			[40244,153026608],
+			[40245,153088696],
+			[40245,153088696],
+			[40246,153144032],
+			[40246,153144032],
+			[40247,153200168],
+			[40247,153200168],
+			[40248,153255616],
+			[40248,153255616],
+			[40249,153312744],
+			[40249,153312744],
+			[40250,153374272],
+			[40250,153374272],
+			[40251,153428944],
+			[40251,153428944],
+			[40252,153490800],
+			[40252,153490800],
+			[40253,153563344],
+			[40253,153563344],
+			[40254,153615048],
+			[40254,153615048],
+			[40255,153705592],
+			[40255,153705592],
+			[40256,153776752],
+			[40256,153776752],
+			[40257,153800480],
+			[40257,153800480],
+			[40258,153879608],
+			[40258,153879608],
+			[40259,153933152],
+			[40259,153933152],
+			[40260,153951168],
+			[40260,153951168],
+			[40261,154012712],
+			[40261,154012712],
+			[40262,154079408],
+			[40262,154079408],
+			[40263,154139664],
+			[40263,154139664],
+			[40264,154197032],
+			[40264,154197032],
+			[40265,154260096],
+			[40265,154260096],
+			[40266,154321840],
+			[40266,154321840],
+			[40267,154394936],
+			[40267,154394936],
+			[40268,154468072],
+			[40268,154468072],
+			[40269,154541440],
+			[40269,154541440],
+			[40270,154599448],
+			[40270,154599448],
+			[40271,154639832],
+			[40271,154639832],
+			[40272,154691472],
+			[40272,154691472],
+			[40273,154753928],
+			[40273,154753928],
+			[40274,154810416],
+			[40274,154810416],
+			[40275,154880632],
+			[40275,154880632],
+			[40276,154957936],
+			[40276,154957936],
+			[40277,155034120],
+			[40277,155034120],
+			[40278,155098536],
+			[40278,155098536],
+			[40279,155173824],
+			[40279,155173824],
+			[40280,155233520],
+			[40280,155233520],
+			[40281,155326336],
+			[40281,155326336],
+			[40281,155348248],
+			[40282,155348248],
+			[40283,155406064],
+			[40283,155406064],
+			[40284,155472624],
+			[40284,155472624],
+			[40285,155527888],
+			[40285,155527888],
+			[40286,155574880],
+			[40287,155574880],
+			[40287,155589728],
+			[40288,155589728],
+			[40288,155615472],
+			[40289,155615472],
+			[40290,155671944],
+			[40290,155671944],
+			[40291,155728704],
+			[40291,155728704],
+			[40292,155781368],
+			[40292,155781368],
+			[40293,155833776],
+			[40293,155833776],
+			[40294,155906848],
+			[40295,155906848],
+			[40296,156007824],
+			[40296,156007824],
+			[40297,156097016],
+			[40297,156097016],
+			[40298,156179360],
+			[40299,156179360],
+			[40300,156243648],
+			[40300,156243648],
+			[40301,156283632],
+			[40301,156283632],
+			[40302,156328816],
+			[40302,156328816],
+			[40303,156413608],
+			[40303,156413608],
+			[40304,156488464],
+			[40304,156488464],
+			[40305,156564456],
+			[40305,156564456],
+			[40306,156635720],
+			[40306,156635720],
+			[40307,156705896],
+			[40307,156705896],
+			[40308,156785528],
+			[40308,156785528],
+			[40309,156827616],
+			[40309,156827616],
+			[40310,156863968],
+			[40310,156863968],
+			[40311,156912712],
+			[40311,156912712],
+			[40312,156997024],
+			[40312,156997024],
+			[40313,157062264],
+			[40313,157062264],
+			[40313,157082984],
+			[40315,157082984],
+			[40316,157140464],
+			[40316,157140464],
+			[40317,157242120],
+			[40317,157242120],
+			[40318,157328304],
+			[40318,157328304],
+			[40319,157413424],
+			[40319,157413424],
+			[40320,157496688],
+			[40320,157496688],
+			[40321,157580840],
+			[40321,157580840],
+			[40322,157656280],
+			[40322,157656280],
+			[40323,157717272],
+			[40323,157717272],
+			[40324,157785024],
+			[40324,157785024],
+			[40325,157893272],
+			[40325,157893272],
+			[40326,157964296],
+			[40326,157964296],
+			[40327,158031416],
+			[40327,158031416],
+			[40328,158101448],
+			[40328,158101448],
+			[40329,158185648],
+			[40329,158185648],
+			[40330,158271248],
+			[40330,158271248],
+			[40331,158324352],
+			[40331,158324352],
+			[40332,158392424],
+			[40332,158392424],
+			[40333,158467640],
+			[40333,158467640],
+			[40334,158527928],
+			[40334,158527928],
+			[40335,158599232],
+			[40335,158599232],
+			[40336,158669056],
+			[40336,158669056],
+			[40337,158734832],
+			[40337,158734832],
+			[40338,158837272],
+			[40338,158837272],
+			[40339,158920272],
+			[40339,158920272],
+			[40340,159003400],
+			[40340,159003400],
+			[40341,159083808],
+			[40341,159083808],
+			[40342,159166328],
+			[40342,159166328],
+			[40343,159214160],
+			[40343,159214160],
+			[40344,159256968],
+			[40345,159256968],
+			[40345,159306592],
+			[40346,159306592],
+			[40347,159384072],
+			[40347,159384072],
+			[40348,159475056],
+			[40348,159475056],
+			[40349,159563432],
+			[40349,159563432],
+			[40350,159610472],
+			[40350,159610472],
+			[40351,159660456],
+			[40351,159660456],
+			[40352,159721576],
+			[40352,159721576],
+			[40353,159818064],
+			[40353,159818064],
+			[40354,159902336],
+			[40354,159902336],
+			[40355,159975120],
+			[40355,159975120],
+			[40356,160032176],
+			[40356,160032176],
+			[40357,160103936],
+			[40357,160103936],
+			[40358,160172096],
+			[40358,160172096],
+			[40359,160242656],
+			[40359,160242656],
+			[40360,160305992],
+			[40360,160305992],
+			[40361,160370760],
+			[40361,160370760],
+			[40362,160433928],
+			[40362,160433928],
+			[40363,160498296],
+			[40363,160498296],
+			[40364,160564576],
+			[40364,160564576],
+			[40365,160635096],
+			[40365,160635096],
+			[40366,160709832],
+			[40366,160709832],
+			[40367,160782840],
+			[40367,160782840],
+			[40368,160840608],
+			[40368,160840608],
+			[40369,160896976],
+			[40369,160896976],
+			[40370,160974592],
+			[40370,160974592],
+			[40371,161053488],
+			[40371,161053488],
+			[40372,161115544],
+			[40372,161115544],
+			[40373,161183240],
+			[40373,161183240],
+			[40374,161271112],
+			[40374,161271112],
+			[40375,161335984],
+			[40375,161335984],
+			[40376,161415952],
+			[40376,161415952],
+			[40377,161483904],
+			[40377,161483904],
+			[40378,161555408],
+			[40378,161555408],
+			[40379,161638312],
+			[40379,161638312],
+			[40380,161718048],
+			[40380,161718048],
+			[40381,161800944],
+			[40381,161800944],
+			[40382,161874224],
+			[40382,161874224],
+			[40383,161957984],
+			[40383,161957984],
+			[40384,162048712],
+			[40384,162048712],
+			[40385,162124504],
+			[40385,162124504],
+			[40386,162198888],
+			[40386,162198888],
+			[40387,162278712],
+			[40387,162278712],
+			[40388,162352392],
+			[40388,162352392],
+			[40389,162434320],
+			[40389,162434320],
+			[40390,162505472],
+			[40390,162505472],
+			[40391,162570224],
+			[40406,162570224],
+			[40407,163103168],
+			[40407,163103168],
+			[40408,163185416],
+			[40408,163185416],
+			[40409,163242488],
+			[40409,163242488],
+			[40410,163292872],
+			[40410,163292872],
+			[40411,163354552],
+			[40411,163354552],
+			[40412,163413704],
+			[40412,163413704],
+			[40413,163474432],
+			[40413,163474432],
+			[40414,163535064],
+			[40414,163535064],
+			[40415,163602704],
+			[40415,163602704],
+			[40416,163690464],
+			[40416,163690464],
+			[40417,163792688],
+			[40417,163792688],
+			[40418,163880696],
+			[40418,163880696],
+			[40419,163966488],
+			[40419,163966488],
+			[40420,164056576],
+			[40420,164056576],
+			[40421,164122976],
+			[40421,164122976],
+			[40422,164189744],
+			[40422,164189744],
+			[40423,164253064],
+			[40424,164253064],
+			[40425,164334008],
+			[40425,164334008],
+			[40426,164408864],
+			[40426,164408864],
+			[40427,164478360],
+			[40427,164478360],
+			[40428,164557088],
+			[40428,164557088],
+			[40429,164663456],
+			[40429,164663456],
+			[40430,164774752],
+			[40430,164774752],
+			[40431,164868216],
+			[40431,164868216],
+			[40432,164942816],
+			[40432,164942816],
+			[40433,165032552],
+			[40433,165032552],
+			[40434,165111176],
+			[40434,165111176],
+			[40435,165179456],
+			[40435,165179456],
+			[40436,165252920],
+			[40436,165252920],
+			[40437,165334912],
+			[40437,165334912],
+			[40438,165427288],
+			[40438,165427288],
+			[40439,165511328],
+			[40439,165511328],
+			[40440,165584368],
+			[40440,165584368],
+			[40441,165662632],
+			[40441,165662632],
+			[40442,165732904],
+			[40442,165732904],
+			[40443,165813720],
+			[40443,165813720],
+			[40444,165870792],
+			[40444,165870792],
+			[40445,165970848],
+			[40445,165970848],
+			[40446,166059760],
+			[40446,166059760],
+			[40447,166135976],
+			[40447,166135976],
+			[40448,166231816],
+			[40448,166231816],
+			[40449,166305064],
+			[40449,166305064],
+			[40450,166369984],
+			[40450,166369984],
+			[40451,166429696],
+			[40451,166429696],
+			[40452,166490336],
+			[40452,166490336],
+			[40453,166553104],
+			[40453,166553104],
+			[40454,166616744],
+			[40454,166616744],
+			[40455,166693728],
+			[40455,166693728],
+			[40456,166750960],
+			[40456,166750960],
+			[40457,166833048],
+			[40457,166833048],
+			[40458,166914544],
+			[40458,166914544],
+			[40459,166997704],
+			[40459,166997704],
+			[40460,167084176],
+			[40460,167084176],
+			[40461,167159200],
+			[40461,167159200],
+			[40462,167231128],
+			[40462,167231128],
+			[40463,167305616],
+			[40463,167305616],
+			[40464,167399280],
+			[40464,167399280],
+			[40465,167475032],
+			[40465,167475032],
+			[40466,167532392],
+			[40466,167532392],
+			[40467,167578440],
+			[40467,167578440],
+			[40468,167636760],
+			[40468,167636760],
+			[40469,167725560],
+			[40469,167725560],
+			[40470,167813112],
+			[40470,167813112],
+			[40471,167906312],
+			[40471,167906312],
+			[40472,167997712],
+			[40472,167997712],
+			[40473,168077608],
+			[40473,168077608],
+			[40474,168155072],
+			[40474,168155072],
+			[40475,168235632],
+			[40475,168235632],
+			[40476,168314648],
+			[40476,168314648],
+			[40477,168374472],
+			[40477,168374472],
+			[40478,168449824],
+			[40478,168449824],
+			[40479,168525456],
+			[40479,168525456],
+			[40480,168603800],
+			[40480,168603800],
+			[40481,168693104],
+			[40481,168693104],
+			[40482,168777592],
+			[40482,168777592],
+			[40483,168851840],
+			[40483,168851840],
+			[40484,168934056],
+			[40484,168934056],
+			[40485,169015560],
+			[40485,169015560],
+			[40486,169111688],
+			[40486,169111688],
+			[40487,169202616],
+			[40487,169202616],
+			[40488,169278224],
+			[40488,169278224],
+			[40489,169346656],
+			[40489,169346656],
+			[40490,169414264],
+			[40490,169414264],
+			[40491,169483280],
+			[40491,169483280],
+			[40492,169553952],
+			[40492,169553952],
+			[40493,169636848],
+			[40493,169636848],
+			[40494,169734960],
+			[40494,169734960],
+			[40495,169814048],
+			[40495,169814048],
+			[40496,169898624],
+			[40496,169898624],
+			[40497,169964688],
+			[40497,169964688],
+			[40498,170034672],
+			[40498,170034672],
+			[40499,170098888],
+			[40499,170098888],
+			[40499,170099136],
+			[40506,170099136],
+			[40507,170137952],
+			[40507,170137952],
+			[40508,170203784],
+			[40508,170203784],
+			[40509,170278048],
+			[40509,170278048],
+			[40510,170337744],
+			[40510,170337744],
+			[40511,170427176],
+			[40511,170427176],
+			[40512,170521952],
+			[40512,170521952],
+			[40513,170611600],
+			[40513,170611600],
+			[40514,170701312],
+			[40514,170701312],
+			[40515,170761640],
+			[40515,170761640],
+			[40516,170838104],
+			[40516,170838104],
+			[40517,170944776],
+			[40517,170944776],
+			[40518,171009072],
+			[40518,171009072],
+			[40519,171035408],
+			[40520,171035408],
+			[40521,171118976],
+			[40521,171118976],
+			[40522,171174560],
+			[40522,171174560],
+			[40523,171231872],
+			[40523,171231872],
+			[40524,171320568],
+			[40524,171320568],
+			[40525,171410184],
+			[40525,171410184],
+			[40526,171489408],
+			[40526,171489408],
+			[40526,171504768],
+			[40528,171504768],
+			[40529,171575712],
+			[40529,171575712],
+			[40530,171668832],
+			[40530,171668832],
+			[40531,171752488],
+			[40531,171752488],
+			[40532,171824776],
+			[40532,171824776],
+			[40533,171861808],
+			[40533,171861808],
+			[40534,171957032],
+			[40534,171957032],
+			[40535,172052384],
+			[40535,172052384],
+			[40536,172126824],
+			[40536,172126824],
+			[40537,172197408],
+			[40537,172197408],
+			[40538,172296168],
+			[40538,172296168],
+			[40539,172374304],
+			[40539,172374304],
+			[40540,172466720],
+			[40540,172466720],
+			[40541,172558672],
+			[40541,172558672],
+			[40541,172613216],
+			[40542,172613216],
+			[40543,172637920],
+			[40543,172637920],
+			[40544,172696024],
+			[40544,172696024],
+			[40545,172741880],
+			[40545,172741880],
+			[40546,172840912],
+			[40546,172840912],
+			[40547,172933160],
+			[40547,172933160],
+			[40548,173027688],
+			[40548,173027688],
+			[40549,173117072],
+			[40549,173117072],
+			[40550,173220304],
+			[40550,173220304],
+			[40551,173287432],
+			[40551,173287432],
+			[40552,173350976],
+			[40552,173350976],
+			[40553,173425888],
+			[40553,173425888],
+			[40554,173497496],
+			[40554,173497496],
+			[40555,173575488],
+			[40555,173575488],
+			[40556,173631408],
+			[40556,173631408],
+			[40557,173705936],
+			[40557,173705936],
+			[40558,173767304],
+			[40558,173767304],
+			[40559,173837248],
+			[40559,173837248],
+			[40560,173910480],
+			[40560,173910480],
+			[40561,173975616],
+			[40561,173975616],
+			[40562,174061320],
+			[40562,174061320],
+			[40563,174149528],
+			[40563,174149528],
+			[40564,174209616],
+			[40564,174209616],
+			[40565,174275576],
+			[40565,174275576],
+			[40566,174360560],
+			[40566,174360560],
+			[40567,174436848],
+			[40567,174436848],
+			[40568,174520920],
+			[40568,174520920],
+			[40569,174588144],
+			[40569,174588144],
+			[40570,174663896],
+			[40570,174663896],
+			[40571,174749176],
+			[40571,174749176],
+			[40572,174829968],
+			[40572,174829968],
+			[40573,174909120],
+			[40573,174909120],
+			[40574,174992216],
+			[40574,174992216],
+			[40575,175079664],
+			[40575,175079664],
+			[40576,175151392],
+			[40576,175151392],
+			[40577,175236056],
+			[40577,175236056],
+			[40578,175269240],
+			[40579,175269240],
+			[40580,175346584],
+			[40580,175346584],
+			[40581,175436288],
+			[40581,175436288],
+			[40582,175523928],
+			[40582,175523928],
+			[40582,175596216],
+			[40583,175596216],
+			[40584,175670488],
+			[40584,175670488],
+			[40585,175764488],
+			[40585,175764488],
+			[40586,175854584],
+			[40586,175854584],
+			[40587,175939872],
+			[40587,175939872],
+			[40588,176022888],
+			[40588,176022888],
+			[40589,176107168],
+			[40589,176107168],
+			[40590,176187400],
+			[40590,176187400],
+			[40591,176270248],
+			[40591,176270248],
+			[40592,176357864],
+			[40592,176357864],
+			[40593,176447552],
+			[40593,176447552],
+			[40594,176529752],
+			[40594,176529752],
+			[40594,175481176],
+			[40594,175481176]
+		]
+	},
+	{
+		"name" : "sample SA",
+		"usage" : [
+			[40594,199467384],
+			[41285,199467384],
+			[41285,198418784],
+			[41285,198418784]
+		]
+	},
+	{
+		"name" : "sample ISA",
+		"usage" : [
+			[41285,198418784],
+			[41286,198418784],
+			[41287,210936192],
+			[42309,210936192],
+			[42309,209887592],
+			[42309,209887592]
+		]
+	}
+]
+;
+var w = window,d = document,e = d.documentElement,g = d.getElementsByTagName('body')[0],
+//  xw = w.innerWidth || e.clientWidth || g.clientWidth,
+xw = 1000    
+//  yh = w.innerHeight || e.clientHeight || g.clientHeight;
+yh = 450
+
+var margin = {top: 0,right: 20,bottom: 100,left: 100},
+  width = xw - margin.left - margin.right,height = yh - margin.top - margin.bottom;
+var x = d3.scale.linear().range([0, width]);
+var y = d3.scale.linear().range([height, 0]);
+var xAxis = d3.svg.axis().scale(x).orient("bottom");
+var yAxis = d3.svg.axis().scale(y).orient("left").ticks(5);
+var color = d3.scale.category10();
+var x_max = d3.max(events, function (d) { return d3.max(d.usage, function (u) { return u[0] / 1000;})})
+var y_max = d3.max(events, function (d) { return d3.max(d.usage, function (u) { return 1.1 * u[1] / (1024 * 1024);})})
+var peak = d3.max(events, function (d) { return d3.max(d.usage, function (u) { return u[1]; })})
+var data = []
+events.forEach(function (d) { data = data.concat(d.usage); });
+var peakelem = data.filter(function (a) { return a[1] == peak; });
+x.domain([0, x_max]);
+ y.domain([0, y_max]);
+var svg = d3.select("#visualization").append("svg")
+  .attr("width", width + margin.left + margin.right)
+  .attr("height", height + margin.top + margin.bottom)
+  .attr("xmlns", "http://www.w3.org/2000/svg")
+  .append("g").attr("transform","translate(" + margin.left + "," + margin.top + ")");
+
+  svg.append("g").attr("class", "xaxis").attr("transform", "translate(0," + height + ")")
+  .call(xAxis).append("text").attr("text-anchor", "end")
+  .attr("shape-rendering", "crispEdges").attr("x", width / 2 + 50).attr("y", 70).attr("shape-rendering", "crispEdges")
+  .attr("font-family", "sans-serif").attr("font-size", "20px").text("Time (seconds)");
+
+svg.append("g").attr("class", "yaxis").call(yAxis).append("text").attr("transform", "rotate(-90)").attr("x", -height / 2 + 50)
+  .attr("y", -80).attr("shape-rendering", "crispEdges").attr("font-family", "sans-serif").attr("font-size", "20px").style("text-anchor", "end")
+  .text("Memory Usage (MiB)");
+
+svg.selectAll(".tick text").style("font-size", "20px");
+svg.selectAll(".xaxis .tick text").attr("dy", 23);
+svg.selectAll(".yaxis .tick text").attr("dx", -10);
+svg.selectAll("line").attr("fill", "none").attr("stroke", "black")
+svg.selectAll("path").attr("fill", "none").attr("stroke", "black")
+
+svg.selectAll("line.horizontalGrid").data(y.ticks(5)).enter().append("line")
+  .attr({"class": "horizontalGrid","x1": 0,"x2": width,"y1": function (d) { return y(d);},
+     "y2": function (d) { return y(d); }, "fill": "none", "shape-rendering": "crispEdges",
+     "stroke": "lightgrey","stroke-dasharray": "10,10","stroke-width": "1.5px"});
+
+var area = d3.svg.area().x(function (d) { return x(d[0] / 1000);}).y0(height).y1(function (d) { return y(d[1] / (1024 * 1024))});
+
+var ev = svg.selectAll(".event").data(events).enter().append("svg:path").attr("class", "area")
+  .attr("fill", function (d) { return d3.rgb(color(d.name)); })
+  .attr("d", function (d) { return area(d.usage) })
+  .style("stroke", function (d) { return d3.rgb(color(d.name)).darker(2);}).style("stroke-width", "2px")
+
+svg.selectAll(".dot").data(peakelem).enter().append("circle").attr("r", 3).attr("fill", "red")
+  .attr("cx", function (d) {return x(d[0] / 1000)})
+  .attr("cy", function (d) {return y(d[1] / (1024 * 1024))})
+  .attr("fill", "red").attr("stroke-width", 2).attr("stroke", "#cc0000")
+
+//svg.selectAll(".dot").data(peakelem).enter().append("svg:text")
+//  .attr("x", function (d) {return x(d[0] / 1000)}).attr("y", function (d) {return y(d[1] / (1024 * 1024) * 1.025)})
+//  .text(function (d) {return "Peak Usage: " + Math.round(d[1] / (1024 * 1024)) + " MB"})
+//  .attr("font-size", 12).attr("fill", "red");
+
+//svg.selectAll(".dot").data(peakelem).enter().append("circle")
+//  .attr("r", 5).attr("fill", "red")
+//  .attr("cx", function (d) {return x(d[0] / 1000)})
+//  .attr("cy", function (d) {return y(d[1] / (1024 * 1024))})
+//  .attr("fill", "none").attr("stroke-width", 2).attr("stroke", "#cc0000").each(pulsepeak());
+
+function pulsepeak() { return function (d, i, j) {
+  d3.select(this).attr("r", 5).style("stroke-opacity", 1.0).transition()
+    .ease("linear").duration(1000).attr("r", 10).style("stroke-opacity", 0.0).each("end", pulsepeak());};}
+
+var vertical = d3.select(".chart").append("div").attr("class", "remove")
+  .style("position", "absolute").style("z-index", "19").style("width", "1px")
+  .style("height", height - margin).style("top", "30px").style("bottom", "50px")
+  .style("left", "0px").style("opacity", "0.4").style("background", "black");
+
+var tooltip = d3.select(".chart").append("div").attr("class", "remove")
+  .style("position", "absolute").style("z-index", "20").style("visibility", "hidden").style("top", "10px");
+
+var circle = svg.append("circle").attr("cx", 100).attr("cy", 350).attr("r", 3).attr("fill", "black").style("opacity", "0")
+
+d3.select("svg").on("mousemove", function () {
+  mousex = d3.mouse(this);
+  if (mousex[0] < margin.left + 3 || mousex[0] >= xw - margin.right) {
+    vertical.style("opacity", "0"); tooltip.style("opacity", "0"); circle.style("opacity", "0")
+  } else {
+    var xvalue = x.invert(mousex[0] - margin.left); var pos = findPosition(xvalue)
+    vertical.style("opacity", "0.4"); tooltip.style("opacity", "1"); circle.style("opacity", "1")
+    circle.attr("cx", pos.x).attr("cy", pos.y); vertical.style("left", mousex[0] + "px");tooltip.style("left", mousex[0] + 15 + "px")
+    tooltip.html("<p>" + xvalue.toFixed(2) + " Seconds <br>" + Math.round(pos.mem) + " MiB <br> " + pos.name + "</p>").style("visibility", "visible");
+  }
+}).on("mouseover", function () {
+  mousex = d3.mouse(this);
+  if (mousex[0] < margin.left + 3 || mousex[0] > xw - margin.right) {
+    vertical.style("opacity", "0")
+  } else {
+    vertical.style("opacity", "0.4");vertical.style("left", mousex[0] + 7 + "px")
+}})
+d3.select("#download").on("click", function () {
+d3.select(this).attr("href", 'data:application/octet-stream;base64,' + btoa(d3.select("#visualization").html())).attr("download", "viz.svg")})
+
+function findPosition(e){correctArea=d3.selectAll(".area").filter(function(t){if(t.usage[0][0]<=e*1e3&&t.usage[t.usage.length-1][0]>=e*1e3){return true}return false});if(correctArea.empty()){return 0}var t=new Array;correctArea[0].forEach(function(n){t.push(findYValueinArea(n,e))});max_elem=d3.max(t,function(e){return e.mem});var n=t.filter(function(e){return e.mem==max_elem});return n[0]}function findYValueinArea(e,t){len=e.getTotalLength();var n=0;var r=len;for(var i=0;i<=len;i+=50){var s=e.getPointAtLength(i);var o=x.invert(s.x);var u=y.invert(s.y);if(u>0&&o>t){n=Math.max(0,i-50);r=i;break}}var a=e.getPointAtLength(0);var f=1;while(n<r){var l=(r+n)/2;a=e.getPointAtLength(l);target_x=x.invert(a.x);if((l==n||l==r)&&Math.abs(target_x-t)>.01){break}if(target_x>t)r=l;else if(target_x<t)n=l;else{break}if(f>50){break}f++}var c=new function(){this.mem=y.invert(a.y);this.name=e.__data__.name;this.x=a.x;this.y=a.y};return c}
+</script>
+
+
+</html>
