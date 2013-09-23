@@ -125,7 +125,7 @@ bibtool literature.bib -#
 <b>configurable</b>, and 
 <b>extensible</b> 
 library of succinct data structures
-for researchers and practitioners</p>
+for researchers and practitioners.</p>
 
 <p>It is/was a challenge to meet all this goals. Here is the current state:</p>
 <ul>
@@ -862,7 +862,7 @@ with varying block size.
 
 <slide>
   <hgroup>
-    <h2>Wavelet trees (WTs)</h2>
+    <h2>Wavelet Trees (WTs)</h2>
     <h3><code>#include &lt;sdsl/wavelet_trees.hpp&gt;</code></h3>
   </hgroup>
 <article>
@@ -885,7 +885,7 @@ with varying block size.
 
 <slide>
   <hgroup>
-    <h2>Wavelet trees (WTs) - Overview</h2>
+    <h2>Wavelet Trees (WTs) - Overview</h2>
   </hgroup>
 <article>
 
@@ -1267,7 +1267,7 @@ alphabet size, and extracted text in
 construct_im(csa, "abracadabra", 1);
 cout << "csa.size(): " << csa.size() << endl;
 cout << "csa.sigma : " << csa.sigma << endl;
-cout << csa << endl;
+cout << csa << endl;  // output CSA
 cout << <b>extract(csa, 0, csa.size()-1)</b> << endl;
 </pre>
 <p>Output:</p>
@@ -1371,8 +1371,8 @@ csXprintf(cout, "%2I %2S %3s %3P %2p %3B   %:3T", csa);
           <li>Output stream</li>
           <li>Format string</li>
           <li>Index (any CSA or CST)</li>
-          <li>Sentinel character (default ='$')</li>
         </ul>
+        Can (of course) also be used with a byte alphabet.
       </section>
     </aside>
 </slide>
@@ -1557,7 +1557,7 @@ and provides the following methods:
 </ul>
 </p>
 <p>
-There are two CSA types:
+There are two CST types:
 <table>
 <tr>
 <td><code style="font-size: 110%;">cst_sct3&lt;..&gt;</code> </td>
@@ -1663,7 +1663,7 @@ H2(data) : 0.0940461
     <h2>Compressed Suffix Trees (CSTs) - Example (3)</h2>
   </hgroup>
 <article>
-<p>The size of a CST depends on heavily on the size
+<p>The size of a CST depends heavily on the size
 of the underlying LCP array
 </p>
 <pre class="prettyprint" data-lang="c++"><!-- expl-23.cpp -->
@@ -1901,7 +1901,7 @@ cout &lt;&lt; bps.find_close(0) &lt;&lt; ", "
   </hgroup>
 <article>
 <p><b>Any</b> RMQ provides <code>operator(i, j)</code> 
-which returns the min/max value in $[i..j]$
+which returns the position of the min/max value in $[i..j]$
 </p>
 <p>
 There are three RMQ types:
