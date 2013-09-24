@@ -369,7 +369,7 @@ Output: <br />&nbsp;
               </li>
           <li>In the example, a <code>bit_vector b</code> is constructed from
              a initialization list; <code>b</code> can be written to a stream.
-             Then we assign a 80 gigabit vector, initialized with zeros, to <code>b</code>
+             Then we assign a 80 megabit vector, initialized with zeros, to <code>b</code>
              and assign every 100th element a one, and output the size of the
              structure.
            </li>
@@ -506,7 +506,7 @@ file named <code>file</code> by method
       <section>
         <ul>
            <li>Initialize a <code>bit_vector</code> with 10000000 zeros. </li>
-           <li>Set the bit at position a <code>b.size()2</code>. </li>
+           <li>Set the bit at position a <code>b.size()/2</code>. </li>
            <li>Initialize <code>sdb</code> with <code>b</code></li>
            <li>Store <code>sdb</code> to file "sdb.sdsl".</li>
            <li>Assign empty vector to <code>sdb</code>.</li>
@@ -1044,8 +1044,6 @@ Build a byte-alphabet Hu-Tucker-shaped WT
               #of symbols in [i..j-1] smaller/greater than <code>c</code>
               </li>
           <li><code>interval_symbols(i,j,k,cs,rank_c_i,rank_c_j)</code></li>
-          <li><code>count_lex_smaller(i,c)</code></li>
-          <li><code>count_lex_smaller(i, j, c)</code></li>
           <li><code>range_search_2d(lb,rb,vlb,vrb,list_pairs)</code></li>
         </ul>
         Count UTF-8 chars: You only count 
