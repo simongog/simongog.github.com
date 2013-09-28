@@ -1,0 +1,5772 @@
+<!--
+Google IO 2012/2013 HTML5 Slide Template
+
+Authors: Eric Bidelman <ebidel@gmail.com>
+         Luke Mahé <lukem@google.com>
+
+URL: https://code.google.com/p/io-2012-slides
+-->
+<!DOCTYPE html>
+<html>
+<head>
+  <title></title>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="chrome=1">
+  <!--<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">-->
+  <!--<meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+  <!--This one seems to work all the time, but really small on ipad-->
+  <!--<meta name="viewport" content="initial-scale=0.4">-->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <link rel="stylesheet" media="all" href="theme/css/default.css">
+  <link rel="stylesheet" media="only screen and (max-device-width: 480px)" href="theme/css/phone.css">
+  <base target="_blank"> <!-- This amazingness opens all links in a new tab. -->
+  <script data-main="js/slides" src="js/require-1.0.8.min.js"></script>
+  <script src="./d3.js"></script>
+  <script src="./sdsl2svg.js"></script>
+<style type="text/css">
+
+.rule { height: 90%; position: absolute; border-right: 1px dotted #000; text-align: right; }
+
+path { stroke: #000; stroke-width: 0.8; cursor: pointer; }
+#breadcrumbs { display: none; }
+svg { font: 16px sans-serif; }
+svg .ticks {stroke-width:1; stroke: black; opacity: 0.8; }
+svg .info_text { font: 18px sans-serif;}
+svg .size_info_text { font: 28px sans-serif; font-weight: bold; text-align: end; text-anchor: middle;}
+svg .sel_rect {opacity:1.0}
+svg .unsel_rect {opacity: 0.5;}
+svg .detailLabel {font: 28px sans-serif; font-weight: bold; opacity: 0.7; }
+svg .overzoomrect {fill: black; opacity: 0.8;}
+em {font-weight:600;}
+span.tnr {font-family:Times New Roman;}
+span.tnrb {font-family:Times New Roman;color:black;}
+table.rad tr td {text-align: right;}
+table.rad tr td span.tnr{text-align: left; width: 100%;}
+</style>
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    extensions: ["tex2jax.js"],
+    jax: ["input/TeX","output/HTML-CSS"],
+    tex2jax: {inlineMath: [["$","$"],["\\(","\\)"]]}
+  });
+</script>
+<script type="text/javascript" src="https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+
+
+</head>
+<body style="opacity: 0">
+
+<slides class="layout-widescreen">
+
+  <!--slide class="logoslide nobackground">
+    <article class="flexbox vcenter">
+      <span><img src="images/google_developers_logo.png"></span>
+    </article>
+  </slide-->
+
+  <slide class="title-slide segue nobackground">
+    <!--aside class="gdbar"><img src="images/google_developers_icon_128.png"></aside-->
+    <!-- The content of this hgroup is replaced programmatically through the slide_config.json. -->
+    <hgroup class="auto-fadein">
+      <h1 data-config-title><!-- populated from slide_config.json --></h1>
+      <h2 data-config-subtitle><!-- populated from slide_config.json --></h2>
+      <p data-config-presenter><!-- populated from slide_config.json --></p>
+    </hgroup>
+  </slide>
+
+  <!--slide>
+    <hgroup>
+      <h2>Succinct/Compact Data Structure</h2>
+    </hgroup>
+    <article>
+      <ul>
+        <li>Represent objects (e.g. trees) with as few bits
+            as possible, while still providing time-efficient 
+            operations (e.g. parent, child, ...)</li>
+        <li>There exist many structures which 
+            provide the same runtime as their
+            fat classical counterparts in O-Notation</li>    
+        <li>However, classical structures are often
+            orders of magnitudes faster (if they fit in memory)</li>
+      </ul>
+    </article>
+  </slide-->
+<!--
+bibtool literature.bib -#
+    STRING              0 read      0 written
+    PREAMBLE            0 read      0 written
+    COMMENT             0 read      0 written
+    ALIAS               0 read      0 written
+    MODIFY              0 read      0 written
+    INCLUDE             0 read      0 written
+    Article            13 read     13 written
+    Book                1 read      1 written
+    Booklet             0 read      0 written
+    Conference          0 read      0 written
+    InBook              0 read      0 written
+    InCollection        0 read      0 written
+    InProceedings      23 read     23 written
+    Manual              0 read      0 written
+    MastersThesis       0 read      0 written
+    Misc                0 read      0 written
+    PhDThesis           1 read      1 written
+    Proceedings         0 read      0 written
+    TechReport          1 read      1 written
+    Unpublished         0 read      0 written
+-->
+
+<slide>
+  <hgroup>
+    <h2>Overview</h2>
+  </hgroup>
+<article style="font-size:40px;">
+&nbsp;<br />
+  <ul>
+    <li>Big Data: Experiments on &quot;massive&quot; data<br />&nbsp;</li>
+    <li>Overview <a href="https://github.com/simongog/sdsl-lite">SDSL v2</a><br />&nbsp;</li>
+    <li>Example application for SDSL v2: 
+        Top-k frequent document retrieval</li>
+  </ul>
+</article>
+</slide>
+
+
+
+
+
+<slide>
+  <hgroup>
+    <h2>Experiments on &quot;massive&quot; data</h2>
+  </hgroup>
+<article>
+<p>
+Time performance of a single access/rank/select operation depends on 
+</p>
+<p>
+<ul>
+<li>Basic rank operation on 64-bit word:
+    <ul>
+      <li><span class="tnrb">BW</span>: SWAR (SIMD Within A Register)</li>
+      <li><span class="tnrb">BLT</span>: use popcount CPU instruction</li>
+    </ul>
+</li> &nbsp;
+<li>Virtual address space translation:
+    <ul>
+      <li><span class="tnrb">no HP</span>: Use standard 4 kiB pages</li>
+      <li><span class="tnrb">HP</span>: Use 1GiB pages (hugepages)</li>
+    </ul>
+</li> &nbsp;
+<li>Data structure design:
+    <ul>
+      <li><span class="tnrb">RANK-V</span>: 
+          <code>rank_support_v&lt;&gt;</code> 25% overhead on top of <code>bit_vector</code>
+      </li>
+      <li><span class="tnrb">RANK-1L</span>
+          interleaving bitvector data and rank data (<code>bit_vector_il&lt;&gt;</code>)
+      </li>    
+    </ul>
+</li>
+</ul>
+</p>
+</article>
+   <aside class="note">
+      <section>
+        <ul>
+           <li>
+             A more detailed version of this intermezzo is contained
+             in this
+             <a href="http://people.eng.unimelb.edu.au/sgog/optimized.pdf">
+             SP&amp;E  paper
+             </a>.
+             </li>
+        </ul>
+      </section>
+    </aside>
+</slide>
+
+<slide>
+  <hgroup>
+    <h2>Experiments on &quot;massive&quot; data</h2>
+  </hgroup>
+<article>
+<p>
+&quot;<span class="tnrb">BV <span class="tnrb" style="font-style:italic;">access</span></span>&quot;
+is the baseline of accessing a random bit of a <code>bit_vector</code>.
+</p>
+<img src="images/rank-time-4k-page.png" alt="rank time (4kB pages)" width="100%" />
+</article>
+   <aside class="note">
+      <section>
+        <ul>
+           <li>Important: Use the random access to a bit vector 
+               as baseline.</li>
+           <li>We can observe that memory address translations
+               has a negative effect on large bitvectors.</li>    
+        </ul>
+      </section>
+    </aside>
+</slide>
+
+<slide>
+  <hgroup>
+    <h2>Experiments on &quot;massive&quot; data</h2>
+  </hgroup>
+<article>
+<p>
+&quot;<span class="tnrb">BV <span class="tnrb" style="font-style:italic;">access</span></span>&quot;
+is the baseline of accessing a random bit of a <code>bit_vector</code>.
+</p>
+<img src="images/rank-time-1G-page.png" alt="rank time (1GiB pages)" width="100%" />
+</article>
+   <aside class="note">
+      <section>
+        <ul>
+           <li>With 1GiB pages, runtime stays constant (in the range
+               where the bitvector does not fit in chache). </li>    
+           <li>Increase above 72 GB is due to NUMA.</li>  
+        </ul>
+      </section>
+    </aside>
+</slide>
+
+<slide>
+  <hgroup>
+    <h2>Experiments on &quot;massive&quot; data</h2>
+  </hgroup>
+<article>
+<p>Performance of binary search select (<span class="tnr">SEL-BS*)</span>,
+<code>select_support_mcl&lt;&gt;</code> (<span class="tnr">SEL-C</span>)
+and <a href="http://sux.di.unimi.it/">Vigna's solutions in Sux</a> 
+<span class="tnr">SEL-V9</span> and <span class="tnr">SEL-VS</span>
+</p>
+<img src="images/select-time.png" alt="select time" width="100%" />
+</article>
+   <aside class="note">
+      <section>
+        <ul>
+           <li>Binary search select is not competitive with
+               best dictionary based solutions.</li>    
+           <li>1 GiB also have a large effect on runtime.</li>  
+        </ul>
+      </section>
+    </aside>
+</slide>
+
+
+<slide>
+  <hgroup>
+    <h2>Experiments on &quot;massive&quot; data</h2>
+  </hgroup>
+<article>
+<p>Space breakdown for 
+<code>rrr_vector&lt;</code><span style="font-style:italic;font-family:Times New Roman;">K</span><code>&gt;</code>
+with varying block size.
+</p>
+<img src="images/rrr-space.png" alt="rrr_vector space" width="100%" />
+</article>
+   <aside class="note">
+      <section>
+        <ul>
+           <li><code>rrr_vector</code> divides the bitvector into blocks of size $K$.</li>
+           <li>$\kappa$-array <code>C</code>: Stores the #ones in a block. We denote this
+                                             number as $\kappa_i$ for the $i$-th block.</li>    
+           <li>$\lambda$-array <code>O</code>: Stores the index of the block value $b_i$
+                                              in the enumeration of all $K \choose \kappa_i$
+                                              possible values in $\lceil\log({K\choose\kappa}+1)\rceil$ bits.</li>    
+           <li>pointers/samples <code>S</code>: <code>rrr_vector</code>stores rank samples and pointers
+                                                every $k$-th block. In the example $k=32$.</li>
+        </ul>
+      </section>
+    </aside>
+</slide>
+
+<slide>
+  <hgroup>
+    <h2>Experiments on &quot;massive&quot; data</h2>
+  </hgroup>
+<article>
+<p>Runtime for 
+<code>rrr_vector&lt;</code><span style="font-style:italic;font-family:Times New Roman;">K</span><code>&gt;</code>
+with varying block size.
+</p>
+<img src="images/rrr-time.png" alt="rrr_vector time" width="100%" />
+</article>
+   <aside class="note">
+      <section>
+        <ul>
+           <li>Runtime of operations access, rank, and select
+               with a random access pattern.</li>
+           <li>For $K=15$ <code>rrr_vector</code> is specialized to use
+               lookup tables to translate $(\kappa_i, \lambda_i)$ to
+               $b_i$ and vice versa.</li>
+           <li>Runtime depends on input, block size, and integer
+               implementation.</li>
+        </ul>
+      </section>
+    </aside>
+</slide>
+
+
+<slide>
+  <hgroup>
+    <h2>Experiments on &quot;massive&quot; data</h2>
+  </hgroup>
+<article>
+<p>Time-space trade-offs of different FM-indexes.  </p>
+<img src="images/FM-count.png" alt="FM time-space trade-off for count" width="100%" />
+</article>
+</slide>
+
+<slide>
+  <hgroup>
+    <h2>Experiments on &quot;massive&quot; data</h2>
+  </hgroup>
+<article>
+<p>Construction of a <code>cst_sct3&lt;&gt;</code> for <span class="tnr">WEB-5G</span> (<span class="tnrb">no HP</span>)</p>
+
+<div class="chart"><div id="vis_cst_const"></div></div>
+
+</article>
+</slide>
+
+
+<slide>
+  <hgroup>
+    <h2>Experiments on &quot;massive&quot; data</h2>
+  </hgroup>
+<article>
+<p>Construction of a <code>cst_sct3&lt;&gt;</code> for <span class="tnr">WEB-5G</span> (<span class="tnrb">HP</span>)</p>
+
+<div class="chart"><div id="vis_cst_const_HP"></div></div>
+
+</article>
+</slide>
+
+<slide>
+    <div style="font-size: 90px;width:100%;text-align:center;">SDSL v2</div>
+    <br />
+    <div style="font-size: 45px;width:100%;text-align:center;">
+        <a href="https://github.com/simongog/sdsl-lite">https://github.com/simongog/sdsl-lite</a>
+    </div>
+    <div style="padding-top: 400px;font-size: 30px;">Contributers: Timo Beller, Matthias Petri, G, ...</div>
+</slide>
+
+<slide>
+  <hgroup>
+    <h2>..implements 40 research papers. We stand on the shoulders of giants</h2>
+  </hgroup>
+<svg width="960" height="600" version="1.1" xmlns="http://www.w3.org/2000/svg"><g></g><g transform="translate(480,300)scale(1.7647058963775635,1.7647058963775635)"><text text-anchor="middle" transform="translate(-85,81)rotate(9.333333015441895)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #d6616b;">Johannes</text><text text-anchor="middle" transform="translate(56,-11)rotate(-32.88888931274414)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #d6616b;">Travis</text><text text-anchor="middle" transform="translate(108,30)rotate(-11.777777671813965)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #ce6dbd;">Puglisi</text><text text-anchor="middle" transform="translate(-140,124)rotate(-43.444442749023445)scale(1,1)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #393b79;">Geary</text><text text-anchor="middle" transform="translate(75,106)rotate(-1.2222222089767456)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #e7969c;">Shane</text><text text-anchor="middle" transform="translate(-54,41)rotate(-1.2222222089767456)scale(1,1)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #e7ba52;">Gonzalo</text><text text-anchor="middle" transform="translate(64,71)rotate(-53.99999999999999)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #843c39;">Navarro</text><text text-anchor="middle" transform="translate(-123,22)rotate(-22.33333396911621)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #637939;">Simon</text><text text-anchor="middle" transform="translate(-40,2)rotate(-1.2222222089767456)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #7b4173;">Fischer</text><text text-anchor="middle" transform="translate(171,-4)rotate(19.88888931274414)scale(1,1)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #6b6ecf;">Culpepper</text><text text-anchor="middle" transform="translate(131,-37)rotate(30.444444656372074)skewX(3.1805546814635168e-15)scale(0.9999999999999999,0.9999999999999999)" style="font-size: 10px; opacity: 0.999780512219488; font-family: Impact; fill: #e7ba52;">Andrew</text><text text-anchor="middle" transform="translate(-185,82)rotate(-32.88888931274414)" style="font-size: 10px; opacity: 0.6707488292514989; font-family: Impact; fill: #e7cb94;">Turpin</text><text text-anchor="middle" transform="translate(-240,-63)rotate(-11.777777671813965)" style="font-size: 10px; opacity: 0.03651827948268156; font-family: Impact; fill: #843c39;">Juha</text><text text-anchor="middle" transform="translate(85,-138)rotate(-1.2222222089767456)" style="font-size: 10px; opacity: 0.06789930410162565; font-family: Impact; fill: #ad494a;">Kärkkäinen</text><text text-anchor="middle" transform="translate(156,143)rotate(-11.777777671813965)scale(1,1)" style="font-size: 10px; opacity: 0.04087421112674558; font-family: Impact; fill: #637939;">Giovanni</text><text text-anchor="middle" transform="translate(195,26)rotate(-53.99999999999999)" style="font-size: 10px; opacity: 0.0796109643899537; font-family: Impact; fill: #b5cf6b;">Manzini</text><text text-anchor="middle" transform="translate(-4,-52)rotate(-53.99999999999999)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #7b4173;">Toru</text><text text-anchor="middle" transform="translate(-18,45)rotate(-53.99999999999999)" style="font-size: 10px; opacity: 0.6615822624180752; font-family: Impact; fill: #a55194;">Kasai</text><text text-anchor="middle" transform="translate(-67,128)rotate(-32.88888931274414)" style="font-size: 10px; opacity: 0.19934492865586995; font-family: Impact; fill: #ce6dbd;">Gunho</text><text text-anchor="middle" transform="translate(-139,11)rotate(30.44444465637207)skewX(3.1805546814635168e-15)scale(0.9999999999999999,0.9999999999999999)" style="font-size: 10px; opacity: 0.41529258470799846; font-family: Impact; fill: #5254a3;">Lee</text><text text-anchor="middle" transform="translate(134,-2)rotate(-11.777777671813965)scale(1,1)" style="font-size: 10px; opacity: 0.29424094175976223; font-family: Impact; fill: #6b6ecf;">Hiroki</text><text text-anchor="middle" transform="translate(-126,141)rotate(-53.99999999999999)" style="font-size: 10px; opacity: 0.9934278785721273; font-family: Impact; fill: #e7cb94;">Arimura</text><text text-anchor="middle" transform="translate(-141,-35)rotate(-32.88888931274414)" style="font-size: 10px; opacity: 0.8225527214474556; font-family: Impact; fill: #ad494a;">Setsuo</text><text text-anchor="middle" transform="translate(97,-8)rotate(19.888889312744137)" style="font-size: 10px; opacity: 0.7362432077570551; font-family: Impact; fill: #d6616b;">Arikawa</text><text text-anchor="middle" transform="translate(161,62)rotate(-32.88888931274414)" style="font-size: 10px; opacity: 0.7078617641385266; font-family: Impact; fill: #843c39;">Kunsoo</text><text text-anchor="middle" transform="translate(52,-87)rotate(-53.99999999999999)" style="font-size: 10px; opacity: 0.4677212082793227; font-family: Impact; fill: #ad494a;">Park</text><text text-anchor="middle" transform="translate(-96,-13)rotate(-53.99999999999999)" style="font-size: 10px; opacity: 0.5793842286161912; font-family: Impact; fill: #b5cf6b;">Gog</text><text text-anchor="middle" transform="translate(54,-110)rotate(9.333333015441895)" style="font-size: 10px; opacity: 0.9083748756252151; font-family: Impact; fill: #cedb9c;">Enno</text><text text-anchor="middle" transform="translate(-100,47)rotate(-1.2222222089767456)scale(1,1)" style="font-size: 10px; opacity: 0.9948198891801155; font-family: Impact; fill: #8ca252;">Ohlebusch</text><text text-anchor="middle" transform="translate(118,54)rotate(-11.777777671813965)" style="font-size: 10px; opacity: 0.9998689281310718; font-family: Impact; fill: #cedb9c;">Timo</text><text text-anchor="middle" transform="translate(217,-128)rotate(-53.99999999999999)" style="font-size: 10px; opacity: 0.9998689281310718; font-family: Impact; fill: #bd9e39;">Beller</text><text text-anchor="middle" transform="translate(-118,121)rotate(41)skewX(3.1805546814635168e-15)scale(0.9999999999999999,0.9999999999999999)" style="font-size: 10px; opacity: 0.9998689281310718; font-family: Impact; fill: #ad494a;">Thomas</text><text text-anchor="middle" transform="translate(65,-83)rotate(-53.99999999999999)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #6b6ecf;">Schnattinger</text><text text-anchor="middle" transform="translate(-170,-113)rotate(19.888889312744137)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #e7969c;">Rajeev</text><text text-anchor="middle" transform="translate(186,-66)rotate(40.99999999999999)skewX(3.1805546814635168e-15)scale(0.9999999999999999,0.9999999999999999)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #cedb9c;">Michael</text><text text-anchor="middle" transform="translate(225,82)rotate(19.888889312744137)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #e7cb94;">Raman</text><text text-anchor="middle" transform="translate(5,-12)rotate(-22.33333396911621)scale(1,1)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #a55194;">Venkatesh</text><text text-anchor="middle" transform="translate(125,17)rotate(19.888889312744137)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #de9ed6;">Srinivasa</text><text text-anchor="middle" transform="translate(6,116)rotate(-22.33333396911621)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #393b79;">Rao</text><text text-anchor="middle" transform="translate(-206,121)rotate(-22.333333969116214)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #5254a3;">Paolo</text><text text-anchor="middle" transform="translate(-8,-138)rotate(-11.777777671813968)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #9c9ede;">Jouni</text><text text-anchor="middle" transform="translate(56,63)rotate(-53.99999999999999)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #9c9ede;">Sirén</text><text text-anchor="middle" transform="translate(114,-34)rotate(40.99999999999999)skewX(3.1805546814635168e-15)scale(0.9999999999999999,0.9999999999999999)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #8ca252;">Rossano</text><text text-anchor="middle" transform="translate(215,112)rotate(-11.777777671813965)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #b5cf6b;">Venturini</text><text text-anchor="middle" transform="translate(-74,-131)rotate(9.333333015441898)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #8c6d31;">Bender</text><text text-anchor="middle" transform="translate(50,50)rotate(-22.33333396911621)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #bd9e39;">Martin</text><text text-anchor="middle" transform="translate(-137,-85)rotate(-11.777777671813965)scale(1,1)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #e7ba52;">Farach-Colton</text><text text-anchor="middle" transform="translate(-17,-151)rotate(-32.88888931274414)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #9c9ede;">Munro</text><text text-anchor="middle" transform="translate(-62,60)rotate(-11.777777671813968)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #5254a3;">Gagie</text><text text-anchor="middle" transform="translate(127,-132)rotate(-1.2222222089767456)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #de9ed6;">Naila</text><text text-anchor="middle" transform="translate(71,-55)rotate(40.999999999999986)skewX(3.1805546814635168e-15)scale(0.9999999999999999,0.9999999999999999)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #8ca252;">Rahman</text><text text-anchor="middle" transform="translate(1,80)rotate(19.888889312744137)scale(1,1)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #e7969c;">Sebastiano</text><text text-anchor="middle" transform="translate(133,46)rotate(40.99999999999999)skewX(3.1805546814635168e-15)scale(0.9999999999999999,0.9999999999999999)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #7b4173;">Vigna</text><text text-anchor="middle" transform="translate(-146,81)rotate(19.888889312744137)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #a55194;">Roberto</text><text text-anchor="middle" transform="translate(166,-30)rotate(40.999999999999986)skewX(3.1805546814635168e-15)scale(0.9999999999999999,0.9999999999999999)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #ce6dbd;">Grossi</text><text text-anchor="middle" transform="translate(164,-147)rotate(30.44444465637207)skewX(3.1805546814635168e-15)scale(0.9999999999999999,0.9999999999999999)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #de9ed6;">Ankur</text><text text-anchor="middle" transform="translate(115,-87)rotate(9.333333015441895)scale(1,1)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #393b79;">Gupta</text><text text-anchor="middle" transform="translate(210,-75)rotate(-1.2222222089767456)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #5254a3;">Jeffrey</text><text text-anchor="middle" transform="translate(-87,-114)rotate(-32.88888931274414)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #6b6ecf;">Scott</text><text text-anchor="middle" transform="translate(75,34)rotate(9.333333015441895)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #9c9ede;">Vitter</text><text text-anchor="middle" transform="translate(-183,-132)rotate(-11.777777671813965)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #637939;">Veli</text><text text-anchor="middle" transform="translate(-173,97)rotate(-54)scale(1,1)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #8ca252;">Mäkinen</text><text text-anchor="middle" transform="translate(-227,101)rotate(30.444444656372074)skewX(3.1805546814635168e-15)scale(0.9999999999999999,0.9999999999999999)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #b5cf6b;">Francisco</text><text text-anchor="middle" transform="translate(159,42)rotate(-1.2222222089767456)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #cedb9c;">Claude</text><text text-anchor="middle" transform="translate(11,-149)rotate(41)skewX(3.1805546814635168e-15)scale(0.9999999999999999,0.9999999999999999)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #8c6d31;">Nieves</text><text text-anchor="middle" transform="translate(-34,85)rotate(-1.2222222089767456)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #bd9e39;">Brisaboa</text><text text-anchor="middle" transform="translate(-122,60)rotate(19.88888931274414)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #e7ba52;">Susana</text><text text-anchor="middle" transform="translate(101,117)rotate(-22.33333396911621)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #e7cb94;">Ladra</text><text text-anchor="middle" transform="translate(97,45)rotate(-11.777777671813965)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #8c6d31;">Kunihiko</text><text text-anchor="middle" transform="translate(-24,106)rotate(-43.444442749023445)scale(1,1)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #bd9e39;">Sadakane</text><text text-anchor="middle" transform="translate(-44,134)rotate(9.333333015441898)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #d6616b;">Eliana</text><text text-anchor="middle" transform="translate(-156,-120)rotate(30.44444465637207)skewX(3.1805546814635168e-15)scale(0.9999999999999999,0.9999999999999999)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #e7969c;">Providel</text><text text-anchor="middle" transform="translate(-95,117)rotate(9.333333015441898)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #7b4173;">Jesper</text><text text-anchor="middle" transform="translate(-228,-127)rotate(-43.444442749023445)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #a55194;">Larsson</text><text text-anchor="middle" transform="translate(139,81)rotate(9.333333015441898)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #ce6dbd;">Daisuke</text><text text-anchor="middle" transform="translate(-51,99)rotate(-11.777777671813965)scale(1,1)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #de9ed6;">Okanohara</text><text text-anchor="middle" transform="translate(191,-41)rotate(-11.777777671813965)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #393b79;">Frederik</text><text text-anchor="middle" transform="translate(-6,105)rotate(-43.444442749023445)scale(1,1)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #5254a3;">Transier</text><text text-anchor="middle" transform="translate(-172,116)rotate(-43.444442749023445)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #8c6d31;">Peter</text><text text-anchor="middle" transform="translate(-11,9)rotate(-53.99999999999999)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #9c9ede;">Sers</text><text text-anchor="middle" transform="translate(223,-92)rotate(-32.88888931274414)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #637939;">Hugh</text><text text-anchor="middle" transform="translate(42,101)rotate(-22.33333396911621)scale(1,1)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #8ca252;">Williams</text><text text-anchor="middle" transform="translate(24,126)rotate(9.333333015441895)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #b5cf6b;">Justin</text><text text-anchor="middle" transform="translate(-219,-47)rotate(-43.444442749023445)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #cedb9c;">Zobel</text><text text-anchor="middle" transform="translate(-206,-27)rotate(-43.444442749023445)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #8c6d31;">Elias</text><text text-anchor="middle" transform="translate(-141,-134)rotate(-11.777777671813965)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #bd9e39;">Robert</text><text text-anchor="middle" transform="translate(-210,-138)rotate(41)skewX(3.1805546814635168e-15)scale(0.9999999999999999,0.9999999999999999)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #e7ba52;">Mario</text><text text-anchor="middle" transform="translate(-146,-66)rotate(-22.33333396911621)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #e7cb94;">Fano</text><text text-anchor="middle" transform="translate(5,63)rotate(9.333333015441895)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #843c39;">Mohamed</text><text text-anchor="middle" transform="translate(166,-54)rotate(-43.44444274902344)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #ad494a;">Ibrahim</text><text text-anchor="middle" transform="translate(-49,23)rotate(19.88888931274414)scale(1,1)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #d6616b;">Abouelhoda</text><text text-anchor="middle" transform="translate(-101,-26)rotate(-1.2222222089767456)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #e7969c;">Stefan</text><text text-anchor="middle" transform="translate(-205,11)rotate(40.99999999999999)skewX(3.1805546814635168e-15)scale(0.9999999999999999,0.9999999999999999)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #7b4173;">Kurtz</text><text text-anchor="middle" transform="translate(-112,-109)rotate(41)skewX(3.1805546814635168e-15)scale(0.9999999999999999,0.9999999999999999)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #a55194;">Rasmus</text><text text-anchor="middle" transform="translate(181,-150)rotate(40.99999999999999)skewX(3.1805546814635168e-15)scale(0.9999999999999999,0.9999999999999999)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #ce6dbd;">Pagh</text><text text-anchor="middle" transform="translate(-52,-26)rotate(40.99999999999999)skewX(3.1805546814635168e-15)scale(0.9999999999999999,0.9999999999999999)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #de9ed6;">David</text><text text-anchor="middle" transform="translate(-27,-14)rotate(-32.88888931274414)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #393b79;">Clark</text><text text-anchor="middle" transform="translate(37,-89)rotate(40.99999999999999)skewX(3.1805546814635168e-15)scale(0.9999999999999999,0.9999999999999999)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #843c39;"></text><text text-anchor="middle" transform="translate(58,23)rotate(-43.444442749023445)" style="font-size: 10px; opacity: 1; font-family: Impact; fill: #6b6ecf;">Ferragina</text></g></svg>
+</slide>
+
+<slide>
+  <hgroup>
+    <h2>SDSL v2: Data Structures Overview</h2>
+  </hgroup>
+<article>
+&nbsp;<br />
+  <ul>
+<li>Integer Vectors (IV)</li>
+<li>Bitvectors (BV)</li>
+<li>Rank Support(RS)</li>
+<li>Select Support (SLS)</li>
+<li>Wavelet Trees (WT=BV+RS+SLS)</li>
+<li>Compressed Suffix Arrays (CSA=IV+WT)</li>
+<li>Longest Common Prefix (LCP) Arrays</li>
+<li>Balanced Parentheses Supports (BPS)</li>
+<li>Compressed Suffix Trees (CST=CSA+LCP+BPS)</li>
+<li>Range Min/Max Query (RMQ) Structures</li>
+<li>...</li>
+<li>Top-k Frequent Document Structures</li>
+  </ul>
+</article>
+</slide>
+
+<slide>
+  <hgroup>
+    <h2>SDSL v2: Release Notes</h2>
+  </hgroup>
+<article>
+SDSL v2..<br />&nbsp;
+  <ul>
+<li>..simplifies the usage of the library</li>
+<li>..features integer-alphabet versions of all indexes</li>
+<li>..contains a unified implementation of pointer based WTs</li>
+<li>..introduces a Hu-Tucker-shape strategy for WTs</li>
+<li>..facilitates the user to switch between semi-external and in-memory construction</li>
+<li>..enables the use of 1 GB hugepages</li>
+<li>..provides more sophisticated visualizations (resource graph/memory breakdowns)</li>
+<li>..includes a tutorial slides set and a new cheatsheet</li>
+<li>..comes with a set of fully automated benchmarks</li>
+<li>..includes a comprehensive test suite</li>
+  </ul>
+</article>
+</slide>
+
+
+<slide>
+  <hgroup>
+    <h2>Wavelet trees (WTs)</h2>
+    <h3><code>#include &lt;sdsl/wavelet_trees.hpp&gt;</code></h3>
+  </hgroup>
+<article>
+<div align="center">
+<img src="images/wavelet-tree.png" alt="wavelet tree" width="65%" />
+</div>
+</article>
+   <aside class="note">
+      <section>
+        <ul>
+           <li>For an introduction to
+               Wavelet Trees we suggest
+               <a href="http://www.dcc.uchile.cl/~gnavarro/ps/cpm12.pdf">Gonzalo Navarro's article: Wavelet Trees for All</a>
+           </li>
+        </ul>
+      </section>
+    </aside>
+
+</slide>
+
+<slide>
+  <hgroup>
+    <h2>Wavelet trees (WTs) - Overview</h2>
+  </hgroup>
+<article>
+
+<ul>
+    <li><code>wt_pc&lt;..&gt;</code>: Prefix code wavelet tree 
+        (parametrizable with shape, bitvector, rank, selects,
+         alphabet) using . Shape specializations:</li>
+    <ul>
+        <li><code>wt_blcd&lt;..&gt;</code>: Balanced-shaped WT</li>
+        <li><code>wt_huff&lt;..&gt;</code>: Huffman-shaped WT</li>
+        <li><code>wt_hutu&lt;..&gt;</code>: Hu-Tucker-shaped WT</li>
+    </ul>
+
+     <li><code>wt_int&lt;..&gt;</code>: Balanced-shaped WT for
+         large alphabets (parametrizable with bitvector, rank, selects)
+         </li>
+     <li><code>wt_rlmn&lt;..&gt;</code>: Run-length WT (parametrizable with
+          bitvector, rank, select, and the underlying WT)</li>
+</ul>
+<p>Note: 
+<ul>
+    <li> <code>wt_pc</code> and <code>wt_rlmn</code> can be
+         parametrize to work on byte or integer alphabets.
+    </li>
+    <li> <code>wt_blcd</code>, <code>wt_hutu</code> and <code>wt_int</code> 
+         are order preserving WTs.
+    </li>
+</ul>
+</p>                      
+</article>
+</slide>
+
+<slide>
+  <hgroup>
+    <h2>Wavelet Trees (WTs) - Example</h2>
+  </hgroup>
+<article>
+<p>
+Build a byte-alphabet Hu-Tucker-shaped WT
+(order preserving) for a byte sequence
+and call <code>lex_count</code>.
+</p>
+<pre class="prettyprint" data-lang="c++"><!-- expl-14.cpp -->
+    <b>wt_hutu&lt;rrr_vector&lt;63&gt;&gt; wt</b>;
+    <b>construct_im(wt, "情報学 研究所", 1)</b>;
+    cout << wt << endl;
+    <b>auto t1 = wt.lex_count(0, wt.size(), 0x80);</b>   
+    <b>auto t2 = wt.lex_count(0, wt.size(), 0xbf);</b>   
+    cout << "# of chars        : " << wt.size() << endl;
+    cout << "# of UTF-8 symbols: " << get<1>(t1)+get<2>(t2) << endl;
+</pre>
+<p>Output:</p>
+<pre class="prettyprint">
+情報学 研究所
+# of bytes        : 19
+# of UTF-8 symbols: 7
+</pre>
+</article>
+<!--
+-->
+</slide>
+
+
+<slide>
+  <hgroup>
+    <h2>Wavelet Trees (WTs) - Example</h2>
+  </hgroup>
+<article>
+<p>
+Build an integer-alphabet balanced WT
+(order preserving) for a integer sequence
+and do a range search (index range = [1..5],
+value range=[4..8]).
+</p>
+<pre class="prettyprint" data-lang="c++"><!-- expl-15.cpp -->
+    <b>wt_int&lt;rrr_vector&lt;63&gt;&gt; wt</b>;
+    construct_im(wt, "6   1000 1 4 7 3   18 6 3", <b>'d'</b>);
+    auto res = <b>wt.range_search_2d(1, 5, 4, 18)</b>;
+    for ( auto point : res.second )
+        cout << point << " ";
+    cout << endl;
+</pre>
+<p>Output (index/value pairs):</p>
+<pre class="prettyprint">
+(3,4) (4,7) 
+</pre>
+<!--
+-->
+</article>
+    <aside class="note">
+      <section>
+        <ul>
+          <li>'d' argument in <code>construct_im</code>
+               interprets data as sequence of
+               decimal numbers</li>
+        </ul>
+      </section>
+    </aside>
+</slide>
+
+<slide>
+  <hgroup>
+    <h2>Compressed Suffix Arrays (CSAs)</h2>
+  </hgroup>
+  <hgroup>
+    <h3><code>#include &lt;sdsl/suffix_arrays.hpp&gt;</code></h3>
+  </hgroup>
+<article>
+<p>&nbsp;</p>
+<div align="center">
+<img src="images/suffix-array.png" alt="suffix array" width="80%" />
+</div>
+</article>
+</slide>
+
+<slide>
+  <hgroup>
+    <h2>Compressed Suffix Arrays (CSAs) - Overview</h2>
+  </hgroup>
+<article>
+<p><b>Any</b> CSA provides the access method (<code>operator[]</code>) and
+the following members:
+<ul>
+<li>
+<code>psi</code>, 
+<code>lf</code>, &nbsp;&nbsp;
+<code>isa</code>, 
+<code>bwt</code>, 
+<code>text</code>, &nbsp;&nbsp;
+<code>L</code>, 
+<code>F</code>, &nbsp;&nbsp;
+<code>C</code>, 
+<code>char2comp</code>, 
+<code>comp2char</code>
+</li>
+</ul>
+</p>
+<p>
+There are three CSA types:
+<table>
+<tr>
+<td><code style="font-size: 110%;">csa_bitcompressed&lt;..&gt;</code> </td>
+<td>
+Based on SA and inverse SA (ISA) stored in an <code>int_vector&lt;&gt;</code>.
+</td> 
+</tr>
+<tr>
+<td><code style="font-size: 110%;">csa_sada&lt;..&gt;</code></td><td>
+Based on $\Psi$-function. $\Psi$ is stored in an vector. The vector
+type is a template parameter and <code>enc_vector</code> per default.
+</td>
+</tr>
+<tr>
+<td><code style="font-size: 110%;">csa_wt&lt;..&gt;</code>
+</td><td>
+Based on a WT over the Burrows-Wheeler-Transform (BWT);
+aka FM-Index. WT is parametrizable, default WT is 
+<code>wt_huff</code>.
+</td>
+</tr>
+</table>
+</p>
+<p>
+<b>SA and ISA sampling density</b>, <b>alphabet strategy</b> and the <b>SA value sampling strategy</b> can 
+be specified via template arguments. 
+</p>
+</article>
+</article>
+    <aside class="note">
+      <section>
+      <p>
+      Alphabet strategy contains
+      </p>
+      <p>
+        <ul>
+          <li>
+            <code>comp2char</code> container,
+          </li>  
+          <li>
+            <code>char2comp</code> container,
+          </li>  
+          <li>
+            <code>C</code> container,
+          </li>
+          <li>
+            <code>sigma</code> (effective alphabet size).
+          </li>
+          <li>Strategies: <code>byte_alphabet</code>,
+              <code>succinct_byte_alphabet</code>,
+              <code>int_alphabet</code>
+          </li>
+        </ul>
+        </p>
+        <p>
+       SA value sampling strategies
+       <ul>
+       <li><code>sa_order_sa_sampling</code></li>
+       <li><code>text_order_sa_sampling</code></li>
+       <li><code>sa_bwt_sampling</code></li>
+       </ul>
+        </p>
+      </section>
+    </aside>
+</slide>
+
+
+<slide>
+  <hgroup>
+    <h2>Compressed Suffix Arrays (CSAs) - Example</h2>
+  </hgroup>
+<article>
+<p>
+Build an byte-alphabet CSA in memory 
+(0-symbol is appended!). Output size,
+alphabet size, and extracted text in
+<code>[0..csa.size()-1]</code>.
+</p>
+<pre class="prettyprint" data-lang="c++"><!-- expl-17.cpp -->
+<b>csa_bitcompressed<> csa</b>;
+construct_im(csa, "abracadabra", 1);
+cout << "csa.size(): " << csa.size() << endl;
+cout << "csa.sigma : " << csa.sigma << endl;
+cout << csa << endl;
+cout << <b>extract(csa, 0, csa.size()-1)</b> << endl;
+</pre>
+<p>Output:</p>
+<pre class="prettyprint">
+csa.size(): 12
+csa.sigma : 6
+11 10 7 0 3 5 8 1 4 6 9 2
+abracadabra
+</pre>
+<!--
+-->
+</article>
+    <aside class="note">
+      <section>
+        <ul>
+          <li>Method <code>extract</code> is defined for
+              any CSA and CST. 
+          </li>
+        </ul>
+      </section>
+    </aside>
+</slide>
+
+<slide>
+  <hgroup>
+    <h2>Compressed Suffix Trees (CSTs)</h2>
+  </hgroup>
+  <hgroup>
+    <h3><code>#include &lt;sdsl/suffix_trees.hpp&gt;</code></h3>
+  </hgroup>
+<article>
+<div align="center">
+<img src="images/suffix-tree.png" alt="suffix tree" width="70%" />
+</div>
+</article>
+    <aside class="note">
+      <section>
+        <li>More about <a href="http://vts.uni-ulm.de/docs/2011/7786/vts_7786_11228.pdf">Design, Construction, and Applications of compressed suffix trees</a>
+        </li>    
+      </section>
+    </aside>
+</slide>
+
+
+
+<slide>
+  <hgroup>
+    <h2>Compressed Suffix Trees (CSTs) - Overview</h2>
+  </hgroup>
+<article>
+<p><b>Any</b> CST contains members <code>csa</code> and <code>lcp</code>
+and provides the following methods:
+<ul>
+<li> 
+<!-- cst global info -->
+<code>nodes()</code>, 
+<code>root()</code>, 
+<code>begin()</code>, 
+<code>end()</code>, 
+<code>begin_bottom_up()</code>, 
+<code>end_bottom_up()</code>
+</li>
+<!-- cst node info --> 
+<li>
+<code>size(v)</code>,
+<code>is_leaf(v)</code>,
+<code>degree(v)</code>,
+<code>depth(v)</code>,
+<code>node_depth(v)</code>,
+<code>edge(v,d)</code>,
+<code>lb(v)</code>, <code>rb(v)</code>,
+<code>id(v)</code>, <code>inv_id(i)</code>,
+<code>sn(v)</code>
+</li>
+<!-- cst global navigation-->
+<li>
+<code>select_leaf(i)</code>, 
+<code>node(lb,rb)</code>
+</li>
+<!-- cst node navigation-->
+<li>
+<code>parent(v)</code>, 
+<code>sibling(v)</code>,
+<code>lca(v,w)</code>,
+<code>select_child(v,i)</code>,
+<code>child(v,c)</code>,
+<code>sl(v)</code>,
+<code>wl(v,c)</code>,
+<code>leftmost_leaf(v)</code>,
+<code>rightmost_leaf(v)</code>
+</li>
+</ul>
+</p>
+<p>
+There are two CSA types:
+<table>
+<tr>
+<td><code style="font-size: 110%;">cst_sct3&lt;..&gt;</code> </td>
+<td>
+Interval based node representation. 
+</td> 
+</tr>
+<tr>
+<td><code style="font-size: 110%;">cst_sada&lt;..&gt;</code></td><td>
+Node represented as position in balanced parentheses sequence.
+</td>
+</tr>
+</table>
+</p>
+<p>
+<b>The underlying CSA</b>, <b>LCP array</b> and the <b>balanced parentheses structure</b> can 
+be specified via template arguments. 
+</p>
+</article>
+</article>
+    <aside class="note">
+      <section>
+      <p>As CSA, a CST contains more functionality as the uncompressed counterpart.</p>
+      <p> Alphabet is determined by the CSA.  </p>
+      </section>
+    </aside>
+</slide>
+
+<slide>
+  <hgroup>
+    <h2>Compressed Suffix Trees (CSTs) - Example</h2>
+  </hgroup>
+<article>
+<p>Use a CSTs to calculate the $k$-th order entropy of
+a integer sequence.
+</p>
+<pre class="prettyprint" data-lang="c++"><!-- expl-22.cpp -->
+<b>cst_sct3&lt;csa_wt&lt;wt_int&lt;rrr_vector&lt;&gt;&gt;&gt;&gt; cst</b>;
+int_vector&lt;&gt; data(100000, 0, 10);
+for (size_t i=0; i &lt; data.size(); ++i)
+    data[i] = 1 + rand()%1023;
+construct_im(cst, data);
+cout &lt;&lt; "cst.csa.sigma: " &lt;&lt; cst.csa.sigma &lt;&lt; endl;
+for (size_t k=0; k&lt;3; ++k)
+    cout &lt;&lt; "H" &lt;&lt; k &lt;&lt; " : " &lt;&lt;  get&lt;0&gt;(Hk(cst, k)) &lt;&lt; endl;
+</pre>
+<p> Output:</p>
+<pre class="prettyprint">
+cst.csa.sigma: 1024
+H0(data) : 9.99038
+H1(data) : 6.52515
+H2(data) : 0.0940461
+</pre>
+<!--
+-->
+</article>
+    <aside class="note">
+      <section>
+        <li><code>data</code> should not contain symbol 0</li>
+      </section>
+    </aside>
+</slide>
+
+<!--slide>
+    <hgroup>
+        <h2>Useful resources for programmers</h2>
+    </hgroup>
+    <article>
+           <ul>
+           <li> Ulrich Drepper: 
+           <a href="http://www.akkadia.org/drepper/cpumemory.pdf">What Every Programmer should Know About Memory</a>
+           </li>
+
+           <li> Colin Scott:  
+           <a href="http://www.eecs.berkeley.edu/~rcs/research/interactive_latency.html">Latency Numbers Every Programmer Should Know</a>
+           </li>
+           </ul>
+     </article>
+</slide-->
+
+<!--slide>
+    <hgroup>
+        <h2>Approximate timings on commodity hardware</h2>
+    </hgroup>
+<article class="smaller">
+<table>
+<tr>
+<th>Operation</th><th>Time in nanoseconds</th>
+</tr>
+<tr>
+<td>execute typical instruction</td><td>1</td> 
+</tr>
+<tr>
+<td>fetch from L1 cache memory</td><td>0.5</td>
+</tr>
+<tr>
+<td>branch misprediction</td><td>5</td>
+</tr>
+<tr>
+<td>fetch from L2 cache memory</td><td> 7 </td>
+</tr>
+<tr>
+<td>Mutex lock/unlock</td><td>25 </td>
+</tr>
+<tr>
+<td>fetch from main memory</td><td>100 </td>
+</tr>
+<tr>
+<td>send 2K bytes over 1Gbps network</td><td> 20,000 </td>
+</tr>
+<tr>
+<td>read 1MB sequentially from memory</td><td>250,000 </td>
+</tr>
+<tr>
+<td>fetch from new disk location (seek)</td><td>8,000,000 </td>
+</tr>
+<tr>
+<td>read 1MB sequentially from disk</td><td>20,000,000 </td>
+</tr>
+<tr>
+<td>send packet US to Europe and back</td><td>150 milliseconds = 150,000,000 </td>
+</tr>
+<tr>
+</table>
+</article>
+</slide-->
+
+<slide>
+  <hgroup>
+    <h2>Top-k frequent document retrieval (Space)</h2>
+  </hgroup>
+<article>
+<p>
+Implementation by Culpepper et al. (ESA 2010)
+</p>
+
+<table class="rad">
+    <tr>
+        <th>Test case</th>
+        <th><span class="tnr">SADA</span></th>
+        <th><span class="tnr">GREEDY</span></th>
+        <th><span class="tnr">QPROBING</span></th>
+    </tr>
+    <tr>
+        <td><span class="tnr">&nbsp;&nbsp;PROTEINS</span></td>
+        <td><span class="tnr">&nbsp;&nbsp;&nbsp;870 (15.4)</span></td>
+        <td><span class="tnr">&nbsp;&nbsp;&nbsp;217 (3.84)</span></td>
+        <td><span class="tnr">&nbsp;&nbsp;&nbsp;217 (3.84)</span></td>
+    </tr>
+</table>
+<p>&nbsp;</p>
+<p>
+Faithful implementation using SDSL 
+</p>
+
+<table class="rad"> <!-- right align data-->
+    <tr>
+        <th>Test case</th>
+        <th><span class="tnr">SADA</span></th>
+        <th><span class="tnr">GREEDY</span></th>
+        <th><span class="tnr">QPROBING</span></th>
+    </tr>
+    <tr>
+        <td><span class="tnr">PROTEINS</span></td>
+        <td>148 (2.62)</td>
+        <td>162 (2.87)</td>
+        <td>162 (2.87)</td>
+    </tr>
+    <tr>
+        <td><span class="tnr">ENWIKI-SML</span></td>
+        <td>199 (3.07)</td>
+        <td>130 (2.01)</td>
+        <td>130 (2.01)</td>
+    </tr>
+    <tr>
+        <td><span class="tnr">ENWIKI-BIG</span></td>
+        <td>23,914 (2.80)</td>
+        <td>27,043 (3.17)</td>
+        <td>27,043 (3.17)</td>
+    </tr>
+</table>
+</article>
+</slide>
+
+
+
+<slide>
+  <hgroup>
+    <h2>Space breakdown (GREEDY/QPROBING)</h2>
+  </hgroup>
+<article>
+<div id="chart_enwikisml_greedy" style="position:absolute; z-index:20; bottom:-100px;"></div>
+</article>
+</slide>
+
+<slide>
+  <hgroup>
+    <h2>Space breakdown (SADA)</h2>
+  </hgroup>
+<article>
+<div id="chart_enwikisml_sada" style="position:absolute; z-index:20; bottom:-100px;"></div>
+</article>
+</slide>
+
+
+<slide>
+  <hgroup>
+    <h2>Space breakdown (SADA)</h2>
+  </hgroup>
+<article>
+<a href="./doc_re_time.pdf">Full results of  the document_retrieval benchmark</a>.
+</article>
+</slide>
+
+
+
+
+  <slide class="thank-you-slide segue nobackground">
+    <article class="flexbox vleft auto-fadein">
+      <h2>&lt;Thank You!&gt;</h2>
+      <!--p>Important contact information goes here.</p-->
+    </article>
+    <p class="auto-fadein" data-config-contact>
+      <!-- populated from slide_config.json -->
+    </p>
+  </slide>
+
+  <slide class="logoslide dark nobackground">
+  </slide>
+
+  <slide class="backdrop"></slide>
+
+</slides>
+
+
+<script>
+var _gaq = _gaq || [];
+_gaq.push(['_setAccount', 'UA-34340677-1']);
+_gaq.push(['_trackPageview']);
+
+(function() {
+  var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+  ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+  var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+})();
+</script>
+
+<!--[if IE]>
+  <script src="http://ajax.googleapis.com/ajax/libs/chrome-frame/1/CFInstall.min.js"></script>
+  <script>CFInstall.check({mode: 'overlay'});</script>
+<![endif]-->
+</body>
+<!--script src="http://d3js.org/d3.v3.js"></script-->
+
+<script>
+(function(){
+var events1 = [
+	{
+		"name" : "unknown",
+		"usage" : [
+			[0,32],
+			[4130733,32]
+		]
+	},
+	{
+		"name" : "construct CST",
+		"usage" : [
+			[0,32],
+			[2375383,32],
+			[2406613,32],
+			[2406613,6357491008],
+			[2406613,6357489576],
+			[2406631,6357489576],
+			[2406631,6011459488],
+			[2406668,6011459488],
+			[2406669,5319094680],
+			[2406669,5319094680],
+			[2406670,5318754200],
+			[2406670,5318754200],
+			[2406671,5318575000],
+			[2406672,5318575000],
+			[2406673,5318180760],
+			[2406673,5318180760],
+			[2406674,5317750680],
+			[2406674,5317750680],
+			[2406675,5317392280],
+			[2406675,5317392280],
+			[2406675,5317338520],
+			[2406676,5317338520],
+			[2406677,5317105560],
+			[2406677,5317105560],
+			[2406678,5316783000],
+			[2406678,5316783000],
+			[2406679,5316514200],
+			[2406680,5316514200],
+			[2406681,5316191640],
+			[2406682,5316191640],
+			[2406683,5316012440],
+			[2406683,5316012440],
+			[2406684,5315492760],
+			[2406684,5315492760],
+			[2406685,5315349400],
+			[2406685,5315349400],
+			[2406686,5315044760],
+			[2406686,5315044760],
+			[2406687,5314578840],
+			[2406687,5314578840],
+			[2406688,5314005400],
+			[2406689,5314005400],
+			[2406689,5313736600],
+			[2406690,5313736600],
+			[2406690,5313306520],
+			[2406692,5313306520],
+			[2406693,5313163160],
+			[2406693,5313163160],
+			[2406694,5312553880],
+			[2406694,5312553880],
+			[2406695,5312231320],
+			[2406695,5312231320],
+			[2406696,5311926680],
+			[2406697,5311926680],
+			[2406698,5311478680],
+			[2406698,5311478680],
+			[2406699,5311335320],
+			[2406699,5311335320],
+			[2406700,5311156120],
+			[2406700,5311156120],
+			[2406700,5310797720],
+			[2406704,5310797720],
+			[2406704,5310278040],
+			[2406705,5310278040],
+			[2406706,5310116760],
+			[2407949,4559378760],
+			[2407950,4558559776],
+			[2407950,4558559776],
+			[2407951,4557743216],
+			[2407951,4557743216],
+			[2407952,4556921728],
+			[2407952,4556921728],
+			[2407953,4556113192],
+			[2407953,4556113192],
+			[2407954,4555291928],
+			[2407954,4555291928],
+			[2407955,4554472592],
+			[2407955,4554472592],
+			[2407956,4553653960],
+			[2407956,4553653960],
+			[2407957,4552858448],
+			[2407957,4552858448],
+			[2407958,4552039680],
+			[2407958,4552039680],
+			[2407959,4551213024],
+			[2407959,4551213024],
+			[2407960,4550381872],
+			[2407960,4550381872],
+			[2407961,4549566392],
+			[2407961,4549566392],
+			[2407962,4548737072],
+			[2407962,4548737072],
+			[2407963,4547912616],
+			[2407963,4547912616],
+			[2407964,4547099976],
+			[2407964,4547099976],
+			[2407965,4546290920],
+			[2407965,4546290920],
+			[2407966,4545472008],
+			[2407966,4545472008],
+			[2407967,4544656032],
+			[2407967,4544656032],
+			[2407968,4543839000],
+			[2407968,4543839000],
+			[2407969,4543050712],
+			[2407969,4543050712],
+			[2407970,4542221408],
+			[2407970,4542221408],
+			[2407971,4541401288],
+			[2407971,4541401288],
+			[2407972,4540578664],
+			[2407972,4540578664],
+			[2407973,4539761632],
+			[2407973,4539761632],
+			[2407974,4538940080],
+			[2407974,4538940080],
+			[2407975,4538119536],
+			[2407975,4538119536],
+			[2407976,4537300016],
+			[2407976,4537300016],
+			[2407977,4536493808],
+			[2407977,4536493808],
+			[2407978,4535673104],
+			[2407978,4535673104],
+			[2407979,4534855544],
+			[2407979,4534855544],
+			[2407980,4534032920],
+			[2407980,4534032920],
+			[2407981,4533237624],
+			[2407981,4533237624],
+			[2407982,4532419128],
+			[2407982,4532419128],
+			[2407983,4531599528],
+			[2407983,4531599528],
+			[2407984,4530775000],
+			[2407984,4530775000],
+			[2407985,4529964488],
+			[2407985,4529964488],
+			[2407986,4529146672],
+			[2407986,4529146672],
+			[2407987,4528323840],
+			[2407987,4528323840],
+			[2407988,4527502432],
+			[2407988,4527502432],
+			[2407989,4526692800],
+			[2407989,4526692800],
+			[2407990,4525869680],
+			[2407990,4525869680],
+			[2407990,4525705200],
+			[2407995,4525705200],
+			[2407995,4509399600],
+			[2408043,4509399600],
+			[2408043,3607519680],
+			[2408237,3607519680],
+			[2408237,32],
+			[3583541,32],
+			[4122301,32],
+			[4130733,32],
+			[4130733,18078779144]
+		]
+	},
+	{
+		"name" : "construct CSA",
+		"usage" : [
+			[0,32],
+			[9308,32],
+			[1747368,32],
+			[2198228,32],
+			[2375383,32],
+			[2375383,6357491008]
+		]
+	},
+	{
+		"name" : "parse input text",
+		"usage" : [
+			[0,5368709152],
+			[5472,5368709152],
+			[5472,5368709160],
+			[9308,5368709160],
+			[9308,32],
+			[9308,32]
+		]
+	},
+	{
+		"name" : "SA",
+		"usage" : [
+			[9308,5368709160],
+			[12228,5368709160],
+			[12228,27514634288],
+			[22569,27514634288],
+			[22569,48318382128],
+			[1572586,48318382128],
+			[1572586,27514634288],
+			[1747018,27514634288],
+			[1747018,5368709160],
+			[1747368,5368709160],
+			[1747368,32],
+			[1747368,32]
+		]
+	},
+	{
+		"name" : "BWT",
+		"usage" : [
+			[1747368,5368709160],
+			[1750348,5368709160],
+			[1750349,5370709192],
+			[2197972,5370709192],
+			[2197972,5368709160],
+			[2198228,5368709160],
+			[2198228,32],
+			[2198228,32]
+		]
+	},
+	{
+		"name" : "construct CSA",
+		"usage" : [
+			[2198228,32],
+			[2211269,32],
+			[2296315,32],
+			[2330582,32],
+			[2375383,32],
+			[2375383,6357491008]
+		]
+	},
+	{
+		"name" : "construct csa-alpbabet",
+		"usage" : [
+			[2198229,1051176],
+			[2211269,1051176],
+			[2211269,1464],
+			[2211269,1464]
+		]
+	},
+	{
+		"name" : "construct wavelet tree",
+		"usage" : [
+			[2211269,1050040],
+			[2226368,1050040],
+			[2226368,3608569688],
+			[2268495,3608569688],
+			[2268495,4510449608],
+			[2270412,4510449608],
+			[2270412,4524969992],
+			[2270419,4524969992],
+			[2270419,4524970360],
+			[2270623,4524970360],
+			[2270623,4524982136],
+			[2270630,4524982136],
+			[2270630,4525009208],
+			[2270644,4525009208],
+			[2270644,4525024712],
+			[2270653,4525024712],
+			[2270653,4525040368],
+			[2270660,4525040368],
+			[2270660,4525053680],
+			[2270684,4525053680],
+			[2270685,4525132024],
+			[2270685,4525132024],
+			[2270686,4525211688],
+			[2270686,4525211688],
+			[2270687,4525290936],
+			[2270687,4525290936],
+			[2270688,4525370808],
+			[2270688,4525370808],
+			[2270689,4525447168],
+			[2270689,4525447168],
+			[2270690,4525527144],
+			[2270690,4525527144],
+			[2270691,4525601656],
+			[2270691,4525601656],
+			[2270692,4525681632],
+			[2270692,4525681632],
+			[2270693,4525760984],
+			[2270693,4525760984],
+			[2270694,4525840440],
+			[2270694,4525840440],
+			[2270695,4525920416],
+			[2270695,4525920416],
+			[2270696,4525999872],
+			[2270696,4525999872],
+			[2270697,4526078912],
+			[2270697,4526078912],
+			[2270698,4526158784],
+			[2270698,4526158784],
+			[2270699,4526238552],
+			[2270699,4526238552],
+			[2270700,4526307024],
+			[2270700,4526307024],
+			[2270701,4526371992],
+			[2270701,4526371992],
+			[2270702,4526441304],
+			[2270702,4526441304],
+			[2270703,4526493896],
+			[2270703,4526493896],
+			[2270704,4526527448],
+			[2270711,4526527448],
+			[2270712,4526585840],
+			[2270712,4526585840],
+			[2270713,4526636432],
+			[2270713,4526636432],
+			[2270714,4526688528],
+			[2270714,4526688528],
+			[2270715,4526733728],
+			[2270715,4526733728],
+			[2270716,4526781592],
+			[2270716,4526781592],
+			[2270717,4526847376],
+			[2270717,4526847376],
+			[2270718,4526900128],
+			[2270718,4526900128],
+			[2270719,4526945648],
+			[2270719,4526945648],
+			[2270720,4526984936],
+			[2270720,4526984936],
+			[2270721,4527032520],
+			[2270721,4527032520],
+			[2270722,4527079600],
+			[2270722,4527079600],
+			[2270723,4527125568],
+			[2270723,4527125568],
+			[2270724,4527162616],
+			[2270724,4527162616],
+			[2270725,4527204704],
+			[2270725,4527204704],
+			[2270726,4527255664],
+			[2270726,4527255664],
+			[2270727,4527301624],
+			[2270727,4527301624],
+			[2270728,4527362000],
+			[2270728,4527362000],
+			[2270728,4527395960],
+			[2270730,4527395960],
+			[2270731,4527456152],
+			[2270731,4527456152],
+			[2270732,4527499896],
+			[2270732,4527499896],
+			[2270733,4527547056],
+			[2270733,4527547056],
+			[2270734,4527605272],
+			[2270734,4527605272],
+			[2270735,4527664752],
+			[2270738,4527664752],
+			[2270738,4527684256],
+			[2270741,4527684256],
+			[2270742,4527740752],
+			[2270744,4527740752],
+			[2270745,4527803624],
+			[2270745,4527803624],
+			[2270746,4527843816],
+			[2270746,4527843816],
+			[2270747,4527901528],
+			[2270747,4527901528],
+			[2270748,4527956128],
+			[2270748,4527956128],
+			[2270749,4528001960],
+			[2270749,4528001960],
+			[2270750,4528077760],
+			[2270750,4528077760],
+			[2270751,4528154176],
+			[2270751,4528154176],
+			[2270752,4528231968],
+			[2270752,4528231968],
+			[2270753,4528310072],
+			[2270753,4528310072],
+			[2270754,4528388208],
+			[2270754,4528388208],
+			[2270755,4528467456],
+			[2270755,4528467456],
+			[2270756,4528541520],
+			[2270756,4528541520],
+			[2270757,4528612208],
+			[2270757,4528612208],
+			[2270758,4528679360],
+			[2270758,4528679360],
+			[2270759,4528724352],
+			[2270759,4528724352],
+			[2270760,4528774240],
+			[2270760,4528774240],
+			[2270761,4528824728],
+			[2270761,4528824728],
+			[2270762,4528884976],
+			[2270762,4528884976],
+			[2270763,4528934544],
+			[2270763,4528934544],
+			[2270764,4528985200],
+			[2270764,4528985200],
+			[2270765,4529035624],
+			[2270765,4529035624],
+			[2270766,4529078064],
+			[2270766,4529078064],
+			[2270766,4529092912],
+			[2270771,4529092912],
+			[2270772,4529146960],
+			[2270772,4529146960],
+			[2270773,4529205736],
+			[2270774,4529205736],
+			[2270775,4529245192],
+			[2270777,4529245192],
+			[2270778,4529289520],
+			[2270778,4529289520],
+			[2270779,4529342704],
+			[2270779,4529342704],
+			[2270780,4529394408],
+			[2270780,4529394408],
+			[2270781,4529445768],
+			[2270782,4529445768],
+			[2270782,4529460616],
+			[2270810,4529460616],
+			[2270811,4529513496],
+			[2270811,4529513496],
+			[2270811,4529535464],
+			[2270814,4529535464],
+			[2270815,4529596896],
+			[2270815,4529596896],
+			[2270815,4529624184],
+			[2270820,4529624184],
+			[2270821,4529673656],
+			[2270821,4529673656],
+			[2270822,4529747840],
+			[2270822,4529747840],
+			[2270823,4529803088],
+			[2270823,4529803088],
+			[2270823,4529836488],
+			[2270825,4529836488],
+			[2270826,4529896856],
+			[2270826,4529896856],
+			[2270827,4529956752],
+			[2296306,5319972384],
+			[2296307,5319991472],
+			[2296308,5319991472],
+			[2296309,5320065608],
+			[2296309,5320065608],
+			[2296310,5320130888],
+			[2296310,5320130888],
+			[2296311,5320200472],
+			[2296311,5320200472],
+			[2296312,5320268464],
+			[2296312,5320268464],
+			[2296313,5320338784],
+			[2296313,5320338784],
+			[2296314,5320402616],
+			[2296314,5320402616],
+			[2296315,5319400752],
+			[2296315,5319400752]
+		]
+	},
+	{
+		"name" : "sample SA",
+		"usage" : [
+			[2296315,5320449360],
+			[2296316,5320449360],
+			[2296316,6012509528],
+			[2330582,6012509528],
+			[2330582,6011460920],
+			[2330582,6011460920]
+		]
+	},
+	{
+		"name" : "sample ISA",
+		"usage" : [
+			[2330582,6358539616],
+			[2375383,6358539616],
+			[2375383,6357491008],
+			[2375383,6357491008]
+		]
+	},
+	{
+		"name" : "store CSA",
+		"usage" : [
+			[2375383,6357491008],
+			[2378474,6357491008],
+			[2378474,6357956888],
+			[2393629,6357956888],
+			[2393629,6357491008],
+			[2393639,6357491008],
+			[2393639,6357905880],
+			[2405849,6357905880],
+			[2405849,6357491008],
+			[2406613,6357491008]
+		]
+	},
+	{
+		"name" : "LCP",
+		"usage" : [
+			[2408237,32],
+			[2408248,32],
+			[2408249,672137288],
+			[2451451,672137288],
+			[2451451,6040846416],
+			[2462068,6040846416],
+			[2462068,6043797840],
+			[2462069,6043797840],
+			[2462069,6047797872],
+			[3583230,6047797872],
+			[3583230,6043797840],
+			[3583507,6043797840],
+			[3583507,675088712],
+			[3583541,675088712],
+			[3583541,32],
+			[3583541,32]
+		]
+	},
+	{
+		"name" : "CST",
+		"usage" : [
+			[3583541,64],
+			[3788869,64],
+			[3823252,64],
+			[4045099,64],
+			[4122301,18078779144],
+			[4122301,18078779144]
+		]
+	},
+	{
+		"name" : "bps-sct",
+		"usage" : [
+			[3583542,2014314608],
+			[3584525,2014314608],
+			[3584525,2696055456],
+			[3584853,2696055456],
+			[3584853,3367144104],
+			[3788836,3367144104],
+			[3788836,2696055456],
+			[3788868,2696055456],
+			[3788869,2013266000],
+			[3788869,2013266000]
+		]
+	},
+	{
+		"name" : "bpss-sct",
+		"usage" : [
+			[3788869,2097152096],
+			[3789570,2097152096],
+			[3789570,2102722664],
+			[3789571,2102722664],
+			[3789572,2102774848],
+			[3789572,2102774848],
+			[3789573,2102829008],
+			[3789573,2102829008],
+			[3789574,2102882792],
+			[3789574,2102882792],
+			[3789575,2102935920],
+			[3789575,2102935920],
+			[3789576,2102987968],
+			[3789576,2102987968],
+			[3789577,2103042000],
+			[3789577,2103042000],
+			[3789578,2103096040],
+			[3789578,2103096040],
+			[3789579,2103149504],
+			[3789579,2103149504],
+			[3789580,2103203480],
+			[3789580,2103203480],
+			[3789581,2103257864],
+			[3789581,2103257864],
+			[3789582,2103312264],
+			[3789582,2103312264],
+			[3789583,2103366640],
+			[3789583,2103366640],
+			[3789584,2103420648],
+			[3789584,2103420648],
+			[3789585,2103474448],
+			[3789585,2103474448],
+			[3789586,2103524872],
+			[3789586,2103524872],
+			[3789587,2103577752],
+			[3789587,2103577752],
+			[3789588,2103629704],
+			[3789588,2103629704],
+			[3789589,2103683136],
+			[3789589,2103683136],
+			[3789590,2103736920],
+			[3789590,2103736920],
+			[3789591,2103790376],
+			[3789591,2103790376],
+			[3789592,2103843888],
+			[3789592,2103843888],
+			[3789593,2103898352],
+			[3789593,2103898352],
+			[3789594,2103951112],
+			[3789594,2103951112],
+			[3789595,2104004888],
+			[3789595,2104004888],
+			[3789596,2104057048],
+			[3789596,2104057048],
+			[3789597,2104110816],
+			[3789597,2104110816],
+			[3789598,2104163832],
+			[3789598,2104163832],
+			[3789599,2104217232],
+			[3789599,2104217232],
+			[3789600,2104269216],
+			[3789600,2104269216],
+			[3789601,2104322144],
+			[3789601,2104322144],
+			[3789602,2104372496],
+			[3789602,2104372496],
+			[3789603,2104426048],
+			[3789603,2104426048],
+			[3789604,2104478984],
+			[3789604,2104478984],
+			[3789605,2104533264],
+			[3789605,2104533264],
+			[3789606,2104587584],
+			[3789606,2104587584],
+			[3789607,2104642328],
+			[3789607,2104642328],
+			[3789608,2104695640],
+			[3789608,2104695640],
+			[3789609,2104749120],
+			[3789609,2104749120],
+			[3789610,2104802448],
+			[3789610,2104802448],
+			[3789611,2104856408],
+			[3789611,2104856408],
+			[3789612,2104910040],
+			[3789612,2104910040],
+			[3789613,2104963728],
+			[3789613,2104963728],
+			[3789614,2105017304],
+			[3789614,2105017304],
+			[3789615,2105071792],
+			[3789615,2105071792],
+			[3789616,2105126176],
+			[3789616,2105126176],
+			[3789617,2105179904],
+			[3789617,2105179904],
+			[3789618,2105233864],
+			[3789618,2105233864],
+			[3789619,2105288528],
+			[3789619,2105288528],
+			[3789620,2105342880],
+			[3789620,2105342880],
+			[3789621,2105396456],
+			[3789621,2105396456],
+			[3789622,2105450128],
+			[3789622,2105450128],
+			[3789623,2105505872],
+			[3789623,2105505872],
+			[3789624,2105558104],
+			[3789624,2105558104],
+			[3789625,2105611704],
+			[3789625,2105611704],
+			[3789626,2105665184],
+			[3789626,2105665184],
+			[3789627,2105718928],
+			[3789627,2105718928],
+			[3789628,2105771608],
+			[3789628,2105771608],
+			[3789629,2105825032],
+			[3789629,2105825032],
+			[3789630,2105879480],
+			[3789630,2105879480],
+			[3789631,2105933624],
+			[3789631,2105933624],
+			[3789632,2105987464],
+			[3789632,2105987464],
+			[3789633,2106040960],
+			[3789633,2106040960],
+			[3789634,2106089344],
+			[3789634,2106089344],
+			[3789635,2106142688],
+			[3789635,2106142688],
+			[3789636,2106196480],
+			[3789636,2106196480],
+			[3789637,2106250136],
+			[3789637,2106250136],
+			[3789638,2106303584],
+			[3789638,2106303584],
+			[3789639,2106358856],
+			[3789639,2106358856],
+			[3789640,2106412520],
+			[3789640,2106412520],
+			[3789641,2106466224],
+			[3789641,2106466224],
+			[3789642,2106519504],
+			[3789643,2106519504],
+			[3789644,2106573872],
+			[3789644,2106573872],
+			[3789645,2106627360],
+			[3789645,2106627360],
+			[3789646,2106680800],
+			[3789646,2106680800],
+			[3789647,2106734984],
+			[3789647,2106734984],
+			[3789648,2106788496],
+			[3789648,2106788496],
+			[3789649,2106841728],
+			[3789649,2106841728],
+			[3789650,2106895408],
+			[3789650,2106895408],
+			[3789651,2106948752],
+			[3792186,2242445224],
+			[3792186,2242445224],
+			[3792187,2242498120],
+			[3792187,2242498120],
+			[3792188,2242551432],
+			[3792188,2242551432],
+			[3792189,2242604080],
+			[3792189,2242604080],
+			[3792190,2242657552],
+			[3792190,2242657552],
+			[3792191,2242711936],
+			[3792191,2242711936],
+			[3792192,2242766296],
+			[3792192,2242766296],
+			[3792193,2242819528],
+			[3792193,2242819528],
+			[3792194,2242873848],
+			[3792194,2242873848],
+			[3792195,2242927704],
+			[3792195,2242927704],
+			[3792196,2242981920],
+			[3792196,2242981920],
+			[3792197,2243035200],
+			[3792197,2243035200],
+			[3792198,2243089080],
+			[3792198,2243089080],
+			[3792199,2243143192],
+			[3792199,2243143192],
+			[3792200,2243196936],
+			[3792200,2243196936],
+			[3792201,2243250280],
+			[3792201,2243250280],
+			[3792202,2243304192],
+			[3792202,2243304192],
+			[3792203,2243357704],
+			[3792203,2243357704],
+			[3792204,2243412824],
+			[3792204,2243412824],
+			[3792205,2243465512],
+			[3792205,2243465512],
+			[3792206,2243519832],
+			[3792206,2243519832],
+			[3792207,2243574048],
+			[3792207,2243574048],
+			[3792208,2243628256],
+			[3792208,2243628256],
+			[3792209,2243681360],
+			[3792209,2243681360],
+			[3792210,2243735696],
+			[3792210,2243735696],
+			[3792211,2243789880],
+			[3792211,2243789880],
+			[3792212,2243843336],
+			[3792212,2243843336],
+			[3792213,2243897208],
+			[3792213,2243897208],
+			[3792214,2243950600],
+			[3792214,2243950600],
+			[3792215,2244003232],
+			[3792215,2244003232],
+			[3792215,2244012800],
+			[3792271,2244012800],
+			[3792271,2338402056],
+			[3792289,2338402056],
+			[3792289,2368220936],
+			[3823003,2368220936],
+			[3823003,2410163992],
+			[3823252,2410163992]
+		]
+	},
+	{
+		"name" : "clcp",
+		"usage" : [
+			[3823252,2410163992],
+			[3823252,2410163992],
+			[3823253,2411212744],
+			[3887517,2411212744],
+			[3887517,4220283312],
+			[3888348,4220283312],
+			[3888348,11609270072],
+			[4044427,11609270072],
+			[4044427,11722336984],
+			[4045099,11722336984],
+			[4045099,11721288200],
+			[4045099,11721288200]
+		]
+	},
+	{
+		"name" : "load csa",
+		"usage" : [
+			[4045100,15328807848],
+			[4085581,15328807848],
+			[4085581,16230687768],
+			[4097884,16230687768],
+			[4097884,16246993368],
+			[4098057,16246993368],
+			[4098057,16247459248],
+			[4098467,16247459248],
+			[4098467,16247655344],
+			[4098468,16247655344],
+			[4098469,16247842232],
+			[4098469,16247842232],
+			[4098470,16248024680],
+			[4098470,16248024680],
+			[4098471,16248183000],
+			[4098471,16248183000],
+			[4098472,16248316536],
+			[4098472,16248316536],
+			[4098473,16248427504],
+			[4098473,16248427504],
+			[4098474,16248620216],
+			[4098474,16248620216],
+
+			[4104343,16648751832],
+			[4104344,16648751832],
+			[4104344,16648890064],
+			[4104345,16648890064],
+			[4104346,16648995808],
+			[4104347,16648995808],
+			[4104347,16649116536],
+			[4104349,16649116536],
+			[4104350,16649263800],
+			[4104350,16649263800],
+			[4104351,16649365920],
+			[4104351,16649365920],
+			[4104352,16649471664],
+			[4104352,16649471664],
+			[4104353,16649546112],
+			[4104353,16649546112],
+			[4104353,16649598920],
+			[4104355,16649598920],
+			[4104356,16649787472],
+			[4104356,16649787472],
+			[4104357,16649893136],
+			[4104358,16649893136],
+			[4104359,16649998800],
+			[4104359,16649998800],
+			[4104360,16650104376],
+			[4104360,16650104376],
+			[4104361,16650209920],
+			[4104362,16650209920],
+			[4104363,16650320032],
+			[4104363,16650320032],
+			[4104363,16650323056],
+			[4104364,16650323056],
+			[4104365,16650443800],
+			[4109854,17040798880],
+			[4109855,17040904544],
+			[4109855,17040904544],
+			[4109856,17041010184],
+			[4109856,17041010184],
+			[4109857,17040687488],
+			[4109858,17040687488],
+			[4109858,17732747656],
+			[4118156,17732747656],
+			[4118156,18078777744],
+			[4122301,18078777744],
+			[4122301,18078779176],
+			[4122301,18078779176]
+		]
+	},
+	{
+		"name" : "delete temporary files",
+		"usage" : [
+			[4122301,18078779144],
+			[4130733,18078779144]
+		]
+	}
+]
+;
+w = window,d = document,e = d.documentElement,g = d.getElementsByTagName('body')[0],
+//  xw = w.innerWidth || e.clientWidth || g.clientWidth,
+    xw = 1000
+//  yh = w.innerHeight || e.clientHeight || g.clientHeight;
+    yh = 500
+
+margin = {top: 20,right: 80,bottom: 120,left: 120},
+  width = xw - margin.left - margin.right,height = yh - margin.top - margin.bottom;
+x = d3.scale.linear().range([0, width]);
+y = d3.scale.linear().range([height, 0]);
+xAxis = d3.svg.axis().scale(x).orient("bottom");
+yAxis = d3.svg.axis().scale(y).orient("left").ticks(5);
+color = d3.scale.category10();
+x_max = d3.max(events1, function (d) { return d3.max(d.usage, function (u) { return u[0] / 1000;})})
+y_max = d3.max(events1, function (d) { return d3.max(d.usage, function (u) { return 1.1 * u[1] / (1024 * 1024);})})
+peak = d3.max(events1, function (d) { return d3.max(d.usage, function (u) { return u[1]; })})
+data = []
+events1.forEach(function (d) { data = data.concat(d.usage); });
+peakelem = data.filter(function (a) { return a[1] == peak; });
+peakelem = peakelem.splice(0,1);
+x.domain([0, x_max]);
+ y.domain([0, y_max]);
+svg = d3.select("#vis_cst_const").append("svg")
+  .attr("width", width + margin.left + margin.right)
+  .attr("height", height + margin.top + margin.bottom)
+  .attr("xmlns", "http://www.w3.org/2000/svg")
+  .append("g").attr("transform","translate(" + margin.left + "," + margin.top + ")");
+
+  svg.append("g").attr("class", "xaxis").attr("transform", "translate(0," + height + ")")
+  .call(xAxis).append("text").attr("text-anchor", "end")
+  .attr("shape-rendering", "crispEdges").attr("x", width / 2 + 50).attr("y", 70).attr("shape-rendering", "crispEdges")
+  .attr("font-family", "sans-serif").attr("font-size", "20px").text("Time (seconds)");
+
+svg.append("g").attr("class", "yaxis").call(yAxis).append("text").attr("transform", "rotate(-90)").attr("x", -height / 2 + 50)
+  .attr("y", -80).attr("shape-rendering", "crispEdges").attr("font-family", "sans-serif").attr("font-size", "20px").style("text-anchor", "end")
+  .text("Memory Usage (MiB)");
+
+svg.selectAll(".tick text").style("font-size", "20px");
+svg.selectAll(".xaxis .tick text").attr("dy", 23);
+svg.selectAll(".yaxis .tick text").attr("dx", -10);
+svg.selectAll("line").attr("fill", "none").attr("stroke", "black")
+svg.selectAll("path").attr("fill", "none").attr("stroke", "black")
+
+svg.selectAll("line.horizontalGrid").data(y.ticks(5)).enter().append("line")
+  .attr({"class": "horizontalGrid","x1": 0,"x2": width,"y1": function (d) { return y(d);},
+     "y2": function (d) { return y(d); }, "fill": "none", "shape-rendering": "crispEdges",
+     "stroke": "lightgrey","stroke-dasharray": "10,10","stroke-width": "1.5px"});
+
+var area1 = d3.svg.area().x(function (d) { return x(d[0] / 1000);}).y0(height).y1(function (d) { return y(d[1] / (1024 * 1024))});
+
+ev = svg.selectAll(".event1").data(events1).enter().append("svg:path").attr("class", "area1")
+  .attr("fill", function (d) { return d3.rgb(color(d.name)); })
+  .attr("d", function (d) { return area1(d.usage) })
+  .style("stroke", function (d) { return d3.rgb(color(d.name)).darker(2);}).style("stroke-width", "2px")
+
+svg.selectAll(".dot").data(peakelem).enter().append("circle").attr("r", 3).attr("fill", "red")
+  .attr("cx", function (d) {return x(d[0] / 1000)})
+  .attr("cy", function (d) {return y(d[1] / (1024 * 1024))})
+  .attr("fill", "red").attr("stroke-width", 2).attr("stroke", "#cc0000")
+
+svg.selectAll(".dot").data(peakelem).enter().append("svg:text")
+  .attr("x", function (d) {return x(d[0] / 1000)}).attr("y", function (d) {return y(d[1] / (1024 * 1024) * 1.025)})
+  .text(function (d) {return "Peak Usage: " + Math.round(d[1] / (1024 * 1024)) + " MB"})
+  .attr("font-size", 12).attr("fill", "red");
+
+svg.selectAll(".dot").data(peakelem).enter().append("circle")
+  .attr("r", 5).attr("fill", "red")
+  .attr("cx", function (d) {return x(d[0] / 1000)})
+  .attr("cy", function (d) {return y(d[1] / (1024 * 1024))})
+  .attr("fill", "none").attr("stroke-width", 2).attr("stroke", "#cc0000").each(pulsepeak());
+
+function pulsepeak() { return function (d, i, j) {
+  d3.select(this).attr("r", 5).style("stroke-opacity", 1.0).transition()
+    .ease("linear").duration(1000).attr("r", 10).style("stroke-opacity", 0.0).each("end", pulsepeak());};}
+
+vertical = d3.select(".chart #vis_cst_const").append("div").attr("class", "remove")
+  .style("position", "absolute").style("z-index", "19").style("width", "1px")
+  .style("height", height - margin).style("top", "30px").style("bottom", "50px")
+  .style("left", "0px").style("opacity", "0.4").style("background", "black");
+
+tooltip = d3.select(".chart #vis_cst_const").append("div").attr("class", "remove")
+  .style("position", "absolute").style("z-index", "20").style("visibility", "hidden").style("top", "10px");
+
+circle = svg.append("circle").attr("cx", 100).attr("cy", 350).attr("r", 3).attr("fill", "black").style("opacity", "0")
+
+d3.select("#vis_cst_const svg").on("mousemove", function () {
+  mousex = d3.mouse(this);
+  if (mousex[0] < margin.left + 3 || mousex[0] >= xw - margin.right) {
+    vertical.style("opacity", "0"); tooltip.style("opacity", "0"); circle.style("opacity", "0")
+  } else {
+    var xvalue = x.invert(mousex[0] - margin.left); var pos = findPosition(xvalue)
+    vertical.style("opacity", "0.4"); tooltip.style("opacity", "1"); circle.style("opacity", "1")
+    circle.attr("cx", pos.x).attr("cy", pos.y); vertical.style("left", mousex[0]+54 + "px");tooltip.style("left", mousex[0]+54+ "px")
+    tooltip.html("<p style=\"padding-left: 10px;\">" + xvalue.toFixed(2) + " Seconds <br>" + Math.round(pos.mem) + " MiB <br> " + pos.name +   "<br> Phase Time: " + pos.ptime + " Seconds </p>").style("visibility", "visible").style("background-color","white");
+  }
+}).on("mouseover", function () {
+  mousex = d3.mouse(this);
+  if (mousex[0] < margin.left + 3 || mousex[0] > xw - margin.right) {
+    vertical.style("opacity", "0")
+  } else {
+    vertical.style("opacity", "0.4");vertical.style("left", mousex[0] + 7 + "px")
+}})
+
+function findPosition(e){correctArea=d3.selectAll(".area1").filter(function(t){if(t.usage[0][0]<=e*1e3&&t.usage[t.usage.length-1][0]>=e*1e3){return true}return false});if(correctArea.empty()){return 0}var t=new Array;correctArea[0].forEach(function(n){t.push(findYValueinArea(n,e))});max_elem=d3.max(t,function(e){return e.mem});var n=t.filter(function(e){return e.mem==max_elem});return n[0]}function findYValueinArea(e,t){len=e.getTotalLength();var n=0;var r=len;for(var i=0;i<=len;i+=50){var s=e.getPointAtLength(i);var o=x.invert(s.x);var u=y.invert(s.y);if(u>0&&o>t){n=Math.max(0,i-50);r=i;break}}var a=e.getPointAtLength(0);var f=1;while(n<r){var l=(r+n)/2;a=e.getPointAtLength(l);target_x=x.invert(a.x);if((l==n||l==r)&&Math.abs(target_x-t)>.01){break}if(target_x>t)r=l;else if(target_x<t)n=l;else{break}if(f>50){break}f++}var c=new function(){this.mem=y.invert(a.y);this.name=e.__data__.name;this.min=d3.min(e.__data__.usage,function(e){return e[0]/1e3});this.max=d3.max(e.__data__.usage,function(e){return e[0]/1e3});this.ptime=Math.round(this.max-this.min);this.x=a.x;this.y=a.y};return c}
+})();
+</script>
+
+<script>
+(function(){
+var events2 = [
+	{
+		"name" : "unknown",
+		"usage" : [
+			[0,0],
+			[181,0],
+			[181,32],
+			[3369295,32]
+		]
+	},
+	{
+		"name" : "construct CST",
+		"usage" : [
+			[181,32],
+			[1815603,32],
+			[1847816,32],
+			[1847816,6357491008],
+			[1847817,5319363480],
+			[1847817,5319363480],
+			[1847818,5319309720],
+			[1847818,5319309720],
+			[1847819,5319238040],
+			[1847820,5319238040],
+			[1847821,5319166360],
+			[1847821,5319166360],
+			[1847821,5319094680],
+			[1847823,5319094680],
+			[1847824,5319005080],
+			[1847824,5319005080],
+			[1847825,5318933400],
+			[1847826,5318933400],
+			[1847827,5318843800],
+			[1847828,5318843800],
+			[1850634,4573275128],
+			[1850635,4572852664],
+			[1850635,4572852664],
+			[1850636,4572426144],
+			[1850636,4572426144],
+			[1850637,4572003088],
+			[1850637,4572003088],
+			[1850638,4571580488],
+			[1850638,4571580488],
+			[1850639,4571158376],
+			[1850639,4571158376],
+			[1850640,4570738376],
+			[1850640,4570738376],
+			[1850641,4570315952],
+			[1850641,4570315952],
+			[1850642,4569887856],
+			[1850642,4569887856],
+			[1850643,4569449416],
+			[1850643,4569449416],
+			[1850644,4569008704],
+			[1850644,4569008704],
+			[1850645,4568564472],
+			[1850645,4568564472],
+			[1850646,4568118608],
+			[1850646,4568118608],
+			[1850647,4567680936],
+			[1850647,4567680936],
+			[1850648,4567240912],
+			[1850648,4567240912],
+			[1850649,4566800376],
+			[1850649,4566800376],
+			[1850650,4566358336],
+			[1850650,4566358336],
+			[1850651,4565914992],
+			[1850651,4565914992],
+			[1850652,4565462712],
+			[1850652,4565462712],
+			[1850653,4565017040],
+			[1850653,4565017040],
+			[1850654,4564574864],
+			[1850654,4564574864],
+			[1850655,4564141376],
+			[1850655,4564141376],
+			[1850656,4563697152],
+			[1850656,4563697152],
+			[1850657,4563253736],
+			[1850657,4563253736],
+			[1850658,4562812368],
+			[1850658,4562812368],
+			[1850659,4562375848],
+			[1850659,4562375848],
+			[1850660,4561929704],
+			[1850660,4561929704],
+			[1850661,4561487168],
+			[1850661,4561487168],
+			[1850662,4561044712],
+			[1850662,4561044712],
+			[1850663,4560608008],
+			[1850663,4560608008],
+			[1850664,4560166736],
+			[1850664,4560166736],
+			[1850665,4559724744],
+			[1850665,4559724744],
+			[1850666,4559283072],
+			[1850666,4559283072],
+			[1850667,4558848296],
+			[1850667,4558848296],
+			[1850668,4558402992],
+			[1850668,4558402992],
+			[1850669,4557968360],
+			[1850669,4557968360],
+			[1850670,4557535264],
+			[1850670,4557535264],
+			[1850671,4557088944],
+			[1850671,4557088944],
+			[1850672,4556653888],
+			[1850672,4556653888],
+			[1850673,4556221384],
+			[1850673,4556221384],
+			[1850674,4555792976],
+			[1850674,4555792976],
+			[1850675,4555366672],
+			[1850675,4555366672],
+			[1850676,4554936384],
+			[1850676,4554936384],
+			[1850677,4554492528],
+			[1850677,4554492528],
+			[1850678,4554046544],
+			[1850678,4554046544],
+			[1850679,4553614064],
+			[1850679,4553614064],
+			[1850680,4553172560],
+			[1850680,4553172560],
+			[1850681,4552730480],
+			[1850681,4552730480],
+			[1850682,4552282128],
+			[1850682,4552282128],
+			[1850683,4551836080],
+			[1850683,4551836080],
+			[1850684,4551388712],
+			[1850684,4551388712],
+			[1850685,4550931624],
+			[1850685,4550931624],
+			[1850686,4550474240],
+			[1850686,4550474240],
+			[1850687,4550023416],
+			[1850687,4550023416],
+			[1850688,4549560712],
+			[1850688,4549560712],
+			[1850689,4549101936],
+			[1850689,4549101936],
+			[1850690,4548640576],
+			[1850690,4548640576],
+			[1850691,4548189464],
+			[1850691,4548189464],
+			[1850692,4547736320],
+			[1850692,4547736320],
+			[1850693,4547284440],
+			[1850693,4547284440],
+			[1850694,4546830792],
+			[1850694,4546830792],
+			[1850695,4546381704],
+			[1850695,4546381704],
+			[1850696,4545922280],
+			[1850696,4545922280],
+			[1850697,4545468056],
+			[1850697,4545468056],
+			[1850698,4545015688],
+			[1850698,4545015688],
+			[1850699,4544568384],
+			[1850699,4544568384],
+			[1850700,4544117072],
+			[1850700,4544117072],
+			[1850701,4543664840],
+			[1850701,4543664840],
+			[1850702,4543217712],
+			[1850702,4543217712],
+			[1850703,4542771224],
+			[1850703,4542771224],
+			[1850704,4542312312],
+			[1850704,4542312312],
+			[1850705,4541859904],
+			[1850705,4541859904],
+			[1850706,4541400560],
+			[1850706,4541400560],
+			[1850707,4540945824],
+			[1850707,4540945824],
+			[1850708,4540477696],
+			[1850708,4540477696],
+			[1850709,4540008664],
+			[1850709,4540008664],
+			[1850710,4539540160],
+			[1850710,4539540160],
+			[1850711,4539080984],
+			[1850711,4539080984],
+			[1850712,4538613368],
+			[1850712,4538613368],
+			[1850713,4538146856],
+			[1850713,4538146856],
+			[1850714,4537681336],
+			[1850714,4537681336],
+			[1850715,4537228624],
+			[1850715,4537228624],
+			[1850716,4536768216],
+			[1850716,4536768216],
+			[1850717,4536305256],
+			[1850717,4536305256],
+			[1850718,4535839192],
+			[1850718,4535839192],
+			[1850719,4535379984],
+			[1850719,4535379984],
+			[1850720,4534915960],
+			[1850720,4534915960],
+			[1850721,4534448096],
+			[1850721,4534448096],
+			[1850722,4533984944],
+			[1850722,4533984944],
+			[1850723,4533515112],
+			[1850723,4533515112],
+			[1850724,4533031952],
+			[1850724,4533031952],
+			[1850725,4532552584],
+			[1850725,4532552584],
+			[1850726,4532075616],
+			[1850726,4532075616],
+			[1850727,4531611384],
+			[1850727,4531611384],
+			[1850728,4531134704],
+			[1850728,4531134704],
+			[1850729,4530657584],
+			[1850729,4530657584],
+			[1850730,4530180320],
+			[1850730,4530180320],
+			[1850731,4529709296],
+			[1850731,4529709296],
+			[1850732,4529219520],
+			[1850732,4529219520],
+			[1850733,4528730936],
+			[1850733,4528730936],
+			[1850734,4528237344],
+			[1850734,4528237344],
+			[1850735,4527750936],
+			[1850735,4527750936],
+			[1850736,4527253912],
+			[1850736,4527253912],
+			[1850737,4526761128],
+			[1850737,4526761128],
+			[1850738,4526270840],
+			[1850738,4526270840],
+			[1850739,4525786216],
+			[1850739,4525786216],
+			[1850739,4525705200],
+			[1850743,4525705200],
+			[1850743,32],
+			[2872169,32],
+			[3361216,32],
+			[3369295,32],
+			[3369295,18078779144]
+		]
+	},
+	{
+		"name" : "construct CSA",
+		"usage" : [
+			[182,32],
+			[31087,32],
+			[1158511,32],
+			[1625263,32],
+			[1815603,32],
+			[1815603,6357491008]
+		]
+	},
+	{
+		"name" : "parse input text",
+		"usage" : [
+			[182,32],
+			[382,32],
+			[382,5368709152],
+			[27360,5368709152],
+			[27360,5368709160],
+			[31087,5368709160],
+			[31087,32],
+			[31087,32]
+		]
+	},
+	{
+		"name" : "SA",
+		"usage" : [
+			[31088,5368709160],
+			[32756,5368709160],
+			[32756,27514634288],
+			[40032,27514634288],
+			[40032,48318382128],
+			[995890,48318382128],
+			[995890,27514634288],
+			[1158511,27514634288],
+			[1158511,32],
+			[1158511,32]
+		]
+	},
+	{
+		"name" : "BWT",
+		"usage" : [
+			[1158511,5368709160],
+			[1160335,5368709160],
+			[1160335,5369709192],
+			[1191141,5369709192],
+			[1191141,5370709192],
+			[1625263,5370709192],
+			[1625263,32],
+			[1625263,32]
+		]
+	},
+	{
+		"name" : "construct CSA",
+		"usage" : [
+			[1625263,32],
+			[1638264,32],
+			[1733238,32],
+			[1767678,32],
+			[1815603,32],
+			[1815603,6357491008]
+		]
+	},
+	{
+		"name" : "construct csa-alpbabet",
+		"usage" : [
+			[1625264,1051176],
+			[1638264,1051176],
+			[1638264,1464],
+			[1638264,1464]
+		]
+	},
+	{
+		"name" : "construct wavelet tree",
+		"usage" : [
+			[1638264,1050040],
+			[1652880,1050040],
+			[1652880,3608569688],
+			[1694846,3608569688],
+			[1694846,4510449608],
+			[1696809,4510449608],
+			[1696809,4524969992],
+			[1696812,4524969992],
+			[1733148,5318417992],
+			[1733148,5318417992],
+			[1733149,5318444240],
+			[1733149,5318444240],
+			[1733150,5318470240],
+			[1733150,5318470240],
+			[1733151,5318496552],
+			[1733151,5318496552],
+			[1733152,5318522968],
+			[1733152,5318522968],
+			[1733153,5318549200],
+			[1733153,5318549200],
+			[1733154,5318575336],
+			[1733154,5318575336],
+			[1733155,5318601680],
+			[1733155,5318601680],
+			[1733156,5318627272],
+			[1733156,5318627272],
+			[1733157,5318652712],
+			[1733157,5318652712],
+			[1733158,5318678096],
+			[1733158,5318678096],
+			[1733159,5318699832],
+			[1733159,5318699832],
+			[1733160,5318725848],
+			[1733160,5318725848],
+			[1733161,5318751344],
+			[1733162,5318751344],
+			[1733163,5318776896],
+			[1733163,5318776896],
+			[1733163,5318799424],
+			[1733164,5318799424],
+			[1733164,5318817344],
+			[1733166,5318817344],
+			[1733167,5318841648],
+			[1733167,5318841648],
+			[1733168,5318867752],
+			[1733168,5318867752],
+			[1733169,5318892112],
+			[1733169,5318892112],
+			[1733170,5318917864],
+			[1733170,5318917864],
+			[1733171,5318943536],
+			[1733171,5318943536],
+			[1733172,5318969584],
+			[1733172,5318969584],
+			[1733173,5318995328],
+			[1733173,5318995328],
+			[1733174,5319021072],
+			[1733174,5319021072],
+			[1733174,5319054320],
+			[1733177,5319054320],
+			[1733178,5319078328],
+			[1733178,5319078328],
+			[1733179,5319103944],
+			[1733179,5319103944],
+			[1733180,5319130320],
+			[1733180,5319130320],
+			[1733181,5319156696],
+			[1733181,5319156696],
+			[1733182,5319183040],
+			[1733182,5319183040],
+			[1733182,5319216096],
+			[1733187,5319216096],
+			[1733188,5319240840],
+			[1733188,5319240840],
+			[1733189,5319266680],
+			[1733189,5319266680],
+			[1733190,5319292384],
+			[1733190,5319292384],
+			[1733191,5319315552],
+			[1733191,5319315552],
+			[1733192,5319340992],
+			[1733192,5319340992],
+			[1733193,5319365336],
+			[1733193,5319365336],
+			[1733194,5319389072],
+			[1733194,5319389072],
+			[1733195,5319415280],
+			[1733195,5319415280],
+			[1733196,5319441248],
+			[1733196,5319441248],
+			[1733197,5319465632],
+			[1733197,5319465632],
+			[1733198,5319491528],
+			[1733198,5319491528],
+			[1733199,5319515952],
+			[1733199,5319515952],
+			[1733200,5319540296],
+			[1733200,5319540296],
+			[1733201,5319565920],
+			[1733201,5319565920],
+			[1733202,5319592024],
+			[1733202,5319592024],
+			[1733203,5319616888],
+			[1733203,5319616888],
+			[1733204,5319640312],
+			[1733204,5319640312],
+			[1733205,5319664296],
+			[1733205,5319664296],
+			[1733206,5319689840],
+			[1733206,5319689840],
+			[1733207,5319707768],
+			[1733207,5319707768],
+			[1733208,5319733520],
+			[1733208,5319733520],
+			[1733209,5319759576],
+			[1733209,5319759576],
+			[1733210,5319783496],
+			[1733210,5319783496],
+			[1733211,5319809000],
+			[1733211,5319809000],
+			[1733212,5319829432],
+			[1733212,5319829432],
+			[1733213,5319855600],
+			[1733213,5319855600],
+			[1733214,5319882016],
+			[1733214,5319882016],
+			[1733215,5319896464],
+			[1733215,5319896464],
+			[1733216,5319920312],
+			[1733216,5319920312],
+			[1733217,5319946512],
+			[1733217,5319946512],
+			[1733218,5319971912],
+			[1733218,5319971912],
+			[1733218,5319991472],
+			[1733220,5319991472],
+			[1733221,5320015728],
+			[1733221,5320015728],
+			[1733222,5320041896],
+			[1733222,5320041896],
+			[1733223,5320067688],
+			[1733223,5320067688],
+			[1733224,5320091312],
+			[1733224,5320091312],
+			[1733225,5320116272],
+			[1733225,5320116272],
+			[1733226,5320142448],
+			[1733226,5320142448],
+			[1733227,5320167904],
+			[1733227,5320167904],
+			[1733228,5320192272],
+			[1733228,5320192272],
+			[1733229,5320216744],
+			[1733229,5320216744],
+			[1733230,5320242952],
+			[1733230,5320242952],
+			[1733231,5320267528],
+			[1733231,5320267528],
+			[1733232,5320292768],
+			[1733232,5320292768],
+			[1733233,5320318656],
+			[1733233,5320318656],
+			[1733234,5320343712],
+			[1733234,5320343712],
+			[1733235,5320368512],
+			[1733235,5320368512],
+			[1733236,5320392424],
+			[1733236,5320392424],
+			[1733237,5320415184],
+			[1733237,5320415184],
+			[1733238,5319400752],
+			[1733238,5319400752]
+		]
+	},
+	{
+		"name" : "sample SA",
+		"usage" : [
+			[1733238,5320449360],
+			[1733469,5320449360],
+			[1733469,6012509528],
+			[1767678,6012509528],
+			[1767678,6011460920],
+			[1767678,6011460920]
+		]
+	},
+	{
+		"name" : "sample ISA",
+		"usage" : [
+			[1767678,6012509528],
+			[1767800,6012509528],
+			[1767800,6358539616],
+			[1815603,6358539616],
+			[1815603,6357491008],
+			[1815603,6357491008]
+		]
+	},
+	{
+		"name" : "store CSA",
+		"usage" : [
+			[1815603,6357491008],
+			[1818810,6357491008],
+			[1818810,6357956888],
+			[1834962,6357956888],
+			[1834962,6357491008],
+			[1834972,6357491008],
+			[1834972,6357905880],
+			[1847098,6357905880],
+			[1847098,6357491008],
+			[1847816,6357491008]
+		]
+	},
+	{
+		"name" : "LCP",
+		"usage" : [
+			[1850744,672137288],
+			[1892111,672137288],
+			[1892111,6040846416],
+			[1900192,6040846416],
+			[1900192,6043797840],
+			[1900193,6043797840],
+			[1900193,6047797872],
+			[2872169,6047797872],
+			[2872169,32],
+			[2872169,32]
+		]
+	},
+	{
+		"name" : "CST",
+		"usage" : [
+			[2872169,64],
+			[3077354,64],
+			[3112278,64],
+			[3336212,64],
+			[3361216,18078779144],
+			[3361216,18078779144]
+		]
+	},
+	{
+		"name" : "bps-sct",
+		"usage" : [
+			[2872169,1048672],
+			[2872684,1048672],
+			[2872684,1343225960],
+			[2872937,1343225960],
+			[2872937,2014314608],
+			[2873362,2014314608],
+			[2873362,2696055456],
+			[2873506,2696055456],
+			[2873506,3367144104],
+			[3077354,3367144104],
+			[3077354,2013266000],
+			[3077354,2013266000]
+		]
+	},
+	{
+		"name" : "bpss-sct",
+		"usage" : [
+			[3077354,2013266000],
+			[3077382,2013266000],
+			[3077382,2097152096],
+			[3078231,2097152096],
+			[3078231,2102722664],
+			[3078232,2102722664],
+			[3078233,2102772040],
+			[3078233,2102772040],
+			[3078234,2102821344],
+			[3078234,2102821344],
+			[3078235,2102871776],
+			[3078235,2102871776],
+			[3078236,2102921480],
+			[3078236,2102921480],
+			[3078237,2102971224],
+			[3078237,2102971224],
+			[3078238,2103020752],
+			[3078238,2103020752],
+			[3078239,2103071096],
+			[3078239,2103071096],
+			[3078240,2103121296],
+			[3078240,2103121296],
+			[3078241,2103171768],
+			[3078241,2103171768],
+			[3078242,2103221368],
+			[3078242,2103221368],
+			[3078243,2103272144],
+			[3078243,2103272144],
+			[3078244,2103322712],
+			[3078244,2103322712],
+			[3078245,2103373496],
+			[3078245,2103373496],
+			[3078246,2103423552],
+			[3078246,2103423552],
+			[3078247,2103473808],
+			[3078247,2103473808],
+			[3078248,2103523368],
+			[3078248,2103523368],
+			[3078249,2103572928],
+			[3078249,2103572928],
+			[3078250,2103621416],
+			[3078250,2103621416],
+			[3078251,2103671280],
+			[3078251,2103671280],
+			[3078252,2103721384],
+			[3078252,2103721384],
+			[3078253,2103771536],
+			[3078253,2103771536],
+			[3078254,2103821096],
+			[3078254,2103821096],
+			[3078255,2103871720],
+			[3078255,2103871720],
+			[3078256,2103922512],
+			[3078256,2103922512],
+			[3078257,2103972112],
+			[3078257,2103972112],
+			[3078258,2104021432],
+			[3078258,2104021432],
+			[3078259,2104070752],
+			[3078259,2104070752],
+			[3078260,2104121192],
+			[3078260,2104121192],
+			[3078261,2104170976],
+			[3078261,2104170976],
+			[3078262,2104219928],
+			[3078262,2104219928],
+			[3078263,2104269424],
+			[3078263,2104269424],
+			[3078264,2104319016],
+			[3078264,2104319016],
+			[3078265,2104368480],
+			[3078265,2104368480],
+			[3078266,2104417528],
+			[3078266,2104417528],
+			[3078267,2104467144],
+			[3078267,2104467144],
+			[3078268,2104517624],
+			[3078268,2104517624],
+			[3078269,2104567752],
+			[3078269,2104567752],
+			[3078270,2104617832],
+			[3078270,2104617832],
+			[3078271,2104668336],
+			[3078271,2104668336],
+			[3078272,2104718440],
+			[3078272,2104718440],
+			[3078273,2104768128],
+			[3078273,2104768128],
+			[3078274,2104817112],
+			[3078274,2104817112],
+			[3078275,2104868184],
+			[3078275,2104868184],
+			[3078276,2104918544],
+			[3078276,2104918544],
+			[3078277,2104968456],
+			[3078277,2104968456],
+			[3078278,2105017736],
+			[3078278,2105017736],
+			[3078279,2105068352],
+			[3078279,2105068352],
+			[3078280,2105119296],
+			[3078280,2105119296],
+			[3078281,2105169504],
+			[3078281,2105169504],
+			[3078282,2105219504],
+			[3078282,2105219504],
+			[3078283,2105270192],
+			[3078283,2105270192],
+			[3078284,2105321336],
+			[3078284,2105321336],
+			[3078285,2105371800],
+			[3078285,2105371800],
+			[3078286,2105420432],
+			[3078286,2105420432],
+			[3078287,2105472400],
+			[3078287,2105472400],
+			[3078288,2105522760],
+			[3078288,2105522760],
+			[3078289,2105572288],
+			[3078289,2105572288],
+			[3078290,2105620792],
+			[3078290,2105620792],
+			[3078291,2105670688],
+			[3078291,2105670688],
+			[3078292,2105720856],
+			[3078293,2105720856],
+			[3078293,2105770312],
+			[3078294,2105770312],
+			[3078295,2105819560],
+			[3078295,2105819560],
+			[3078296,2105870096],
+			[3078296,2105870096],
+			[3078297,2105920808],
+			[3078297,2105920808],
+			[3078298,2105971368],
+			[3078298,2105971368],
+			[3078299,2106020904],
+			[3078299,2106020904],
+			[3078300,2106071000],
+			[3078300,2106071000],
+			[3078301,2106121128],
+			[3078301,2106121128],
+			[3078302,2106170664],
+			[3078302,2106170664],
+			[3078303,2106220408],
+			[3078303,2106220408],
+			[3078304,2106270096],
+			[3078304,2106270096],
+			[3078305,2106320104],
+			[3078305,2106320104],
+			[3078306,2106371464],
+			[3078306,2106371464],
+			[3078307,2106420904],
+			[3078307,2106420904],
+			[3078308,2106470960],
+			[3078308,2106470960],
+			[3078309,2106520688],
+			[3078309,2106520688],
+			[3078310,2106571280],
+			[3078310,2106571280],
+			[3078311,2106621000],
+			[3078311,2106621000],
+			[3078312,2106670656],
+			[3078312,2106670656],
+			[3078313,2106721808],
+			[3078313,2106721808],
+			[3078314,2106771664],
+			[3078314,2106771664],
+			[3078315,2106821560],
+			[3078315,2106821560],
+			[3078316,2106871624],
+			[3078316,2106871624],
+			[3078317,2106921576],
+			[3078317,2106921576],
+			[3078318,2106971704],
+			[3078318,2106971704],
+			[3078319,2107020560],
+			[3078319,2107020560],
+			[3078320,2107070096],
+			[3078320,2107070096],
+			[3078321,2107120216],
+			[3078321,2107120216],
+			[3078322,2107170272],
+			[3078322,2107170272],
+			[3078323,2107220112],
+			[3078323,2107220112],
+			[3078324,2107270048],
+			[3078324,2107270048],
+			[3078325,2107319424],
+			[3078325,2107319424],
+			[3078326,2107368920],
+			[3078326,2107368920],
+			[3078327,2107418184],
+			[3078327,2107418184],
+			[3078328,2107468376],
+			[3078328,2107468376],
+			[3078329,2107518112],
+			[3078329,2107518112],
+			[3078330,2107567936],
+			[3078330,2107567936],
+			[3078331,2107617192],
+			[3078331,2107617192],
+			[3078332,2107666448],
+			[3078332,2107666448],
+			[3078333,2107716128],
+			[3078333,2107716128],
+			[3078334,2107766200],
+			[3078334,2107766200],
+			[3078335,2107815264],
+			[3078335,2107815264],
+			[3078336,2107864728],
+			[3078336,2107864728],
+			[3078337,2107914400],
+			[3078337,2107914400],
+			[3078338,2107964176],
+			[3078338,2107964176],
+			[3078339,2108012896],
+			[3078339,2108012896],
+			[3078340,2108061864],
+			[3078340,2108061864],
+			[3078341,2108111368],
+			[3078341,2108111368],
+			[3078342,2108161088],
+			[3078342,2108161088],
+			[3078343,2108210504],
+			[3078343,2108210504],
+			[3078344,2108260728],
+			[3078344,2108260728],
+			[3078345,2108310608],
+			[3078345,2108310608],
+			[3078346,2108360008],
+			[3078346,2108360008],
+			[3078347,2108408912],
+			[3078347,2108408912],
+			[3078348,2108458768],
+			[3078348,2108458768],
+			[3078349,2108508736],
+			[3078349,2108508736],
+			[3078350,2108558384],
+			[3078350,2108558384],
+			[3078351,2108607656],
+			[3078351,2108607656],
+			[3078352,2108657664],
+			[3078352,2108657664],
+			[3078353,2108707720],
+			[3078353,2108707720],
+			[3078354,2108757528],
+			[3078354,2108757528],
+			[3080264,2203954832],
+			[3080264,2203954832],
+			[3080265,2204004248],
+			[3080265,2204004248],
+			[3080266,2204054248],
+			[3080266,2204054248],
+			[3080267,2204104264],
+			[3080267,2204104264],
+			[3080268,2204154400],
+			[3080268,2204154400],
+			[3080269,2204204552],
+			[3080269,2204204552],
+			[3080270,2204254520],
+			[3080270,2204254520],
+			[3080271,2204303192],
+			[3080271,2204303192],
+			[3080272,2204352720],
+			[3080272,2204352720],
+			[3080273,2204402496],
+			[3080273,2204402496],
+			[3080274,2204453128],
+			[3080274,2204453128],
+			[3080275,2204502352],
+			[3080275,2204502352],
+			[3080276,2204552440],
+			[3080276,2204552440],
+			[3080277,2204602736],
+			[3080277,2204602736],
+			[3080278,2204652264],
+			[3080278,2204652264],
+			[3080279,2204701264],
+			[3080279,2204701264],
+			[3080280,2204750368],
+			[3080280,2204750368],
+			[3080281,2204799256],
+			[3080281,2204799256],
+			[3080282,2204849576],
+			[3080282,2204849576],
+			[3080283,2204898688],
+			[3080283,2204898688],
+			[3080284,2204948696],
+			[3080284,2204948696],
+			[3080285,2204998744],
+			[3080285,2204998744],
+			[3080286,2205048904],
+			[3080286,2205048904],
+			[3080287,2205098216],
+			[3080287,2205098216],
+			[3080288,2205150176],
+			[3080288,2205150176],
+			[3080289,2205200888],
+			[3080289,2205200888],
+			[3080290,2205250760],
+			[3080290,2205250760],
+			[3080291,2205300168],
+			[3080291,2205300168],
+			[3080292,2205351368],
+			[3080292,2205351368],
+			[3080293,2205402424],
+			[3080293,2205402424],
+			[3080294,2205453024],
+			[3080294,2205453024],
+			[3080295,2205502248],
+			[3080295,2205502248],
+			[3080296,2205552304],
+			[3080296,2205552304],
+			[3080297,2205602560],
+			[3080297,2205602560],
+			[3080298,2205652400],
+			[3080298,2205652400],
+			[3080299,2205701600],
+			[3080299,2205701600],
+			[3080300,2205751456],
+			[3080300,2205751456],
+			[3080301,2205801784],
+			[3080301,2205801784],
+			[3080302,2205851272],
+			[3080302,2205851272],
+			[3080303,2205899816],
+			[3080303,2205899816],
+			[3080304,2205949472],
+			[3080304,2205949472],
+			[3080305,2205999264],
+			[3080305,2205999264],
+			[3080306,2206049048],
+			[3080306,2206049048],
+			[3080307,2206098120],
+			[3080307,2206098120],
+			[3080308,2206148152],
+			[3080308,2206148152],
+			[3080309,2206198240],
+			[3080309,2206198240],
+			[3080310,2206247872],
+			[3080310,2206247872],
+			[3080311,2206297128],
+			[3080311,2206297128],
+			[3080312,2206347024],
+			[3080312,2206347024],
+			[3080313,2206396088],
+			[3080313,2206396088],
+			[3080314,2206445896],
+			[3080314,2206445896],
+			[3080315,2206495528],
+			[3080315,2206495528],
+			[3080316,2206545240],
+			[3080316,2206545240],
+			[3080317,2206595168],
+			[3080317,2206595168],
+			[3080318,2206645184],
+			[3080318,2206645184],
+			[3080319,2206693904],
+			[3080319,2206693904],
+			[3080320,2206743064],
+			[3080320,2206743064],
+			[3080321,2206792928],
+			[3080321,2206792928],
+			[3080322,2206843344],
+			[3080322,2206843344],
+			[3080323,2206893400],
+			[3080323,2206893400],
+			[3080324,2206943496],
+			[3080324,2206943496],
+			[3080325,2206995160],
+			[3080325,2206995160],
+			[3080326,2207045512],
+			[3080326,2207045512],
+			[3080327,2207094440],
+			[3080327,2207094440],
+			[3080328,2207144160],
+			[3080328,2207144160],
+			[3080329,2207193392],
+			[3080329,2207193392],
+			[3080330,2207243552],
+			[3080330,2207243552],
+			[3080331,2207292248],
+			[3080331,2207292248],
+			[3080332,2207342296],
+			[3080332,2207342296],
+			[3080333,2207391912],
+			[3080333,2207391912],
+			[3080334,2207442936],
+			[3080334,2207442936],
+			[3080335,2207491720],
+			[3080335,2207491720],
+			[3080336,2207541008],
+			[3080336,2207541008],
+			[3080337,2207590432],
+			[3080337,2207590432],
+			[3080338,2207640632],
+			[3080338,2207640632],
+			[3080339,2207690360],
+			[3080339,2207690360],
+			[3080340,2207740104],
+			[3080340,2207740104],
+			[3080341,2207790216],
+			[3080341,2207790216],
+			[3080342,2207840176],
+			[3080342,2207840176],
+			[3080343,2207888952],
+			[3080343,2207888952],
+			[3080344,2207938664],
+			[3080344,2207938664],
+			[3080345,2207988488],
+			[3080345,2207988488],
+			[3080346,2208038856],
+			[3080346,2208038856],
+			[3080347,2208088904],
+			[3080347,2208088904],
+			[3080348,2208139416],
+			[3080348,2208139416],
+			[3080349,2208189296],
+			[3080349,2208189296],
+			[3080350,2208239024],
+			[3080350,2208239024],
+			[3080351,2208288216],
+			[3080351,2208288216],
+			[3080352,2208337536],
+			[3080352,2208337536],
+			[3080353,2208387368],
+			[3080353,2208387368],
+			[3080354,2208437272],
+			[3080354,2208437272],
+			[3080355,2208485800],
+			[3080355,2208485800],
+			[3080356,2208536040],
+			[3080356,2208536040],
+			[3080357,2208586088],
+			[3080357,2208586088],
+			[3080358,2208635192],
+			[3080358,2208635192],
+			[3080359,2208684576],
+			[3080359,2208684576],
+			[3080360,2208734856],
+			[3080360,2208734856],
+			[3080361,2208785712],
+			[3080361,2208785712],
+			[3080362,2208835776],
+			[3080362,2208835776],
+			[3080363,2208885136],
+			[3080363,2208885136],
+			[3080364,2208934288],
+			[3080364,2208934288],
+			[3080365,2208984168],
+			[3080365,2208984168],
+			[3080366,2209033960],
+			[3080366,2209033960],
+			[3080367,2209083240],
+			[3080367,2209083240],
+			[3080368,2209133448],
+			[3080368,2209133448],
+			[3080369,2209183296],
+			[3080369,2209183296],
+			[3080370,2209233912],
+			[3080370,2209233912],
+			[3080371,2209283144],
+			[3080371,2209283144],
+			[3080372,2209332928],
+			[3080372,2209332928],
+			[3080373,2209382360],
+			[3080373,2209382360],
+			[3080374,2209432648],
+			[3080374,2209432648],
+			[3080375,2209482088],
+			[3080375,2209482088],
+			[3080376,2209531616],
+			[3080376,2209531616],
+			[3080377,2209581688],
+			[3080377,2209581688],
+			[3080378,2209631608],
+			[3080378,2209631608],
+			[3080379,2209680824],
+			[3080379,2209680824],
+			[3080380,2209730504],
+			[3080380,2209730504],
+			[3080381,2209780000],
+			[3080381,2209780000],
+			[3080382,2209828944],
+			[3080382,2209828944],
+			[3080383,2209877528],
+			[3080383,2209877528],
+			[3080384,2209927472],
+			[3080384,2209927472],
+			[3080385,2209978128],
+			[3080385,2209978128],
+			[3080386,2210028728],
+			[3080386,2210028728],
+			[3080387,2210077880],
+			[3080387,2210077880],
+			[3080388,2210129240],
+			[3080388,2210129240],
+			[3080389,2210178680],
+			[3080389,2210178680],
+			[3080390,2210228000],
+			[3080390,2210228000],
+			[3080391,2210276792],
+			[3080391,2210276792],
+			[3080392,2210326992],
+			[3080392,2210326992],
+			[3080393,2210376864],
+			[3080393,2210376864],
+			[3080394,2210426800],
+			[3080394,2210426800],
+			[3080395,2210475576],
+			[3080395,2210475576],
+			[3080396,2210525200],
+			[3080396,2210525200],
+			[3080397,2210574752],
+			[3080397,2210574752],
+			[3080398,2210624640],
+			[3080398,2210624640],
+			[3080399,2210674272],
+			[3080399,2210674272],
+			[3080400,2210724624],
+			[3080400,2210724624],
+			[3080401,2210774560],
+			[3080401,2210774560],
+			[3080402,2210824520],
+			[3080402,2210824520],
+			[3080403,2210873696],
+			[3080403,2210873696],
+			[3080404,2210923848],
+			[3080404,2210923848],
+			[3080405,2210973800],
+			[3080405,2210973800],
+			[3080406,2211023592],
+			[3080406,2211023592],
+			[3080407,2211072784],
+			[3080407,2211072784],
+			[3080408,2211122432],
+			[3080408,2211122432],
+			[3080409,2211172344],
+			[3080409,2211172344],
+			[3080410,2211222192],
+			[3080410,2211222192],
+			[3080411,2211271376],
+			[3080411,2211271376],
+			[3080412,2211321184],
+			[3080412,2211321184],
+			[3080413,2211373168],
+			[3080413,2211373168],
+			[3080414,2211422824],
+			[3080414,2211422824],
+			[3080415,2211472112],
+			[3080415,2211472112],
+			[3080416,2211521792],
+			[3080416,2211521792],
+			[3080417,2211572488],
+			[3080417,2211572488],
+			[3080418,2211621896],
+			[3080418,2211621896],
+			[3080419,2211670792],
+			[3080419,2211670792],
+			[3080420,2211721320],
+			[3080420,2211721320],
+			[3080421,2211772664],
+			[3080421,2211772664],
+			[3080422,2211823064],
+			[3080422,2211823064],
+			[3080423,2211872744],
+			[3080423,2211872744],
+			[3080424,2211923232],
+			[3080424,2211923232],
+			[3080425,2211972408],
+			[3080425,2211972408],
+			[3080426,2212022568],
+			[3080426,2212022568],
+			[3080427,2212071384],
+			[3080427,2212071384],
+			[3080428,2212121224],
+			[3080428,2212121224],
+			[3080429,2212170720],
+			[3080429,2212170720],
+			[3080430,2212220424],
+			[3080430,2212220424],
+			[3080431,2212269584],
+			[3080431,2212269584],
+			[3080432,2212319168],
+			[3080432,2212319168],
+			[3080433,2212369000],
+			[3080433,2212369000],
+			[3080434,2212418744],
+			[3080434,2212418744],
+			[3080435,2212468600],
+			[3080435,2212468600],
+			[3080436,2212519160],
+			[3080436,2212519160],
+			[3080437,2212568984],
+			[3080437,2212568984],
+			[3080438,2212619288],
+			[3080438,2212619288],
+			[3080439,2212668520],
+			[3080439,2212668520],
+			[3080440,2212718512],
+			[3080440,2212718512],
+			[3080441,2212768408],
+			[3080441,2212768408],
+			[3080442,2212818560],
+			[3080442,2212818560],
+			[3080443,2212867864],
+			[3080443,2212867864],
+			[3080444,2212917752],
+			[3080444,2212917752],
+			[3080445,2212968320],
+			[3080445,2212968320],
+			[3080446,2213018152],
+			[3080446,2213018152],
+			[3080447,2213067856],
+			[3080447,2213067856],
+			[3080448,2213117960],
+			[3080448,2213117960],
+			[3080449,2213168736],
+			[3080449,2213168736],
+			[3080450,2213218624],
+			[3080450,2213218624],
+			[3080451,2213267800],
+			[3080451,2213267800],
+			[3080452,2213319024],
+			[3080452,2213319024],
+			[3080453,2213369784],
+			[3080453,2213369784],
+			[3080454,2213421216],
+			[3080454,2213421216],
+			[3080455,2213470016],
+			[3080455,2213470016],
+			[3080456,2213519656],
+			[3080456,2213519656],
+			[3080457,2213569352],
+			[3080457,2213569352],
+			[3080458,2213619232],
+			[3080458,2213619232],
+			[3080459,2213668320],
+			[3080459,2213668320],
+			[3080460,2213718192],
+			[3080460,2213718192],
+			[3080461,2213768136],
+			[3080461,2213768136],
+			[3080462,2213818248],
+			[3080462,2213818248],
+			[3080463,2213867632],
+			[3080463,2213867632],
+			[3080464,2213918064],
+			[3080464,2213918064],
+			[3080465,2213968032],
+			[3080465,2213968032],
+			[3080466,2214017608],
+			[3080466,2214017608],
+			[3080467,2214066848],
+			[3080467,2214066848],
+			[3080468,2214116832],
+			[3080468,2214116832],
+			[3080469,2214166920],
+			[3080469,2214166920],
+			[3080470,2214216760],
+			[3080470,2214216760],
+			[3080471,2214266496],
+			[3080471,2214266496],
+			[3080472,2214316168],
+			[3080472,2214316168],
+			[3080473,2214366384],
+			[3080473,2214366384],
+			[3080474,2214416328],
+			[3080474,2214416328],
+			[3080475,2214465728],
+			[3080475,2214465728],
+			[3080476,2214516240],
+			[3080476,2214516240],
+			[3080477,2214566224],
+			[3080477,2214566224],
+			[3080478,2214616024],
+			[3080478,2214616024],
+			[3080479,2214665088],
+			[3080479,2214665088],
+			[3080480,2214715752],
+			[3080480,2214715752],
+			[3080481,2214767080],
+			[3080481,2214767080],
+			[3080482,2214817496],
+			[3080482,2214817496],
+			[3080483,2214868576],
+			[3080483,2214868576],
+			[3080484,2214918880],
+			[3080484,2214918880],
+			[3080485,2214968240],
+			[3080485,2214968240],
+			[3080486,2215018088],
+			[3080486,2215018088],
+			[3080487,2215067016],
+			[3080487,2215067016],
+			[3080488,2215117160],
+			[3080488,2215117160],
+			[3080489,2215167016],
+			[3080489,2215167016],
+			[3080490,2215217736],
+			[3080490,2215217736],
+			[3080491,2215266752],
+			[3080491,2215266752],
+			[3080492,2215316296],
+			[3080492,2215316296],
+			[3080493,2215367776],
+			[3080493,2215367776],
+			[3080494,2215418664],
+			[3080494,2215418664],
+			[3080495,2215468112],
+			[3080495,2215468112],
+			[3080496,2215518480],
+			[3080496,2215518480],
+			[3080497,2215568464],
+			[3080497,2215568464],
+			[3080498,2215619088],
+			[3080498,2215619088],
+			[3080499,2215667840],
+			[3080499,2215667840],
+			[3080500,2215719368],
+			[3080500,2215719368],
+			[3080501,2215768768],
+			[3080501,2215768768],
+			[3080502,2215819536],
+			[3080502,2215819536],
+			[3080503,2215869560],
+			[3080503,2215869560],
+			[3080504,2215920128],
+			[3080504,2215920128],
+			[3080505,2215969576],
+			[3080505,2215969576],
+			[3080506,2216019544],
+			[3080506,2216019544],
+			[3080507,2216068104],
+			[3080507,2216068104],
+			[3080508,2216117624],
+			[3080508,2216117624],
+			[3080509,2216167688],
+			[3080509,2216167688],
+			[3080510,2216217336],
+			[3080510,2216217336],
+			[3080511,2216266392],
+			[3080511,2216266392],
+			[3080512,2216316896],
+			[3080512,2216316896],
+			[3080513,2216367416],
+			[3080513,2216367416],
+			[3080514,2216417576],
+			[3080514,2216417576],
+			[3080515,2216466992],
+			[3080515,2216466992],
+			[3080516,2216517352],
+			[3080516,2216517352],
+			[3080517,2216568296],
+			[3080517,2216568296],
+			[3080518,2216618584],
+			[3080518,2216618584],
+			[3080519,2216667904],
+			[3080519,2216667904],
+			[3080520,2216717616],
+			[3080520,2216717616],
+			[3080521,2216766952],
+			[3080521,2216766952],
+			[3080522,2216817696],
+			[3080522,2216817696],
+			[3080523,2216868416],
+			[3080523,2216868416],
+			[3080524,2216918704],
+			[3080524,2216918704],
+			[3080525,2216968712],
+			[3080525,2216968712],
+			[3080526,2217019048],
+			[3080526,2217019048],
+			[3080527,2217068176],
+			[3080527,2217068176],
+			[3080528,2217118048],
+			[3080528,2217118048],
+			[3080529,2217168120],
+			[3080529,2217168120],
+			[3080530,2217218256],
+			[3080530,2217218256],
+			[3080531,2217266984],
+			[3080531,2217266984],
+			[3080532,2217316720],
+			[3080532,2217316720],
+			[3080533,2217366336],
+			[3080533,2217366336],
+			[3080534,2217416152],
+			[3080534,2217416152],
+			[3080535,2217464944],
+			[3080535,2217464944],
+			[3080536,2217515664],
+			[3080536,2217515664],
+			[3080537,2217565984],
+			[3080537,2217565984],
+			[3080538,2217615696],
+			[3080538,2217615696],
+			[3080539,2217664848],
+			[3080539,2217664848],
+			[3080540,2217715272],
+			[3080540,2217715272],
+			[3080541,2217765248],
+			[3080541,2217765248],
+			[3080542,2217814944],
+			[3080542,2217814944],
+			[3080543,2217864248],
+			[3080543,2217864248],
+			[3080544,2217914656],
+			[3080544,2217914656],
+			[3080545,2217964720],
+			[3080545,2217964720],
+			[3080546,2218014560],
+			[3080546,2218014560],
+			[3080547,2218063152],
+			[3080547,2218063152],
+			[3080548,2218112800],
+			[3080548,2218112800],
+			[3080549,2218163176],
+			[3080549,2218163176],
+			[3080550,2218213984],
+			[3080550,2218213984],
+			[3080551,2218259696],
+			[3080551,2218259696],
+			[3080552,2218309184],
+			[3080552,2218309184],
+			[3080553,2218358984],
+			[3080553,2218358984],
+			[3080554,2218408136],
+			[3080554,2218408136],
+			[3080555,2218457448],
+			[3080555,2218457448],
+			[3080556,2218507704],
+			[3080556,2218507704],
+			[3080557,2218557720],
+			[3080557,2218557720],
+			[3080558,2218608112],
+			[3080558,2218608112],
+			[3080559,2218656936],
+			[3080559,2218656936],
+			[3080560,2218707312],
+			[3080560,2218707312],
+			[3080561,2218758144],
+			[3080561,2218758144],
+			[3080562,2218809120],
+			[3080562,2218809120],
+			[3080563,2218858400],
+			[3080563,2218858400],
+			[3080564,2218908488],
+			[3080564,2218908488],
+			[3080565,2218958400],
+			[3080565,2218958400],
+			[3080566,2219008584],
+			[3080566,2219008584],
+			[3080567,2219057920],
+			[3080567,2219057920],
+			[3080568,2219108288],
+			[3080568,2219108288],
+			[3080569,2219158232],
+			[3080569,2219158232],
+			[3080570,2219208224],
+			[3080570,2219208224],
+			[3080571,2219257544],
+			[3080571,2219257544],
+			[3080572,2219307304],
+			[3080572,2219307304],
+			[3080573,2219356680],
+			[3080573,2219356680],
+			[3080574,2219406528],
+			[3080574,2219406528],
+			[3080575,2219456312],
+			[3080575,2219456312],
+			[3080576,2219506344],
+			[3080576,2219506344],
+			[3080577,2219556424],
+			[3080577,2219556424],
+			[3080578,2219606144],
+			[3080578,2219606144],
+			[3080579,2219653800],
+			[3080579,2219653800],
+			[3080580,2219703448],
+			[3080580,2219703448],
+			[3080581,2219753656],
+			[3080581,2219753656],
+			[3080582,2219803280],
+			[3080582,2219803280],
+			[3080583,2219851928],
+			[3080583,2219851928],
+			[3080584,2219901304],
+			[3080584,2219901304],
+			[3080585,2219951704],
+			[3080585,2219951704],
+			[3080586,2220001920],
+			[3080586,2220001920],
+			[3080587,2220051440],
+			[3080587,2220051440],
+			[3080588,2220102200],
+			[3080588,2220102200],
+			[3080589,2220153704],
+			[3080589,2220153704],
+			[3080590,2220204200],
+			[3080590,2220204200],
+			[3080591,2220252944],
+			[3080591,2220252944],
+			[3080592,2220302288],
+			[3080592,2220302288],
+			[3080593,2220351784],
+			[3080593,2220351784],
+			[3080594,2220401000],
+			[3080594,2220401000],
+			[3080595,2220449224],
+			[3080595,2220449224],
+			[3080596,2220498480],
+			[3080596,2220498480],
+			[3080597,2220548312],
+			[3080597,2220548312],
+			[3080598,2220598096],
+			[3080598,2220598096],
+			[3080599,2220647552],
+			[3080599,2220647552],
+			[3080600,2220697512],
+			[3080600,2220697512],
+			[3080601,2220747680],
+			[3080601,2220747680],
+			[3080602,2220797824],
+			[3080602,2220797824],
+			[3080603,2220846216],
+			[3080603,2220846216],
+			[3080604,2220895888],
+			[3080604,2220895888],
+			[3080605,2220945912],
+			[3080605,2220945912],
+			[3080606,2220995408],
+			[3080606,2220995408],
+			[3080607,2221044416],
+			[3080607,2221044416],
+			[3080608,2221094720],
+			[3080608,2221094720],
+			[3080609,2221144080],
+			[3080609,2221144080],
+			[3080610,2221195576],
+			[3080610,2221195576],
+			[3080611,2221244712],
+			[3080611,2221244712],
+			[3080612,2221295240],
+			[3080612,2221295240],
+			[3080613,2221345456],
+			[3080613,2221345456],
+			[3080614,2221395248],
+			[3080614,2221395248],
+			[3080615,2221444200],
+			[3080615,2221444200],
+			[3080616,2221493920],
+			[3080616,2221493920],
+			[3080617,2221544192],
+			[3080617,2221544192],
+			[3080618,2221594712],
+			[3080618,2221594712],
+			[3080619,2221643528],
+			[3080619,2221643528],
+			[3080620,2221693392],
+			[3080620,2221693392],
+			[3080621,2221744048],
+			[3080621,2221744048],
+			[3080622,2221794760],
+			[3080622,2221794760],
+			[3080623,2221844656],
+			[3080623,2221844656],
+			[3080624,2221894512],
+			[3080624,2221894512],
+			[3080625,2221944672],
+			[3080625,2221944672],
+			[3080626,2221994280],
+			[3080626,2221994280],
+			[3080627,2222043824],
+			[3080627,2222043824],
+			[3080628,2222094632],
+			[3080628,2222094632],
+			[3080629,2222144912],
+			[3080629,2222144912],
+			[3080630,2222196616],
+			[3080630,2222196616],
+			[3080631,2222245464],
+			[3080631,2222245464],
+			[3080632,2222295176],
+			[3080632,2222295176],
+			[3080633,2222344920],
+			[3080633,2222344920],
+			[3080634,2222394904],
+			[3080634,2222394904],
+			[3080635,2222443728],
+			[3080635,2222443728],
+			[3080636,2222492984],
+			[3080636,2222492984],
+			[3080637,2222542488],
+			[3080637,2222542488],
+			[3080638,2222592664],
+			[3080638,2222592664],
+			[3080639,2222641792],
+			[3080639,2222641792],
+			[3080640,2222690800],
+			[3080640,2222690800],
+			[3080641,2222740544],
+			[3080641,2222740544],
+			[3080642,2222790096],
+			[3080642,2222790096],
+			[3080643,2222838312],
+			[3080643,2222838312],
+			[3080644,2222888040],
+			[3080644,2222888040],
+			[3080645,2222938032],
+			[3080645,2222938032],
+			[3080646,2222987960],
+			[3080646,2222987960],
+			[3080647,2223036504],
+			[3080647,2223036504],
+			[3080648,2223086608],
+			[3080648,2223086608],
+			[3080649,2223136376],
+			[3080649,2223136376],
+			[3080650,2223186264],
+			[3080650,2223186264],
+			[3080651,2223235768],
+			[3080651,2223235768],
+			[3080652,2223285184],
+			[3080652,2223285184],
+			[3080653,2223334360],
+			[3080653,2223334360],
+			[3080654,2223383368],
+			[3080654,2223383368],
+			[3080655,2223431344],
+			[3080655,2223431344],
+			[3080656,2223480560],
+			[3080656,2223480560],
+			[3080657,2223530400],
+			[3080657,2223530400],
+			[3080658,2223579560],
+			[3080658,2223579560],
+			[3080659,2223628464],
+			[3080659,2223628464],
+			[3080660,2223677336],
+			[3080660,2223677336],
+			[3080661,2223726944],
+			[3080661,2223726944],
+			[3080662,2223776544],
+			[3080662,2223776544],
+			[3080663,2223825232],
+			[3080663,2223825232],
+			[3080664,2223875088],
+			[3080664,2223875088],
+			[3080665,2223924224],
+			[3080665,2223924224],
+			[3080666,2223974280],
+			[3080666,2223974280],
+			[3080667,2224022736],
+			[3080667,2224022736],
+			[3080668,2224073192],
+			[3080668,2224073192],
+			[3080669,2224123552],
+			[3080669,2224123552],
+			[3080670,2224175160],
+			[3080670,2224175160],
+			[3080671,2224224248],
+			[3080671,2224224248],
+			[3080672,2224273696],
+			[3080672,2224273696],
+			[3080673,2224323192],
+			[3080673,2224323192],
+			[3080674,2224374168],
+			[3080674,2224374168],
+			[3080675,2224423288],
+			[3080675,2224423288],
+			[3080676,2224472800],
+			[3080676,2224472800],
+			[3080677,2224522488],
+			[3080677,2224522488],
+			[3080678,2224571952],
+			[3080678,2224571952],
+			[3080679,2224620544],
+			[3080679,2224620544],
+			[3080680,2224670112],
+			[3080680,2224670112],
+			[3080681,2224719544],
+			[3080681,2224719544],
+			[3080682,2224770912],
+			[3080682,2224770912],
+			[3080683,2224819384],
+			[3080683,2224819384],
+			[3080684,2224869104],
+			[3080684,2224869104],
+			[3080685,2224919408],
+			[3080685,2224919408],
+			[3080686,2224968872],
+			[3080686,2224968872],
+			[3080687,2225017760],
+			[3080687,2225017760],
+			[3080688,2225067048],
+			[3080688,2225067048],
+			[3080689,2225115952],
+			[3080689,2225115952],
+			[3080690,2225165664],
+			[3080690,2225165664],
+			[3080691,2225214376],
+			[3080691,2225214376],
+			[3080692,2225264792],
+			[3080692,2225264792],
+			[3080693,2225315136],
+			[3080693,2225315136],
+			[3080694,2225367744],
+			[3080694,2225367744],
+			[3080695,2225416288],
+			[3080695,2225416288],
+			[3080696,2225466016],
+			[3080696,2225466016],
+			[3080697,2225516152],
+			[3080697,2225516152],
+			[3080698,2225565672],
+			[3080698,2225565672],
+			[3080699,2225614776],
+			[3080699,2225614776],
+			[3080700,2225664632],
+			[3080700,2225664632],
+			[3080701,2225714496],
+			[3080701,2225714496],
+			[3080702,2225764576],
+			[3080702,2225764576],
+			[3080703,2225813120],
+			[3080703,2225813120],
+			[3080704,2225862528],
+			[3080704,2225862528],
+			[3080705,2225912920],
+			[3080705,2225912920],
+			[3080706,2225962424],
+			[3080706,2225962424],
+			[3080707,2226011592],
+			[3080707,2226011592],
+			[3080708,2226061056],
+			[3080708,2226061056],
+			[3080709,2226110944],
+			[3080709,2226110944],
+			[3080710,2226160832],
+			[3080710,2226160832],
+			[3080711,2226210856],
+			[3080711,2226210856],
+			[3080712,2226260424],
+			[3080712,2226260424],
+			[3080713,2226310648],
+			[3080713,2226310648],
+			[3080714,2226362312],
+			[3080714,2226362312],
+			[3080715,2226411200],
+			[3080715,2226411200],
+			[3080716,2226461128],
+			[3080716,2226461128],
+			[3080717,2226511864],
+			[3080717,2226511864],
+			[3080718,2226562440],
+			[3080718,2226562440],
+			[3080719,2226612136],
+			[3080719,2226612136],
+			[3080720,2226661952],
+			[3080720,2226661952],
+			[3080721,2226711584],
+			[3080721,2226711584],
+			[3080722,2226760928],
+			[3080722,2226760928],
+			[3080723,2226810816],
+			[3080723,2226810816],
+			[3080724,2226860096],
+			[3080724,2226860096],
+			[3080725,2226909816],
+			[3080725,2226909816],
+			[3080726,2226959768],
+			[3080726,2226959768],
+			[3080727,2227008592],
+			[3080727,2227008592],
+			[3080728,2227057728],
+			[3080728,2227057728],
+			[3080729,2227108984],
+			[3080729,2227108984],
+			[3080730,2227159048],
+			[3080730,2227159048],
+			[3080731,2227207840],
+			[3080731,2227207840],
+			[3080732,2227257880],
+			[3080732,2227257880],
+			[3080733,2227307976],
+			[3080733,2227307976],
+			[3080734,2227357976],
+			[3080734,2227357976],
+			[3080735,2227407136],
+			[3080735,2227407136],
+			[3080736,2227456144],
+			[3080736,2227456144],
+			[3080737,2227506016],
+			[3080737,2227506016],
+			[3080738,2227555728],
+			[3080738,2227555728],
+			[3080739,2227604160],
+			[3080739,2227604160],
+			[3080740,2227653576],
+			[3080740,2227653576],
+			[3080741,2227703328],
+			[3080741,2227703328],
+			[3080742,2227753688],
+			[3080742,2227753688],
+			[3080743,2227802976],
+			[3080743,2227802976],
+			[3080744,2227853264],
+			[3080744,2227853264],
+			[3080745,2227903240],
+			[3080745,2227903240],
+			[3080746,2227953048],
+			[3080746,2227953048],
+			[3080747,2228002344],
+			[3080747,2228002344],
+			[3080748,2228052664],
+			[3080748,2228052664],
+			[3080749,2228102584],
+			[3080749,2228102584],
+			[3080750,2228152544],
+			[3080750,2228152544],
+			[3080751,2228201688],
+			[3080751,2228201688],
+			[3080752,2228251488],
+			[3080752,2228251488],
+			[3080753,2228301456],
+			[3080753,2228301456],
+			[3080754,2228352040],
+			[3080754,2228352040],
+			[3080755,2228401152],
+			[3080755,2228401152],
+			[3080756,2228450648],
+			[3080756,2228450648],
+			[3080757,2228500448],
+			[3080757,2228500448],
+			[3080758,2228549936],
+			[3080758,2228549936],
+			[3080759,2228599576],
+			[3080759,2228599576],
+			[3080760,2228649416],
+			[3080760,2228649416],
+			[3080761,2228699232],
+			[3080761,2228699232],
+			[3080762,2228748552],
+			[3080762,2228748552],
+			[3080763,2228797800],
+			[3080763,2228797800],
+			[3080764,2228847400],
+			[3080764,2228847400],
+			[3080765,2228897288],
+			[3080765,2228897288],
+			[3080766,2228947032],
+			[3080766,2228947032],
+			[3080767,2228995280],
+			[3080767,2228995280],
+			[3080768,2229045040],
+			[3080768,2229045040],
+			[3080769,2229094256],
+			[3080769,2229094256],
+			[3080770,2229143848],
+			[3080770,2229143848],
+			[3080771,2229193096],
+			[3080771,2229193096],
+			[3080772,2229243912],
+			[3080772,2229243912],
+			[3080773,2229293632],
+			[3080773,2229293632],
+			[3080774,2229343816],
+			[3080774,2229343816],
+			[3080775,2229392800],
+			[3080775,2229392800],
+			[3080776,2229442736],
+			[3080776,2229442736],
+			[3080777,2229492936],
+			[3080777,2229492936],
+			[3080778,2229543304],
+			[3080778,2229543304],
+			[3080779,2229592304],
+			[3080779,2229592304],
+			[3080780,2229641616],
+			[3080780,2229641616],
+			[3080781,2229691656],
+			[3080781,2229691656],
+			[3080782,2229740800],
+			[3080782,2229740800],
+			[3080783,2229790744],
+			[3080783,2229790744],
+			[3080784,2229841632],
+			[3080784,2229841632],
+			[3080785,2229892008],
+			[3080785,2229892008],
+			[3080786,2229941488],
+			[3080786,2229941488],
+			[3080787,2229991232],
+			[3080787,2229991232],
+			[3080788,2230041088],
+			[3080788,2230041088],
+			[3080789,2230091280],
+			[3080789,2230091280],
+			[3080790,2230141104],
+			[3080790,2230141104],
+			[3080791,2230190440],
+			[3080791,2230190440],
+			[3080792,2230240624],
+			[3080792,2230240624],
+			[3080793,2230290808],
+			[3080793,2230290808],
+			[3080794,2230341072],
+			[3080794,2230341072],
+			[3080795,2230391632],
+			[3080795,2230391632],
+			[3080796,2230441336],
+			[3080796,2230441336],
+			[3080797,2230491112],
+			[3080797,2230491112],
+			[3080798,2230541096],
+			[3080798,2230541096],
+			[3080799,2230591168],
+			[3080799,2230591168],
+			[3080800,2230641576],
+			[3080800,2230641576],
+			[3080801,2230692112],
+			[3080801,2230692112],
+			[3080802,2230742800],
+			[3080802,2230742800],
+			[3080803,2230792984],
+			[3080803,2230792984],
+			[3080804,2230843800],
+			[3080804,2230843800],
+			[3080805,2230894136],
+			[3080805,2230894136],
+			[3080806,2230944312],
+			[3080806,2230944312],
+			[3080807,2230993832],
+			[3080807,2230993832],
+			[3080808,2231044400],
+			[3080808,2231044400],
+			[3080809,2231094248],
+			[3080809,2231094248],
+			[3080810,2231143736],
+			[3080810,2231143736],
+			[3080811,2231192936],
+			[3080811,2231192936],
+			[3080812,2231243784],
+			[3080812,2231243784],
+			[3080813,2231294024],
+			[3080813,2231294024],
+			[3080814,2231344512],
+			[3080814,2231344512],
+			[3080815,2231393672],
+			[3080815,2231393672],
+			[3080816,2231443752],
+			[3080816,2231443752],
+			[3080817,2231493232],
+			[3080817,2231493232],
+			[3080818,2231543128],
+			[3080818,2231543128],
+			[3080819,2231592960],
+			[3080819,2231592960],
+			[3080820,2231642464],
+			[3080820,2231642464],
+			[3080821,2231692544],
+			[3080821,2231692544],
+			[3080822,2231742664],
+			[3080822,2231742664],
+			[3080823,2231791656],
+			[3080823,2231791656],
+			[3080824,2231841736],
+			[3080824,2231841736],
+			[3080825,2231891440],
+			[3080825,2231891440],
+			[3080826,2231941648],
+			[3080826,2231941648],
+			[3080827,2231990096],
+			[3080827,2231990096],
+			[3080828,2232039624],
+			[3080828,2232039624],
+			[3080829,2232088832],
+			[3080829,2232088832],
+			[3080830,2232138656],
+			[3080830,2232138656],
+			[3080831,2232187728],
+			[3080831,2232187728],
+			[3080832,2232238264],
+			[3080832,2232238264],
+			[3080833,2232288952],
+			[3080833,2232288952],
+			[3080834,2232339680],
+			[3080834,2232339680],
+			[3080835,2232388656],
+			[3080835,2232388656],
+			[3080836,2232439024],
+			[3080836,2232439024],
+			[3080837,2232488768],
+			[3080837,2232488768],
+			[3080838,2232538376],
+			[3080838,2232538376],
+			[3080839,2232587888],
+			[3080839,2232587888],
+			[3080840,2232637696],
+			[3080840,2232637696],
+			[3080841,2232686928],
+			[3080841,2232686928],
+			[3080842,2232737040],
+			[3080842,2232737040],
+			[3080843,2232786336],
+			[3080843,2232786336],
+			[3080844,2232836352],
+			[3080844,2232836352],
+			[3080845,2232886424],
+			[3080845,2232886424],
+			[3080846,2232936240],
+			[3080846,2232936240],
+			[3080847,2232985392],
+			[3080847,2232985392],
+			[3080848,2233035112],
+			[3080848,2233035112],
+			[3080849,2233085656],
+			[3080849,2233085656],
+			[3080850,2233135976],
+			[3080850,2233135976],
+			[3080851,2233185552],
+			[3080851,2233185552],
+			[3080852,2233235584],
+			[3080852,2233235584],
+			[3080853,2233285736],
+			[3080853,2233285736],
+			[3080854,2233335800],
+			[3080854,2233335800],
+			[3080855,2233385224],
+			[3080855,2233385224],
+			[3080856,2233434776],
+			[3080856,2233434776],
+			[3080857,2233484848],
+			[3080857,2233484848],
+			[3080858,2233534744],
+			[3080858,2233534744],
+			[3080859,2233583056],
+			[3080859,2233583056],
+			[3080860,2233632968],
+			[3080860,2233632968],
+			[3080861,2233682552],
+			[3080861,2233682552],
+			[3080862,2233731832],
+			[3080862,2233731832],
+			[3080863,2233780968],
+			[3080863,2233780968],
+			[3080864,2233830208],
+			[3080864,2233830208],
+			[3080865,2233879768],
+			[3080865,2233879768],
+			[3080866,2233929328],
+			[3080866,2233929328],
+			[3080867,2233978368],
+			[3080867,2233978368],
+			[3080868,2234029112],
+			[3080868,2234029112],
+			[3080869,2234080880],
+			[3080869,2234080880],
+			[3080870,2234131160],
+			[3080870,2234131160],
+			[3080871,2234180632],
+			[3080871,2234180632],
+			[3080872,2234230328],
+			[3080872,2234230328],
+			[3080873,2234280008],
+			[3080873,2234280008],
+			[3080874,2234328984],
+			[3080874,2234328984],
+			[3080875,2234377880],
+			[3080875,2234377880],
+			[3080876,2234428104],
+			[3080876,2234428104],
+			[3080877,2234477568],
+			[3080877,2234477568],
+			[3080878,2234527000],
+			[3080878,2234527000],
+			[3080879,2234576152],
+			[3080879,2234576152],
+			[3080880,2234625520],
+			[3080880,2234625520],
+			[3080881,2234675040],
+			[3080881,2234675040],
+			[3080882,2234723920],
+			[3080882,2234723920],
+			[3080883,2234773720],
+			[3080883,2234773720],
+			[3080884,2234825168],
+			[3080884,2234825168],
+			[3080885,2234876232],
+			[3080885,2234876232],
+			[3080886,2234926408],
+			[3080886,2234926408],
+			[3080887,2234975936],
+			[3080887,2234975936],
+			[3080888,2235026272],
+			[3080888,2235026272],
+			[3080889,2235075536],
+			[3080889,2235075536],
+			[3080890,2235125112],
+			[3080890,2235125112],
+			[3080891,2235174728],
+			[3080891,2235174728],
+			[3080892,2235224256],
+			[3080892,2235224256],
+			[3080893,2235274056],
+			[3080893,2235274056],
+			[3080894,2235323008],
+			[3080894,2235323008],
+			[3080895,2235372864],
+			[3080895,2235372864],
+			[3080896,2235424344],
+			[3080896,2235424344],
+			[3080897,2235475784],
+			[3080897,2235475784],
+			[3080898,2235526496],
+			[3080898,2235526496],
+			[3080899,2235578064],
+			[3080899,2235578064],
+			[3080900,2235627992],
+			[3080900,2235627992],
+			[3080901,2235678248],
+			[3080901,2235678248],
+			[3080902,2235728216],
+			[3080902,2235728216],
+			[3080903,2235778624],
+			[3080903,2235778624],
+			[3080904,2235828552],
+			[3080904,2235828552],
+			[3080905,2235879384],
+			[3080905,2235879384],
+			[3080906,2235928088],
+			[3080906,2235928088],
+			[3080907,2235977368],
+			[3080907,2235977368],
+			[3080908,2236027776],
+			[3080908,2236027776],
+			[3080909,2236079144],
+			[3080909,2236079144],
+			[3080910,2236128648],
+			[3080910,2236128648],
+			[3080911,2236179320],
+			[3080911,2236179320],
+			[3080912,2236231080],
+			[3080912,2236231080],
+			[3080913,2236281568],
+			[3080913,2236281568],
+			[3080914,2236333784],
+			[3080914,2236333784],
+			[3080915,2236383904],
+			[3080915,2236383904],
+			[3080916,2236433544],
+			[3080916,2236433544],
+			[3080917,2236482896],
+			[3080917,2236482896],
+			[3080918,2236532688],
+			[3080918,2236532688],
+			[3080919,2236583608],
+			[3080919,2236583608],
+			[3080920,2236634440],
+			[3080920,2236634440],
+			[3080921,2236685264],
+			[3080921,2236685264],
+			[3080922,2236735080],
+			[3080922,2236735080],
+			[3080923,2236784952],
+			[3080923,2236784952],
+			[3080924,2236835384],
+			[3080924,2236835384],
+			[3080925,2236885592],
+			[3080925,2236885592],
+			[3080926,2236935248],
+			[3080926,2236935248],
+			[3080927,2236985744],
+			[3080927,2236985744],
+			[3080928,2237035840],
+			[3080928,2237035840],
+			[3080929,2237085784],
+			[3080929,2237085784],
+			[3080930,2237135048],
+			[3080930,2237135048],
+			[3080931,2237184464],
+			[3080931,2237184464],
+			[3080932,2237234688],
+			[3080932,2237234688],
+			[3080933,2237284936],
+			[3080933,2237284936],
+			[3080934,2237334152],
+			[3080934,2237334152],
+			[3080935,2237384288],
+			[3080935,2237384288],
+			[3080936,2237433984],
+			[3080936,2237433984],
+			[3080937,2237483992],
+			[3080937,2237483992],
+			[3080938,2237533760],
+			[3080938,2237533760],
+			[3080939,2237583640],
+			[3080939,2237583640],
+			[3080940,2237634144],
+			[3080940,2237634144],
+			[3080941,2237683872],
+			[3080941,2237683872],
+			[3080942,2237733368],
+			[3080942,2237733368],
+			[3080943,2237783736],
+			[3080943,2237783736],
+			[3080944,2237833712],
+			[3080944,2237833712],
+			[3080945,2237883760],
+			[3080945,2237883760],
+			[3080946,2237932880],
+			[3080946,2237932880],
+			[3080947,2237982808],
+			[3080947,2237982808],
+			[3080948,2238032656],
+			[3080948,2238032656],
+			[3080949,2238082664],
+			[3080949,2238082664],
+			[3080950,2238131968],
+			[3080950,2238131968],
+			[3080951,2238181984],
+			[3080951,2238181984],
+			[3080952,2238231736],
+			[3080952,2238231736],
+			[3080953,2238281560],
+			[3080953,2238281560],
+			[3080954,2238330440],
+			[3080954,2238330440],
+			[3080955,2238380376],
+			[3080955,2238380376],
+			[3080956,2238430648],
+			[3080956,2238430648],
+			[3080957,2238480512],
+			[3080957,2238480512],
+			[3080958,2238530096],
+			[3080958,2238530096],
+			[3080959,2238579920],
+			[3080959,2238579920],
+			[3080960,2238630136],
+			[3080960,2238630136],
+			[3080961,2238680720],
+			[3080961,2238680720],
+			[3080962,2238730840],
+			[3080962,2238730840],
+			[3080963,2238781064],
+			[3080963,2238781064],
+			[3080964,2238831648],
+			[3080964,2238831648],
+			[3080965,2238881320],
+			[3080965,2238881320],
+			[3080966,2238929920],
+			[3080966,2238929920],
+			[3080967,2238979256],
+			[3080967,2238979256],
+			[3080968,2239029624],
+			[3080968,2239029624],
+			[3080969,2239079688],
+			[3080969,2239079688],
+			[3080970,2239128888],
+			[3080970,2239128888],
+			[3080971,2239178664],
+			[3080971,2239178664],
+			[3080972,2239228584],
+			[3080972,2239228584],
+			[3080973,2239278872],
+			[3080973,2239278872],
+			[3080974,2239328024],
+			[3080974,2239328024],
+			[3080975,2239377968],
+			[3080975,2239377968],
+			[3080976,2239428016],
+			[3080976,2239428016],
+			[3080977,2239477728],
+			[3080977,2239477728],
+			[3080978,2239526552],
+			[3080978,2239526552],
+			[3080979,2239576472],
+			[3080979,2239576472],
+			[3080980,2239627560],
+			[3080980,2239627560],
+			[3080981,2239679704],
+			[3080981,2239679704],
+			[3080982,2239730840],
+			[3080982,2239730840],
+			[3080983,2239782104],
+			[3080983,2239782104],
+			[3080984,2239831912],
+			[3080984,2239831912],
+			[3080985,2239881456],
+			[3080985,2239881456],
+			[3080986,2239931680],
+			[3080986,2239931680],
+			[3080987,2239981984],
+			[3080987,2239981984],
+			[3080988,2240032896],
+			[3080988,2240032896],
+			[3080989,2240083008],
+			[3080989,2240083008],
+			[3080990,2240131672],
+			[3080990,2240131672],
+			[3080991,2240182384],
+			[3080991,2240182384],
+			[3080992,2240233320],
+			[3080992,2240233320],
+			[3080993,2240283560],
+			[3080993,2240283560],
+			[3080994,2240333400],
+			[3080994,2240333400],
+			[3080995,2240382800],
+			[3080995,2240382800],
+			[3080996,2240431952],
+			[3080996,2240431952],
+			[3080997,2240481552],
+			[3080997,2240481552],
+			[3080998,2240530688],
+			[3080998,2240530688],
+			[3080999,2240580640],
+			[3080999,2240580640],
+			[3081000,2240630312],
+			[3081000,2240630312],
+			[3081001,2240680024],
+			[3081001,2240680024],
+			[3081002,2240729160],
+			[3081002,2240729160],
+			[3081003,2240779552],
+			[3081003,2240779552],
+			[3081004,2240830208],
+			[3081004,2240830208],
+			[3081005,2240882088],
+			[3081005,2240882088],
+			[3081006,2240932376],
+			[3081006,2240932376],
+			[3081007,2240982536],
+			[3081007,2240982536],
+			[3081008,2241032368],
+			[3081008,2241032368],
+			[3081009,2241082864],
+			[3081009,2241082864],
+			[3081010,2241132776],
+			[3081010,2241132776],
+			[3081011,2241184768],
+			[3081011,2241184768],
+			[3081012,2241237584],
+			[3081012,2241237584],
+			[3081013,2241289096],
+			[3081013,2241289096],
+			[3081014,2241338584],
+			[3081014,2241338584],
+			[3081015,2241388536],
+			[3081015,2241388536],
+			[3081016,2241438824],
+			[3081016,2241438824],
+			[3081017,2241490224],
+			[3081017,2241490224],
+			[3081018,2241540656],
+			[3081018,2241540656],
+			[3081019,2241590664],
+			[3081019,2241590664],
+			[3081020,2241640784],
+			[3081020,2241640784],
+			[3081021,2241690552],
+			[3081021,2241690552],
+			[3081022,2241739432],
+			[3081022,2241739432],
+			[3081023,2241789624],
+			[3081023,2241789624],
+			[3081024,2241839792],
+			[3081024,2241839792],
+			[3081025,2241890024],
+			[3081025,2241890024],
+			[3081026,2241939352],
+			[3081026,2241939352],
+			[3081027,2241989152],
+			[3081027,2241989152],
+			[3081028,2242039456],
+			[3081028,2242039456],
+			[3081029,2242089848],
+			[3081029,2242089848],
+			[3081030,2242139544],
+			[3081030,2242139544],
+			[3081031,2242189192],
+			[3081031,2242189192],
+			[3081032,2242238976],
+			[3081032,2242238976],
+			[3081033,2242289176],
+			[3081033,2242289176],
+			[3081034,2242338416],
+			[3081034,2242338416],
+			[3081035,2242388624],
+			[3081035,2242388624],
+			[3081036,2242438584],
+			[3081036,2242438584],
+			[3081037,2242488264],
+			[3081037,2242488264],
+			[3081038,2242536888],
+			[3081038,2242536888],
+			[3081039,2242586936],
+			[3081039,2242586936],
+			[3081040,2242636616],
+			[3081040,2242636616],
+			[3081041,2242687024],
+			[3081041,2242687024],
+			[3081042,2242737184],
+			[3081042,2242737184],
+			[3081043,2242787312],
+			[3081043,2242787312],
+			[3081044,2242837864],
+			[3081044,2242837864],
+			[3081045,2242888088],
+			[3081045,2242888088],
+			[3081046,2242937824],
+			[3081046,2242937824],
+			[3081047,2242988064],
+			[3081047,2242988064],
+			[3081048,2243038544],
+			[3081048,2243038544],
+			[3081049,2243088752],
+			[3081049,2243088752],
+			[3081050,2243138096],
+			[3081050,2243138096],
+			[3081051,2243187800],
+			[3081051,2243187800],
+			[3081052,2243237424],
+			[3081052,2243237424],
+			[3081053,2243287712],
+			[3081053,2243287712],
+			[3081054,2243336736],
+			[3081054,2243336736],
+			[3081055,2243387200],
+			[3081055,2243387200],
+			[3081056,2243437032],
+			[3081056,2243437032],
+			[3081057,2243487152],
+			[3081057,2243487152],
+			[3081058,2243536896],
+			[3081059,2243536896],
+			[3081059,2243587304],
+			[3081060,2243587304],
+			[3081060,2243637080],
+			[3081061,2243637080],
+			[3081062,2243687176],
+			[3081062,2243687176],
+			[3081063,2243736880],
+			[3081063,2243736880],
+			[3081064,2243787280],
+			[3081064,2243787280],
+			[3081065,2243837312],
+			[3081065,2243837312],
+			[3081066,2243888128],
+			[3081066,2243888128],
+			[3081067,2243937720],
+			[3081067,2243937720],
+			[3081068,2243986656],
+			[3081068,2243986656],
+			[3081068,2244012800],
+			[3081188,2244012800],
+			[3081188,2338402056],
+			[3081207,2338402056],
+			[3081207,2368220936],
+			[3112021,2368220936],
+			[3112021,2410163992],
+			[3112278,2410163992]
+		]
+	},
+	{
+		"name" : "clcp",
+		"usage" : [
+			[3112278,2410163992],
+			[3112278,2410163992],
+			[3112279,2411212744],
+			[3176699,2411212744],
+			[3176699,4220283312],
+			[3179481,4220283312],
+			[3179481,11609270072],
+			[3335544,11609270072],
+			[3335544,11722336984],
+			[3336212,11722336984],
+			[3336212,11721288200],
+			[3336212,11721288200]
+		]
+	},
+	{
+		"name" : "load csa",
+		"usage" : [
+			[3336212,11721288200],
+			[3337004,11721288200],
+			[3337004,15328807848],
+			[3338327,15328807848],
+			[3338327,16230687768],
+			[3338602,16230687768],
+			[3338602,16246993368],
+			[3338607,16246993368],
+			[3338607,16247459248],
+			[3339279,16247459248],
+			[3339280,16247677912],
+			[3339280,16247677912],
+			[3339281,16247902552],
+			[3339281,16247902552],
+			[3358381,17000860256],
+			[3358381,17000860256],
+			[3358382,17000876696],
+			[3358382,17000876696],
+			[3358383,17000893072],
+			[3358383,17000893072],
+			[3358384,17000910024],
+			[3360658,17039931928],
+			[3360659,17039948016],
+			[3360659,17039948016],
+			[3360660,17039965064],
+			[3360660,17039965064],
+			[3360661,17039981296],
+			[3360661,17039981296],
+			[3360662,17039997400],
+			[3360662,17039997400],
+			[3360663,17040012816],
+			[3360663,17040012816],
+			[3360664,17040028880],
+			[3360664,17040028880],
+			[3360665,17040044896],
+			[3360665,17040044896],
+			[3360666,17040061096],
+			[3360666,17040061096],
+			[3360667,17040076912],
+			[3360667,17040076912],
+			[3360668,17040092920],
+			[3360668,17040092920],
+			[3360669,17040109056],
+			[3360669,17040109056],
+			[3360670,17040124864],
+			[3360670,17040124864],
+			[3360671,17040140536],
+			[3360671,17040140536],
+			[3360672,17040173952],
+			[3360672,17040173952],
+			[3360673,17040189656],
+			[3360673,17040189656],
+			[3360674,17040205736],
+			[3360674,17040205736],
+			[3360675,17040221288],
+			[3360675,17040221288],
+			[3360676,17040236896],
+			[3360676,17040236896],
+			[3360677,17040252600],
+			[3360677,17040252600],
+			[3360678,17040268200],
+			[3360678,17040268200],
+			[3360679,17040284264],
+			[3360679,17040284264],
+			[3360680,17040300256],
+			[3360680,17040300256],
+			[3360681,17040316616],
+			[3360681,17040316616],
+			[3360682,17040332544],
+			[3360682,17040332544],
+			[3360683,17040348192],
+			[3360683,17040348192],
+			[3360684,17040363800],
+			[3360684,17040363800],
+			[3360685,17040379592],
+			[3360685,17040379592],
+			[3360686,17040395360],
+			[3360686,17040395360],
+			[3360687,17040411016],
+			[3360687,17040411016],
+			[3360688,17040426872],
+			[3360688,17040426872],
+			[3360689,17040442584],
+			[3360689,17040442584],
+			[3360690,17040458336],
+			[3360690,17040458336],
+			[3360691,17040474512],
+			[3360691,17040474512],
+			[3360692,17040490232],
+			[3360692,17040490232],
+			[3360693,17040506280],
+			[3360693,17040506280],
+			[3360694,17040522448],
+			[3360694,17040522448],
+			[3360695,17040538232],
+			[3360695,17040538232],
+			[3360696,17040554248],
+			[3360696,17040554248],
+			[3360697,17040570032],
+			[3360697,17040570032],
+			[3360698,17040585536],
+			[3360698,17040585536],
+			[3360699,17040601344],
+			[3360699,17040601344],
+			[3360700,17040617056],
+			[3360700,17040617056],
+			[3360701,17040632776],
+			[3360701,17040632776],
+			[3360702,17040649536],
+			[3360702,17040649536],
+			[3360703,17040665328],
+			[3360703,17040665328],
+			[3360704,17040680960],
+			[3360704,17040680960],
+			[3360705,17040696560],
+			[3360705,17040696560],
+			[3360706,17040712216],
+			[3360706,17040712216],
+			[3360707,17040728000],
+			[3360707,17040728000],
+			[3360708,17040743704],
+			[3360708,17040743704],
+			[3360709,17040777016],
+			[3360709,17040777016],
+			[3360710,17040792536],
+			[3360711,17040792536],
+			[3360712,17040808352],
+			[3360712,17040808352],
+			[3360713,17040824432],
+			[3360713,17040824432],
+			[3360714,17040841040],
+			[3360714,17040841040],
+			[3360715,17040856832],
+			[3360715,17040856832],
+			[3360716,17040872624],
+			[3360716,17040872624],
+			[3360717,17040888584],
+			[3360717,17040888584],
+			[3360718,17040904440],
+			[3360718,17040904440],
+			[3360719,17040920344],
+			[3360719,17040920344],
+			[3360720,17040936144],
+			[3360720,17040936144],
+			[3360721,17040952096],
+			[3360721,17040952096],
+			[3360722,17040968208],
+			[3360722,17040968208],
+			[3360723,17040983840],
+			[3360723,17040983840],
+			[3360724,17040999984],
+			[3360724,17040999984],
+			[3360725,17041015848],
+			[3360725,17041015848],
+			[3360726,17041031704],
+			[3360726,17041031704],
+			[3360727,17041047616],
+			[3360727,17041047616],
+			[3360728,17041064008],
+			[3360728,17041064008],
+			[3360729,17041080648],
+			[3360729,17041080648],
+			[3360729,17040687488],
+			[3360859,17040687488],
+			[3360859,17732747656],
+			[3361121,17732747656],
+			[3361121,18078777744],
+			[3361216,18078777744],
+			[3361216,18078779176],
+			[3361216,18078779176]
+		]
+	},
+	{
+		"name" : "delete temporary files",
+		"usage" : [
+			[3361216,18078779144],
+			[3369295,18078779144]
+		]
+	}
+]
+;
+//w = window,d = document,e = d.documentElement,g = d.getElementsByTagName('body')[0],
+//  xw = w.innerWidth || e.clientWidth || g.clientWidth,
+  xw = 850 
+//  yh = w.innerHeight || e.clientHeight || g.clientHeight;
+  yh = 500
+
+margin = {top: 20,right: 80,bottom: 120,left: 120},
+  width = xw - margin.left - margin.right,height = yh - margin.top - margin.bottom;
+x = d3.scale.linear().range([0, width]);
+y = d3.scale.linear().range([height, 0]);
+xAxis = d3.svg.axis().scale(x).orient("bottom");
+yAxis = d3.svg.axis().scale(y).orient("left").ticks(5);
+color = d3.scale.category10();
+x_max = d3.max(events2, function (d) { return d3.max(d.usage, function (u) { return u[0] / 1000;})})
+y_max = d3.max(events2, function (d) { return d3.max(d.usage, function (u) { return 1.1 * u[1] / (1024 * 1024);})})
+peak = d3.max(events2, function (d) { return d3.max(d.usage, function (u) { return u[1]; })})
+data = []
+events2.forEach(function (d) { data = data.concat(d.usage); });
+peakelem = data.filter(function (a) { return a[1] == peak; });
+peakelem = peakelem.splice(0,1);
+x.domain([0, x_max]);
+ y.domain([0, y_max]);
+svg = d3.select("#vis_cst_const_HP").append("svg")
+  .attr("width", width + margin.left + margin.right)
+  .attr("height", height + margin.top + margin.bottom)
+  .attr("xmlns", "http://www.w3.org/2000/svg")
+  .append("g").attr("transform","translate(" + margin.left + "," + margin.top + ")");
+
+  svg.append("g").attr("class", "xaxis").attr("transform", "translate(0," + height + ")")
+  .call(xAxis).append("text").attr("text-anchor", "end")
+  .attr("shape-rendering", "crispEdges").attr("x", width / 2 + 50).attr("y", 70).attr("shape-rendering", "crispEdges")
+  .attr("font-family", "sans-serif").attr("font-size", "20px").text("Time (seconds)");
+
+svg.append("g").attr("class", "yaxis").call(yAxis).append("text").attr("transform", "rotate(-90)").attr("x", -height / 2 + 50)
+  .attr("y", -80).attr("shape-rendering", "crispEdges").attr("font-family", "sans-serif").attr("font-size", "20px").style("text-anchor", "end")
+  .text("Memory Usage (MiB)");
+
+svg.selectAll(".tick text").style("font-size", "20px");
+svg.selectAll(".xaxis .tick text").attr("dy", 23);
+svg.selectAll(".yaxis .tick text").attr("dx", -10);
+svg.selectAll("line").attr("fill", "none").attr("stroke", "black")
+svg.selectAll("path").attr("fill", "none").attr("stroke", "black")
+
+svg.selectAll("line.horizontalGrid").data(y.ticks(5)).enter().append("line")
+  .attr({"class": "horizontalGrid","x1": 0,"x2": width,"y1": function (d) { return y(d);},
+     "y2": function (d) { return y(d); }, "fill": "none", "shape-rendering": "crispEdges",
+     "stroke": "lightgrey","stroke-dasharray": "10,10","stroke-width": "1.5px"});
+
+var area2 = d3.svg.area().x(function (d) { return x(d[0] / 1000);}).y0(height).y1(function (d) { return y(d[1] / (1024 * 1024))});
+
+ev = svg.selectAll(".event2").data(events2).enter().append("svg:path").attr("class", "area2")
+  .attr("fill", function (d) { return d3.rgb(color(d.name)); })
+  .attr("d", function (d) { return area2(d.usage) })
+  .style("stroke", function (d) { return d3.rgb(color(d.name)).darker(2);}).style("stroke-width", "2px")
+
+svg.selectAll(".dot").data(peakelem).enter().append("circle").attr("r", 3).attr("fill", "red")
+  .attr("cx", function (d) {return x(d[0] / 1000)})
+  .attr("cy", function (d) {return y(d[1] / (1024 * 1024))})
+  .attr("fill", "red").attr("stroke-width", 2).attr("stroke", "#cc0000")
+
+svg.selectAll(".dot").data(peakelem).enter().append("svg:text")
+  .attr("x", function (d) {return x(d[0] / 1000)}).attr("y", function (d) {return y(d[1] / (1024 * 1024) * 1.025)})
+  .text(function (d) {return "Peak Usage: " + Math.round(d[1] / (1024 * 1024)) + " MB"})
+  .attr("font-size", 12).attr("fill", "red");
+
+svg.selectAll(".dot").data(peakelem).enter().append("circle")
+  .attr("r", 5).attr("fill", "red")
+  .attr("cx", function (d) {return x(d[0] / 1000)})
+  .attr("cy", function (d) {return y(d[1] / (1024 * 1024))})
+  .attr("fill", "none").attr("stroke-width", 2).attr("stroke", "#cc0000").each(pulsepeak());
+
+function pulsepeak() { return function (d, i, j) {
+  d3.select(this).attr("r", 5).style("stroke-opacity", 1.0).transition()
+    .ease("linear").duration(1000).attr("r", 10).style("stroke-opacity", 0.0).each("end", pulsepeak());};}
+
+vertical = d3.select(".chart #vis_cst_const_HP").append("div").attr("class", "remove")
+  .style("position", "absolute").style("z-index", "19").style("width", "1px")
+  .style("height", height - margin).style("top", "30px").style("bottom", "50px")
+  .style("left", "0px").style("opacity", "0.4").style("background", "black");
+
+tooltip = d3.select(".chart #vis_cst_const_HP").append("div").attr("class", "remove")
+  .style("position", "absolute").style("z-index", "20").style("visibility", "hidden").style("top", "10px");
+
+circle = svg.append("circle").attr("cx", 100).attr("cy", 350).attr("r", 3).attr("fill", "black").style("opacity", "0")
+
+d3.select("#vis_cst_const_HP svg").on("mousemove", function () {
+  mousex = d3.mouse(this);
+  if (mousex[0] < margin.left + 3 || mousex[0] >= xw - margin.right) {
+    vertical.style("opacity", "0"); tooltip.style("opacity", "0"); circle.style("opacity", "0")
+  } else {
+    var xvalue = x.invert(mousex[0] - margin.left); var pos = findPosition(xvalue)
+    vertical.style("opacity", "0.4"); tooltip.style("opacity", "1"); circle.style("opacity", "1")
+    circle.attr("cx", pos.x).attr("cy", pos.y); vertical.style("left", mousex[0]+53 +"px");tooltip.style("left", mousex[0]+54 + "px")
+    tooltip.html("<p style=\"padding-left: 10px;\">" + xvalue.toFixed(2) + " Seconds <br>" + Math.round(pos.mem) + " MiB <br> " + pos.name +   "<br> Phase Time: " + pos.ptime + " Seconds </p>").style("visibility", "visible").style("background-color","white");
+  }
+}).on("mouseover", function () {
+  mousex = d3.mouse(this);
+  if (mousex[0] < margin.left + 3 || mousex[0] > xw - margin.right) {
+    vertical.style("opacity", "0")
+  } else {
+    vertical.style("opacity", "0.4");vertical.style("left", mousex[0] + 7 + "px")
+}})
+
+function findPosition(e){correctArea=d3.selectAll(".area2").filter(function(t){if(t.usage[0][0]<=e*1e3&&t.usage[t.usage.length-1][0]>=e*1e3){return true}return false});if(correctArea.empty()){return 0}var t=new Array;correctArea[0].forEach(function(n){t.push(findYValueinArea(n,e))});max_elem=d3.max(t,function(e){return e.mem});var n=t.filter(function(e){return e.mem==max_elem});return n[0]}function findYValueinArea(e,t){len=e.getTotalLength();var n=0;var r=len;for(var i=0;i<=len;i+=50){var s=e.getPointAtLength(i);var o=x.invert(s.x);var u=y.invert(s.y);if(u>0&&o>t){n=Math.max(0,i-50);r=i;break}}var a=e.getPointAtLength(0);var f=1;while(n<r){var l=(r+n)/2;a=e.getPointAtLength(l);target_x=x.invert(a.x);if((l==n||l==r)&&Math.abs(target_x-t)>.01){break}if(target_x>t)r=l;else if(target_x<t)n=l;else{break}if(f>50){break}f++}var c=new function(){this.mem=y.invert(a.y);this.name=e.__data__.name;this.min=d3.min(e.__data__.usage,function(e){return e[0]/1e3});this.max=d3.max(e.__data__.usage,function(e){return e[0]/1e3});this.ptime=Math.round(this.max-this.min);this.x=a.x;this.y=a.y};return c}
+})();
+</script>
+
+<script type="text/javascript">
+var w = 700,
+  h = w,
+  r = w / 2,
+  x = d3.scale.linear().range([0, 2 * Math.PI]),
+  y = d3.scale.pow().exponent(1.3).domain([0, 1]).range([0, r]),
+  p = 5,
+  color = d3.scale.category20c(),
+  duration = 1000;
+
+var vis = d3.select("#chart_enwikisml_greedy").append("svg:svg")
+  .attr("width", w + p * 2)
+  .attr("height", h + p * 2)
+  .append("g")
+  .attr("transform", "translate(" + (r + p) + "," + (r + p) + ")");
+
+vis.append("p")
+  .attr("id", "intro")
+  .text("Click to zoom!");
+
+var partition = d3.layout.partition()
+  .sort(null)
+  .size([2 * Math.PI, r * r])
+  .value(function(d) { return d.size; });
+
+var arc = d3.svg.arc()
+  .startAngle(function(d) { return Math.max(0, Math.min(2 * Math.PI, x(d.x))); })
+  .endAngle(function(d) { return Math.max(0, Math.min(2 * Math.PI, x(d.x + d.dx))); })
+  .innerRadius(function(d) { return Math.max(0, d.y ? y(d.y) : d.y); })
+  .outerRadius(function(d) { return Math.max(0, y(d.y + d.dy)); });
+
+      
+var spaceJSON = {
+	"class_name":"doc_list_index_greedy",
+	"name":"",
+	"size":"136829635",
+	"children":[
+		{
+			"class_name":"wt_int",
+			"name":"wtd",
+			"size":"117777028",
+			"children":[
+				{
+					"class_name":"select_support_scan",
+					"name":"tree_select_0",
+					"size":"0"
+				},
+				{
+					"class_name":"select_support_scan",
+					"name":"tree_select_1",
+					"size":"0"
+				},
+				{
+					"class_name":"rank_support_v5",
+					"name":"tree_rank",
+					"size":"6928072",
+					"children":[
+						{
+							"class_name":"int_vector",
+							"name":"cumulative_counts",
+							"size":"6928072"
+						}
+					]
+				},
+				{
+					"class_name":"bit_vector",
+					"name":"tree",
+					"size":"110848936"
+				},
+				{
+					"class_name":"unsigned int",
+					"name":"max_depth",
+					"size":"4"
+				},
+				{
+					"class_name":"unsigned long long",
+					"name":"sigma",
+					"size":"8"
+				},
+				{
+					"class_name":"unsigned long long",
+					"name":"size",
+					"size":"8"
+				}
+			]
+		},
+		{
+			"class_name":"csa_wt",
+			"name":"csa",
+			"size":"19052599",
+			"children":[
+				{
+					"class_name":"int_vector",
+					"name":"isa_samples",
+					"size":"249"
+				},
+				{
+					"class_name":"byte_alphabet",
+					"name":"alphabet",
+					"size":"2146",
+					"children":[
+						{
+							"class_name":"unsigned short",
+							"name":"m_sigma",
+							"size":"2"
+						},
+						{
+							"class_name":"int_vector",
+							"name":"m_C",
+							"size":"1664"
+						},
+						{
+							"class_name":"int_vector",
+							"name":"m_comp2char",
+							"size":"216"
+						},
+						{
+							"class_name":"int_vector",
+							"name":"m_char2comp",
+							"size":"264"
+						}
+					]
+				},
+				{
+					"class_name":"int_vector",
+					"name":"sa_samples",
+					"size":"249"
+				},
+				{
+					"class_name":"wt_pc",
+					"name":"wavelet_tree",
+					"size":"19049955",
+					"children":[
+						{
+							"class_name":"_byte_tree",
+							"name":"tree",
+							"size":"2560",
+							"children":[
+								{
+									"class_name":"std::vector<_node>",
+									"name":"m_nodes",
+									"size":"9042",
+									"children":[
+										{
+											"class_name":"_node",
+											"name":"[]",
+											"size":"9042"
+										}
+									]
+								},
+								{
+									"class_name":"unsigned long long",
+									"name":"m_nodes.size()",
+									"size":"8"
+								}
+							]
+						},
+						{
+							"class_name":"select_support_rrr",
+							"name":"bv_select_1",
+							"size":"0"
+						},
+						{
+							"class_name":"rank_support_rrr",
+							"name":"bv_rank",
+							"size":"0"
+						},
+						{
+							"class_name":"select_support_rrr",
+							"name":"bv_select_0",
+							"size":"0"
+						},
+						{
+							"class_name":"rrr_vector",
+							"name":"bv",
+							"size":"19047379",
+							"children":[
+								{
+									"class_name":"bit_vector",
+									"name":"invert",
+									"size":"19544"
+								},
+								{
+									"class_name":"int_vector",
+									"name":"btnrp",
+									"size":"527305"
+								},
+								{
+									"class_name":"bit_vector",
+									"name":"btnr",
+									"size":"14204080"
+								},
+								{
+									"class_name":"int_vector",
+									"name":"rank_samples",
+									"size":"546833"
+								},
+								{
+									"class_name":"int_vector",
+									"name":"bt",
+									"size":"3749609"
+								},
+								{
+									"class_name":"unsigned long long",
+									"name":"size",
+									"size":"8"
+								}
+							]
+						},
+						{
+							"class_name":"unsigned long long",
+							"name":"sigma",
+							"size":"8"
+						},
+						{
+							"class_name":"unsigned long long",
+							"name":"size",
+							"size":"8"
+						}
+					]
+				}
+			]
+		},
+		{
+			"class_name":"unsigned long long",
+			"name":"doc_cnt",
+			"size":"8"
+		}
+	]
+};
+
+
+
+  var nodes = partition.nodes(spaceJSON);
+
+  var path = vis.selectAll("path").data(nodes);
+  path.enter().append("path")
+    .attr("id", function(d, i) { return "path-" + i; })
+    .attr("d", arc)
+    .attr("fill-rule", "evenodd")
+    .style("fill", colour)
+    .on("click", click);
+
+  path.append("title").text(function(d) { return 'class name: ' + d.class_name + '\nmember_name: ' + d.name + '\n size: ' + sizeMB(d) });
+
+  var text = vis.selectAll("text").data(nodes);
+  var textEnter = text.enter().append("text")
+    .style("opacity", 1)
+    .style("fill", function(d) {
+    return brightness(d3.rgb(colour(d))) < 125 ? "#eee" : "#000";
+    })
+    .attr("text-anchor", function(d) {
+    return x(d.x + d.dx / 2) > Math.PI ? "end" : "start";
+    })
+    .attr("dy", ".2em")
+    .attr("transform", function(d) {
+    var multiline = (d.name || "").split(" ").length > 1,
+      angle = x(d.x + d.dx / 2) * 180 / Math.PI - 90,
+      rotate = angle + (multiline ? -.5 : 0);
+    return "rotate(" + rotate + ")translate(" + (y(d.y) + p) + ")rotate(" + (angle > 90 ? -180 : 0) + ")";
+    })
+    .on("click", click);
+
+  textEnter.append("title").text(function(d) { return 'class name: ' + d.class_name + '\nmember_name: ' + d.name + '\n size: ' + sizeMB(d) });
+
+  textEnter.append("tspan")
+    .attr("x", 0)
+    .text(function(d) { return d.dx < 0.05 ? "" : d.depth ? d.name.split(" ")[0] : ""; });
+  textEnter.append("tspan")
+    .attr("x", 0)
+    .attr("dy", "1em")
+    .text(function(d) { return d.dx < 0.05 ? "" : d.depth ? d.name.split(" ")[1] || "" : ""; });
+
+  function click(d) {
+  path.transition()
+    .duration(duration)
+    .attrTween("d", arcTween(d));
+
+  // Somewhat of a hack as we rely on arcTween updating the scales.
+  text
+    .style("visibility", function(e) {
+    return isParentOf(d, e) ? null : d3.select(this).style("visibility");
+    })
+    .transition().duration(duration)
+    .attrTween("text-anchor", function(d) {
+    return function() {
+      return x(d.x + d.dx / 2) > Math.PI ? "end" : "start";
+    };
+    })
+    .attrTween("transform", function(d) {
+    var multiline = (d.name || "").split(" ").length > 1;
+    return function() {
+      var angle = x(d.x + d.dx / 2) * 180 / Math.PI - 90,
+        rotate = angle + (multiline ? -.5 : 0);
+      return "rotate(" + rotate + ")translate(" + (y(d.y) + p) + ")rotate(" + (angle > 90 ? -180 : 0) + ")";
+    };
+    })
+    .style("opacity", function(e) { return isParentOf(d, e) ? 1 : 1e-6; })
+    .each("end", function(e) {
+    d3.select(this).style("visibility", isParentOf(d, e) ? null : "hidden");
+    });
+  }
+
+
+function sizeMB(d) {
+//  if (d.children) {
+//  var sum = calcSum(d);
+//  return (sum / (1024*1024)).toFixed(2) + 'MB';
+//  } else {
+  return (d.size / (1024*1024)).toFixed(2) + 'MB';
+//  }
+}
+
+function calcSum(d) {
+  if(d.children) {
+  var sum = 0;
+  function recurse(d) {
+    if(d.children) d.children.forEach( function(child) { recurse(child); } );
+    else sum += d.size;
+  }
+  recurse(d,sum);
+  console.log(sum);
+  console.log(d.children);
+  return sum;
+  } else {
+  console.log(d.size);
+  return d.size;
+  }
+}
+
+function isParentOf(p, c) {
+  if (p === c) return true;
+  if (p.children) {
+  return p.children.some(function(d) {
+    return isParentOf(d, c);
+  });
+  }
+  return false;
+}
+
+function colour(d) {
+  return color(d.name);
+}
+
+// Interpolate the scales!
+function arcTween(d) {
+  var my = maxY(d),
+    xd = d3.interpolate(x.domain(), [d.x, d.x + d.dx]),
+    yd = d3.interpolate(y.domain(), [d.y, my]),
+    yr = d3.interpolate(y.range(), [d.y ? 20 : 0, r]);
+  return function(d) {
+  return function(t) { x.domain(xd(t)); y.domain(yd(t)).range(yr(t)); return arc(d); };
+  };
+}
+
+// Interpolate the scales!
+function arcTween2(d) {
+  var xd = d3.interpolate(x.domain(), [d.x, d.x + d.dx]),
+    yd = d3.interpolate(y.domain(), [d.y, 1]),
+    yr = d3.interpolate(y.range(), [d.y ? 20 : 0, radius]);
+  return function(d, i) {
+  return i
+    ? function(t) { return arc(d); }
+    : function(t) { x.domain(xd(t)); y.domain(yd(t)).range(yr(t)); return arc(d); };
+  };
+}
+
+function maxY(d) {
+  return d.children ? Math.max.apply(Math, d.children.map(maxY)) : d.y + d.dy;
+}
+
+// http://www.w3.org/WAI/ER/WD-AERT/#color-contrast
+function brightness(rgb) {
+  return rgb.r * .299 + rgb.g * .587 + rgb.b * .114;
+}
+
+click(nodes[0]);
+    
+</script>
+
+<script type="text/javascript">
+var w = 700,
+  h = w,
+  r = w / 2,
+  x = d3.scale.linear().range([0, 2 * Math.PI]),
+  y = d3.scale.pow().exponent(1.3).domain([0, 1]).range([0, r]),
+  p = 5,
+  color = d3.scale.category20c(),
+  duration = 1000;
+
+var vis = d3.select("#chart_enwikisml_sada").append("svg:svg")
+  .attr("width", w + p * 2)
+  .attr("height", h + p * 2)
+  .append("g")
+  .attr("transform", "translate(" + (r + p) + "," + (r + p) + ")");
+
+vis.append("p")
+  .attr("id", "intro")
+  .text("Click to zoom!");
+
+var partition = d3.layout.partition()
+  .sort(null)
+  .size([2 * Math.PI, r * r])
+  .value(function(d) { return d.size; });
+
+var arc = d3.svg.arc()
+  .startAngle(function(d) { return Math.max(0, Math.min(2 * Math.PI, x(d.x))); })
+  .endAngle(function(d) { return Math.max(0, Math.min(2 * Math.PI, x(d.x + d.dx))); })
+  .innerRadius(function(d) { return Math.max(0, d.y ? y(d.y) : d.y); })
+  .outerRadius(function(d) { return Math.max(0, y(d.y + d.dy)); });
+
+      
+var spaceJSON = {
+	"class_name":"doc_list_index_sada",
+	"name":"",
+	"size":"209305823",
+	"children":[
+		{
+			"class_name":"select_support_sd",
+			"name":"doc_border_select",
+			"size":"0"
+		},
+		{
+			"class_name":"unsigned long long",
+			"name":"doc_max_len",
+			"size":"8"
+		},
+		{
+			"class_name":"rmq_succinct_sct",
+			"name":"rmaxq",
+			"size":"21688529",
+			"children":[
+				{
+					"class_name":"bp_support_sada",
+					"name":"sct_bp_support",
+					"size":"4634833",
+					"children":[
+						{
+							"class_name":"int_vector",
+							"name":"sml_blocks",
+							"size":"1199097"
+						},
+						{
+							"class_name":"select_support_mcl",
+							"name":"bp_select",
+							"size":"2011527",
+							"children":[
+								{
+									"class_name":"int_vector",
+									"name":"minisuperblock",
+									"size":"1953206"
+								},
+								{
+									"class_name":"int_vector",
+									"name":"longsuperblock",
+									"size":"0"
+								},
+								{
+									"class_name":"bit_vector",
+									"name":"mini_or_long",
+									"size":"8"
+								},
+								{
+									"class_name":"int_vector",
+									"name":"superblock",
+									"size":"58305"
+								}
+							]
+						},
+						{
+							"class_name":"rank_support_v5",
+							"name":"bp_rank",
+							"size":"1065864",
+							"children":[
+								{
+									"class_name":"int_vector",
+									"name":"cumulative_counts",
+									"size":"1065864"
+								}
+							]
+						},
+						{
+							"class_name":"int_vector",
+							"name":"med_blocks",
+							"size":"358313"
+						},
+						{
+							"class_name":"unsigned long long",
+							"name":"med_inner_blocks",
+							"size":"8"
+						},
+						{
+							"class_name":"unsigned long long",
+							"name":"med_block_cnt",
+							"size":"8"
+						},
+						{
+							"class_name":"unsigned long long",
+							"name":"sml_block_cnt",
+							"size":"8"
+						},
+						{
+							"class_name":"unsigned long long",
+							"name":"size",
+							"size":"8"
+						}
+					]
+				},
+				{
+					"class_name":"bit_vector",
+					"name":"sct_bp",
+					"size":"17053696"
+				}
+			]
+		},
+		{
+			"class_name":"rmq_succinct_sct",
+			"name":"rminq",
+			"size":"21688377",
+			"children":[
+				{
+					"class_name":"bp_support_sada",
+					"name":"sct_bp_support",
+					"size":"4634681",
+					"children":[
+						{
+							"class_name":"int_vector",
+							"name":"sml_blocks",
+							"size":"1199097"
+						},
+						{
+							"class_name":"select_support_mcl",
+							"name":"bp_select",
+							"size":"2011375",
+							"children":[
+								{
+									"class_name":"int_vector",
+									"name":"minisuperblock",
+									"size":"1953054"
+								},
+								{
+									"class_name":"int_vector",
+									"name":"longsuperblock",
+									"size":"0"
+								},
+								{
+									"class_name":"bit_vector",
+									"name":"mini_or_long",
+									"size":"8"
+								},
+								{
+									"class_name":"int_vector",
+									"name":"superblock",
+									"size":"58305"
+								}
+							]
+						},
+						{
+							"class_name":"rank_support_v5",
+							"name":"bp_rank",
+							"size":"1065864",
+							"children":[
+								{
+									"class_name":"int_vector",
+									"name":"cumulative_counts",
+									"size":"1065864"
+								}
+							]
+						},
+						{
+							"class_name":"int_vector",
+							"name":"med_blocks",
+							"size":"358313"
+						},
+						{
+							"class_name":"unsigned long long",
+							"name":"med_inner_blocks",
+							"size":"8"
+						},
+						{
+							"class_name":"unsigned long long",
+							"name":"med_block_cnt",
+							"size":"8"
+						},
+						{
+							"class_name":"unsigned long long",
+							"name":"sml_block_cnt",
+							"size":"8"
+						},
+						{
+							"class_name":"unsigned long long",
+							"name":"size",
+							"size":"8"
+						}
+					]
+				},
+				{
+					"class_name":"bit_vector",
+					"name":"sct_bp",
+					"size":"17053696"
+				}
+			]
+		},
+		{
+			"class_name":"sd_vector",
+			"name":"doc_border",
+			"size":"9792",
+			"children":[
+				{
+					"class_name":"select_support_mcl",
+					"name":"high_0_select",
+					"size":"267",
+					"children":[
+						{
+							"class_name":"int_vector",
+							"name":"minisuperblock",
+							"size":"234"
+						},
+						{
+							"class_name":"int_vector",
+							"name":"longsuperblock",
+							"size":"0"
+						},
+						{
+							"class_name":"bit_vector",
+							"name":"mini_or_long",
+							"size":"8"
+						},
+						{
+							"class_name":"int_vector",
+							"name":"superblock",
+							"size":"17"
+						}
+					]
+				},
+				{
+					"class_name":"select_support_mcl",
+					"name":"high_1_select",
+					"size":"235",
+					"children":[
+						{
+							"class_name":"int_vector",
+							"name":"minisuperblock",
+							"size":"202"
+						},
+						{
+							"class_name":"int_vector",
+							"name":"longsuperblock",
+							"size":"0"
+						},
+						{
+							"class_name":"bit_vector",
+							"name":"mini_or_long",
+							"size":"8"
+						},
+						{
+							"class_name":"int_vector",
+							"name":"superblock",
+							"size":"17"
+						}
+					]
+				},
+				{
+					"class_name":"bit_vector",
+					"name":"high",
+					"size":"1584"
+				},
+				{
+					"class_name":"int_vector",
+					"name":"low",
+					"size":"7697"
+				},
+				{
+					"class_name":"unsigned char",
+					"name":"wl",
+					"size":"1"
+				},
+				{
+					"class_name":"unsigned long long",
+					"name":"size",
+					"size":"8"
+				}
+			]
+		},
+		{
+			"class_name":"csa_wt",
+			"name":"full_csa",
+			"size":"37385111",
+			"children":[
+				{
+					"class_name":"byte_alphabet",
+					"name":"alphabet",
+					"size":"2146",
+					"children":[
+						{
+							"class_name":"unsigned short",
+							"name":"m_sigma",
+							"size":"2"
+						},
+						{
+							"class_name":"int_vector",
+							"name":"m_C",
+							"size":"1664"
+						},
+						{
+							"class_name":"int_vector",
+							"name":"m_comp2char",
+							"size":"216"
+						},
+						{
+							"class_name":"int_vector",
+							"name":"m_char2comp",
+							"size":"264"
+						}
+					]
+				},
+				{
+					"class_name":"int_vector",
+					"name":"isa_samples",
+					"size":"249"
+				},
+				{
+					"class_name":"_text_order_sampling",
+					"name":"sa_samples",
+					"size":"18332761",
+					"children":[
+						{
+							"class_name":"rank_support_v",
+							"name":"rank_marked",
+							"size":"2131736",
+							"children":[
+								{
+									"class_name":"int_vector",
+									"name":"cumulative_counts",
+									"size":"2131736"
+								}
+							]
+						},
+						{
+							"class_name":"bit_vector",
+							"name":"marked",
+							"size":"8526856"
+						},
+						{
+							"class_name":"int_vector",
+							"name":"samples",
+							"size":"7674169"
+						}
+					]
+				},
+				{
+					"class_name":"wt_pc",
+					"name":"wavelet_tree",
+					"size":"19049955",
+					"children":[
+						{
+							"class_name":"_byte_tree",
+							"name":"tree",
+							"size":"2560",
+							"children":[
+								{
+									"class_name":"std::vector<_node>",
+									"name":"m_nodes",
+									"size":"9042",
+									"children":[
+										{
+											"class_name":"_node",
+											"name":"[]",
+											"size":"9042"
+										}
+									]
+								},
+								{
+									"class_name":"unsigned long long",
+									"name":"m_nodes.size()",
+									"size":"8"
+								}
+							]
+						},
+						{
+							"class_name":"select_support_rrr",
+							"name":"bv_select_1",
+							"size":"0"
+						},
+						{
+							"class_name":"rank_support_rrr",
+							"name":"bv_rank",
+							"size":"0"
+						},
+						{
+							"class_name":"select_support_rrr",
+							"name":"bv_select_0",
+							"size":"0"
+						},
+						{
+							"class_name":"rrr_vector",
+							"name":"bv",
+							"size":"19047379",
+							"children":[
+								{
+									"class_name":"bit_vector",
+									"name":"invert",
+									"size":"19544"
+								},
+								{
+									"class_name":"int_vector",
+									"name":"btnrp",
+									"size":"527305"
+								},
+								{
+									"class_name":"bit_vector",
+									"name":"btnr",
+									"size":"14204080"
+								},
+								{
+									"class_name":"int_vector",
+									"name":"rank_samples",
+									"size":"546833"
+								},
+								{
+									"class_name":"int_vector",
+									"name":"bt",
+									"size":"3749609"
+								},
+								{
+									"class_name":"unsigned long long",
+									"name":"size",
+									"size":"8"
+								}
+							]
+						},
+						{
+							"class_name":"unsigned long long",
+							"name":"sigma",
+							"size":"8"
+						},
+						{
+							"class_name":"unsigned long long",
+							"name":"size",
+							"size":"8"
+						}
+					]
+				}
+			]
+		},
+		{
+			"class_name":"rank_support_sd",
+			"name":"doc_border_rank",
+			"size":"0"
+		},
+		{
+			"class_name":"std::vector<int_vector>",
+			"name":"doc_isa",
+			"size":"128533998",
+			"children":[
+				{
+					"class_name":"int_vector",
+					"name":"[]",
+					"size":"128533998"
+				}
+			]
+		},
+		{
+			"class_name":"unsigned long long",
+			"name":"doc_cnt",
+			"size":"8"
+		}
+	]
+};
+
+
+
+  var nodes = partition.nodes(spaceJSON);
+
+  var path = vis.selectAll("path").data(nodes);
+  path.enter().append("path")
+    .attr("id", function(d, i) { return "path-" + i; })
+    .attr("d", arc)
+    .attr("fill-rule", "evenodd")
+    .style("fill", colour)
+    .on("click", click);
+
+  path.append("title").text(function(d) { return 'class name: ' + d.class_name + '\nmember_name: ' + d.name + '\n size: ' + sizeMB(d) });
+
+  var text = vis.selectAll("text").data(nodes);
+  var textEnter = text.enter().append("text")
+    .style("opacity", 1)
+    .style("fill", function(d) {
+    return brightness(d3.rgb(colour(d))) < 125 ? "#eee" : "#000";
+    })
+    .attr("text-anchor", function(d) {
+    return x(d.x + d.dx / 2) > Math.PI ? "end" : "start";
+    })
+    .attr("dy", ".2em")
+    .attr("transform", function(d) {
+    var multiline = (d.name || "").split(" ").length > 1,
+      angle = x(d.x + d.dx / 2) * 180 / Math.PI - 90,
+      rotate = angle + (multiline ? -.5 : 0);
+    return "rotate(" + rotate + ")translate(" + (y(d.y) + p) + ")rotate(" + (angle > 90 ? -180 : 0) + ")";
+    })
+    .on("click", click);
+
+  textEnter.append("title").text(function(d) { return 'class name: ' + d.class_name + '\nmember_name: ' + d.name + '\n size: ' + sizeMB(d) });
+
+  textEnter.append("tspan")
+    .attr("x", 0)
+    .text(function(d) { return d.dx < 0.05 ? "" : d.depth ? d.name.split(" ")[0] : ""; });
+  textEnter.append("tspan")
+    .attr("x", 0)
+    .attr("dy", "1em")
+    .text(function(d) { return d.dx < 0.05 ? "" : d.depth ? d.name.split(" ")[1] || "" : ""; });
+
+  function click(d) {
+  path.transition()
+    .duration(duration)
+    .attrTween("d", arcTween(d));
+
+  // Somewhat of a hack as we rely on arcTween updating the scales.
+  text
+    .style("visibility", function(e) {
+    return isParentOf(d, e) ? null : d3.select(this).style("visibility");
+    })
+    .transition().duration(duration)
+    .attrTween("text-anchor", function(d) {
+    return function() {
+      return x(d.x + d.dx / 2) > Math.PI ? "end" : "start";
+    };
+    })
+    .attrTween("transform", function(d) {
+    var multiline = (d.name || "").split(" ").length > 1;
+    return function() {
+      var angle = x(d.x + d.dx / 2) * 180 / Math.PI - 90,
+        rotate = angle + (multiline ? -.5 : 0);
+      return "rotate(" + rotate + ")translate(" + (y(d.y) + p) + ")rotate(" + (angle > 90 ? -180 : 0) + ")";
+    };
+    })
+    .style("opacity", function(e) { return isParentOf(d, e) ? 1 : 1e-6; })
+    .each("end", function(e) {
+    d3.select(this).style("visibility", isParentOf(d, e) ? null : "hidden");
+    });
+  }
+
+
+function sizeMB(d) {
+//  if (d.children) {
+//  var sum = calcSum(d);
+//  return (sum / (1024*1024)).toFixed(2) + 'MB';
+//  } else {
+  return (d.size / (1024*1024)).toFixed(2) + 'MB';
+//  }
+}
+
+function calcSum(d) {
+  if(d.children) {
+  var sum = 0;
+  function recurse(d) {
+    if(d.children) d.children.forEach( function(child) { recurse(child); } );
+    else sum += d.size;
+  }
+  recurse(d,sum);
+  console.log(sum);
+  console.log(d.children);
+  return sum;
+  } else {
+  console.log(d.size);
+  return d.size;
+  }
+}
+
+function isParentOf(p, c) {
+  if (p === c) return true;
+  if (p.children) {
+  return p.children.some(function(d) {
+    return isParentOf(d, c);
+  });
+  }
+  return false;
+}
+
+function colour(d) {
+  return color(d.name);
+}
+
+// Interpolate the scales!
+function arcTween(d) {
+  var my = maxY(d),
+    xd = d3.interpolate(x.domain(), [d.x, d.x + d.dx]),
+    yd = d3.interpolate(y.domain(), [d.y, my]),
+    yr = d3.interpolate(y.range(), [d.y ? 20 : 0, r]);
+  return function(d) {
+  return function(t) { x.domain(xd(t)); y.domain(yd(t)).range(yr(t)); return arc(d); };
+  };
+}
+
+// Interpolate the scales!
+function arcTween2(d) {
+  var xd = d3.interpolate(x.domain(), [d.x, d.x + d.dx]),
+    yd = d3.interpolate(y.domain(), [d.y, 1]),
+    yr = d3.interpolate(y.range(), [d.y ? 20 : 0, radius]);
+  return function(d, i) {
+  return i
+    ? function(t) { return arc(d); }
+    : function(t) { x.domain(xd(t)); y.domain(yd(t)).range(yr(t)); return arc(d); };
+  };
+}
+
+function maxY(d) {
+  return d.children ? Math.max.apply(Math, d.children.map(maxY)) : d.y + d.dy;
+}
+
+// http://www.w3.org/WAI/ER/WD-AERT/#color-contrast
+function brightness(rgb) {
+  return rgb.r * .299 + rgb.g * .587 + rgb.b * .114;
+}
+
+click(nodes[0]);
+    
+</script>
+
+
+
+</html>
+
+
