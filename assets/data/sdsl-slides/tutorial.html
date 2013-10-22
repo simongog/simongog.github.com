@@ -1447,7 +1447,7 @@ memory_monitor::start();
 csa_wt<> csa;
 construct(csa, "english.200MB", 1);
 memory_monitor::stop();
-memory_monitor::write_memory_log<HTML_FORMAT>(cout);
+memory_monitor::write_memory_log&lt;HTML_FORMAT&gt;(cout);
 </pre>
 Output (next slide):
 </p>
