@@ -1,0 +1,205 @@
+<svg width="810" height="810"><g transform="translate(405,405)"><p id="intro">Click to zoom!</p><path id="path-0" d="M0,49.362709017600764A49.362709017600764,49.362709017600764 0 1,1 0,-49.362709017600764A49.362709017600764,49.362709017600764 0 1,1 0,49.362709017600764Z" fill-rule="evenodd" style="fill: #3182bd;"><title>class name: surf::idx_d
+member_name: 
+ size: 184118.25MB</title></path><path id="path-1" d="M0,-121.5452468691798A121.5452468691798,121.5452468691798 0 0,1 1.291239141672781,-121.53838791908036L0.5244060435463426,-49.35992341827338A49.362709017600764,49.362709017600764 0 0,0 0,-49.362709017600764Z" fill-rule="evenodd" style="fill: #6baed6;"><title>class name: surf::doc_perm
+member_name: docperm
+ size: 311.31MB</title></path><path id="path-2" d="M0,-205.90012810658274A205.90012810658274,205.90012810658274 0 0,1 1.0937081556307289,-205.89722328573902L0.6456286793088317,-121.54353211955917A121.5452468691798,121.5452468691798 0 0,0 0,-121.5452468691798Z" fill-rule="evenodd" style="fill: #9ecae1;"><title>class name: int_vector
+member_name: len2id
+ size: 155.66MB</title></path><path id="path-3" d="M1.0937081556307289,-205.89722328573902A205.90012810658274,205.90012810658274 0 0,1 2.1873854513851434,-205.88850890516986L1.291239141672781,-121.53838791908036A121.5452468691798,121.5452468691798 0 0,0 0.6456286793088317,-121.54353211955917Z" fill-rule="evenodd" style="fill: #c6dbef;"><title>class name: int_vector
+member_name: id2len
+ size: 155.66MB</title></path><path id="path-4" d="M1.291239141672781,-121.53838791908036A121.5452468691798,121.5452468691798 0 0,1 14.334750720775745,-120.69698404791662L5.821717812059687,-49.018207262945296A49.362709017600764,49.362709017600764 0 0,0 0.5244060435463426,-49.35992341827338Z" fill-rule="evenodd" style="fill: #e6550d;"><title>class name: surf::df_sada
+member_name: df
+ size: 3152.72MB</title></path><path id="path-5" d="M2.1873854513851434,-205.88850890516986A205.90012810658274,205.90012810658274 0 0,1 2.1873854513851434,-205.88850890516986L1.291239141672781,-121.53838791908036A121.5452468691798,121.5452468691798 0 0,0 1.291239141672781,-121.53838791908036Z" fill-rule="evenodd" style="fill: #fd8d3c;"><title>class name: select_support_rrr
+member_name: m_sel
+ size: 0.00MB</title></path><path id="path-6" d="M2.1873854513851434,-205.88850890516986A205.90012810658274,205.90012810658274 0 0,1 24.283360195569053,-204.46315358009937L14.334750720775745,-120.69698404791662A121.5452468691798,121.5452468691798 0 0,0 1.291239141672781,-121.53838791908036Z" fill-rule="evenodd" style="fill: #fdae6b;"><title>class name: rrr_vector
+member_name: m_bv
+ size: 3152.72MB</title></path><path id="path-7" d="M3.1794037111254583,-299.2626145870461A299.27950330323876,299.27950330323876 0 0,1 3.2283847392885607,-299.2620901975527L2.2210837162588204,-205.88814813250528A205.90012810658274,205.90012810658274 0 0,0 2.1873854513851434,-205.88850890516986Z" fill-rule="evenodd" style="fill: #fdd0a2;"><title>class name: bit_vector
+member_name: invert
+ size: 4.80MB</title></path><path id="path-8" d="M3.2283847392885607,-299.2620901975527A299.27950330323876,299.27950330323876 0 0,1 4.893675453537374,-299.2394911070205L3.366780523470885,-205.87260027311527A205.90012810658274,205.90012810658274 0 0,0 2.2210837162588204,-205.88814813250528Z" fill-rule="evenodd" style="fill: #31a354;"><title>class name: int_vector
+member_name: btnrp
+ size: 163.07MB</title></path><path id="path-9" d="M4.893675453537374,-299.2394911070205A299.27950330323876,299.27950330323876 0 0,1 24.183954631147095,-298.3007834985214L16.638223806565254,-205.22678251843675A205.90012810658274,205.90012810658274 0 0,0 3.366780523470885,-205.87260027311527Z" fill-rule="evenodd" style="fill: #74c476;"><title>class name: bit_vector
+member_name: btnr
+ size: 1891.33MB</title></path><path id="path-10" d="M24.183954631147095,-298.3007834985214A299.27950330323876,299.27950330323876 0 0,1 25.941171478667428,-298.15310952553796L17.847164512567712,-205.12518488271598A205.90012810658274,205.90012810658274 0 0,0 16.638223806565254,-205.22678251843675Z" fill-rule="evenodd" style="fill: #a1d99b;"><title>class name: int_vector
+member_name: rank_samples
+ size: 172.66MB</title></path><path id="path-11" d="M25.941171478667428,-298.15310952553796A299.27950330323876,299.27950330323876 0 0,1 35.29629645577375,-297.19083524553577L24.28336014233518,-204.46315358642178A205.90012810658274,205.90012810658274 0 0,0 17.847164512567712,-205.12518488271598Z" fill-rule="evenodd" style="fill: #c7e9c0;"><title>class name: int_vector
+member_name: bt
+ size: 920.86MB</title></path><path id="path-12" d="M35.29629645577375,-297.19083524553577A299.27950330323876,299.27950330323876 0 0,1 35.296296533150134,-297.190835236346L24.283360195569053,-204.46315358009937A205.90012810658274,205.90012810658274 0 0,0 24.28336014233518,-204.46315358642178Z" fill-rule="evenodd" style="fill: #756bb1;"><title>class name: unsigned long
+member_name: size
+ size: 0.00MB</title></path><path id="path-13" d="M14.334750720775745,-120.69698404791662A121.5452468691798,121.5452468691798 0 1,1 -121.47606698611058,4.1002665859433165L-49.334613254699455,1.6652256800659297A49.362709017600764,49.362709017600764 0 1,0 5.821717812059687,-49.018207262945296Z" fill-rule="evenodd" style="fill: #9e9ac8;"><title>class name: wt_int
+member_name: wtd
+ size: 133635.94MB</title></path><path id="path-14" d="M24.283360195569053,-204.46315358009937A205.90012810658274,205.90012810658274 0 0,1 24.283360195569053,-204.46315358009937L14.334750720775745,-120.69698404791662A121.5452468691798,121.5452468691798 0 0,0 14.334750720775745,-120.69698404791662Z" fill-rule="evenodd" style="fill: #bcbddc;"><title>class name: select_support_scan
+member_name: tree_select_0
+ size: 0.00MB</title></path><path id="path-15" d="M24.283360195569053,-204.46315358009937A205.90012810658274,205.90012810658274 0 0,1 77.6087948946065,-190.71375857371712L45.81337671534411,-112.58055582749546A121.5452468691798,121.5452468691798 0 0,0 14.334750720775745,-120.69698404791662Z" fill-rule="evenodd" style="fill: #dadaeb;"><title>class name: rank_support_v5
+member_name: tree_rank
+ size: 7860.94MB</title></path><path id="path-16" d="M35.296296533150134,-297.190835236346A299.27950330323876,299.27950330323876 0 0,1 112.80576559912394,-277.2058447165729L77.6087948946065,-190.71375857371712A205.90012810658274,205.90012810658274 0 0,0 24.283360195569053,-204.46315358009937Z" fill-rule="evenodd" style="fill: #636363;"><title>class name: int_vector
+member_name: cumulative_counts
+ size: 7860.94MB</title></path><path id="path-17" d="M77.6087948946065,-190.71375857371712A205.90012810658274,205.90012810658274 0 0,1 77.60879491943355,-190.71375856361402L45.81337672999981,-112.58055582153148A121.5452468691798,121.5452468691798 0 0,0 45.81337671534411,-112.58055582749546Z" fill-rule="evenodd" style="fill: #969696;"><title>class name: unsigned int
+member_name: max_level
+ size: 0.00MB</title></path><path id="path-18" d="M77.60879491943355,-190.71375856361402A205.90012810658274,205.90012810658274 0 1,1 -205.78293596955663,6.945935362241662L-121.4760669839755,4.100266649198057A121.5452468691798,121.5452468691798 0 1,0 45.81337672999981,-112.58055582153148Z" fill-rule="evenodd" style="fill: #bdbdbd;"><title>class name: bit_vector
+member_name: tree
+ size: 125775.00MB</title></path><path id="path-19" d="M-205.78293596955663,6.945935362241662A205.90012810658274,205.90012810658274 0 0,1 -205.7829359713651,6.9459353086640885L-121.47606698504306,4.100266617570591A121.5452468691798,121.5452468691798 0 0,0 -121.4760669839755,4.100266649198057Z" fill-rule="evenodd" style="fill: #d9d9d9;"><title>class name: unsigned long
+member_name: sigma
+ size: 0.00MB</title></path><path id="path-20" d="M-205.7829359713651,6.9459353086640885A205.90012810658274,205.90012810658274 0 0,1 -205.7829359713651,6.9459353086640885L-121.47606698504306,4.100266617570591A121.5452468691798,121.5452468691798 0 0,0 -121.47606698504306,4.100266617570591Z" fill-rule="evenodd" style="fill: #3182bd;"><title>class name: select_support_scan
+member_name: tree_select_1
+ size: 0.00MB</title></path><path id="path-21" d="M-205.7829359713651,6.9459353086640885A205.90012810658274,205.90012810658274 0 0,1 -205.78293597317352,6.945935255086473L-121.4760669861106,4.100266585943099A121.5452468691798,121.5452468691798 0 0,0 -121.47606698504306,4.100266617570591Z" fill-rule="evenodd" style="fill: #756bb1;"><title>class name: unsigned long
+member_name: size
+ size: 0.00MB</title></path><path id="path-22" d="M-121.47606698611058,4.1002665859433165A121.5452468691798,121.5452468691798 0 0,1 -2.2327499598355525e-14,-121.5452468691798L-9.06778252670358e-15,-49.362709017600764A49.362709017600764,49.362709017600764 0 0,0 -49.334613254699455,1.6652256800659297Z" fill-rule="evenodd" style="fill: #6baed6;"><title>class name: csa_wt
+member_name: csa
+ size: 47018.28MB</title></path><path id="path-23" d="M-205.78293597317352,6.945935255086842A205.90012810658274,205.90012810658274 0 0,1 -205.85686523013672,4.220638805724056L-121.51970828867353,2.4914923089402863A121.5452468691798,121.5452468691798 0 0,0 -121.47606698611058,4.1002665859433165Z" fill-rule="evenodd" style="fill: #9ecae1;"><title>class name: int_alphabet
+member_name: alphabet
+ size: 388.00MB</title></path><path id="path-24" d="M-299.1091624501257,10.096040601017894A299.27950330323876,299.27950330323876 0 0,1 -299.1091624527543,10.096040523141937L-205.78293597498194,6.945935201509268A205.90012810658274,205.90012810658274 0 0,0 -205.78293597317352,6.945935255086842Z" fill-rule="evenodd" style="fill: #c6dbef;"><title>class name: unsigned long
+member_name: m_sigma
+ size: 0.00MB</title></path><path id="path-25" d="M-299.1091624527543,10.096040523141937A299.27950330323876,299.27950330323876 0 0,1 -299.2166199334231,6.134774083082358L-205.8568652243676,4.220639087106944A205.90012810658274,205.90012810658274 0 0,0 -205.78293597498194,6.945935201509268Z" fill-rule="evenodd" style="fill: #e6550d;"><title>class name: int_vector
+member_name: m_C
+ size: 388.00MB</title></path><path id="path-26" d="M-299.2166199334231,6.134774083082358A299.27950330323876,299.27950330323876 0 0,1 -299.2166199334231,6.134774083082358L-205.8568652243676,4.220639087106944A205.90012810658274,205.90012810658274 0 0,0 -205.8568652243676,4.220639087106944Z" fill-rule="evenodd" style="fill: #fd8d3c;"><title>class name: rank_support_sd
+member_name: m_char_rank
+ size: 0.00MB</title></path><path id="path-27" d="M-299.2166199334231,6.134774083082358A299.27950330323876,299.27950330323876 0 0,1 -299.2166199334231,6.134774083082358L-205.8568652243676,4.220639087106944A205.90012810658274,205.90012810658274 0 0,0 -205.8568652243676,4.220639087106944Z" fill-rule="evenodd" style="fill: #fdae6b;"><title>class name: select_support_sd
+member_name: m_char_select
+ size: 0.00MB</title></path><path id="path-28" d="M-299.2166199334231,6.134774083082358A299.27950330323876,299.27950330323876 0 0,1 -299.21661994180863,6.134773674087318L-205.85686523013672,4.220638805724056A205.90012810658274,205.90012810658274 0 0,0 -205.8568652243676,4.220639087106944Z" fill-rule="evenodd" style="fill: #fdd0a2;"><title>class name: sd_vector
+member_name: m_char
+ size: 0.00MB</title></path><path id="path-29" d="M-399.9159536565363,8.199390890951094A400,400 0 0,1 -399.91595365867107,8.199390786829113L-299.21661993502033,6.134774005178423A299.27950330323876,299.27950330323876 0 0,0 -299.2166199334231,6.134774083082358Z" fill-rule="evenodd" style="fill: #31a354;"><title>class name: select_support_mcl
+member_name: high_1_select
+ size: 0.00MB</title></path><path id="path-30" d="M-399.91595365867107,8.199390786829113A400,400 0 0,1 -399.9159536608059,8.199390682707135L-299.2166199366176,6.1347739272744874A299.27950330323876,299.27950330323876 0 0,0 -299.21661993502033,6.134774005178423Z" fill-rule="evenodd" style="fill: #74c476;"><title>class name: bit_vector
+member_name: high
+ size: 0.00MB</title></path><path id="path-31" d="M-399.9159536608059,8.199390682707135A400,400 0 0,1 -399.9159536632075,8.199390565569967L-299.2166199384145,6.1347738396326035A299.27950330323876,299.27950330323876 0 0,0 -299.2166199366176,6.1347739272744874Z" fill-rule="evenodd" style="fill: #a1d99b;"><title>class name: int_vector
+member_name: low
+ size: 0.00MB</title></path><path id="path-32" d="M-399.9159536632075,8.199390565569967A400,400 0 0,1 -399.91595366534233,8.199390461447987L-299.21661994001175,6.134773761728668A299.27950330323876,299.27950330323876 0 0,0 -299.2166199384145,6.1347738396326035Z" fill-rule="evenodd" style="fill: #c7e9c0;"><title>class name: select_support_mcl
+member_name: high_0_select
+ size: 0.00MB</title></path><path id="path-33" d="M-399.91595366534233,8.199390461447987A400,400 0 0,1 -399.9159536656092,8.199390448432878L-299.21661994021144,6.134773751990779A299.27950330323876,299.27950330323876 0 0,0 -299.21661994001175,6.134773761728668Z" fill-rule="evenodd" style="fill: #756bb1;"><title>class name: unsigned char
+member_name: wl
+ size: 0.00MB</title></path><path id="path-34" d="M-399.9159536656092,8.199390448432878A400,400 0 0,1 -399.915953667744,8.199390344310501L-299.2166199418087,6.134773674086547A299.27950330323876,299.27950330323876 0 0,0 -299.21661994021144,6.134773751990779Z" fill-rule="evenodd" style="fill: #756bb1;"><title>class name: unsigned long
+member_name: size
+ size: 0.00MB</title></path><path id="path-35" d="M-205.85686523013672,4.220638805724056A205.90012810658274,205.90012810658274 0 0,1 -205.85689031193004,4.219415292318983L-121.51972309474863,2.4907700547084177A121.5452468691798,121.5452468691798 0 0,0 -121.51970828867353,2.4914923089402863Z" fill-rule="evenodd" style="fill: #9e9ac8;"><title>class name: int_vector
+member_name: isa_samples
+ size: 0.17MB</title></path><path id="path-36" d="M-205.85689031193004,4.219415292318983A205.90012810658274,205.90012810658274 0 0,1 -205.85691538645142,4.218191778764818L-121.51973789653103,2.490047800388538A121.5452468691798,121.5452468691798 0 0,0 -121.51972309474863,2.4907700547084177Z" fill-rule="evenodd" style="fill: #bcbddc;"><title>class name: int_vector
+member_name: sa_samples
+ size: 0.17MB</title></path><path id="path-37" d="M-205.85691538645142,4.218191778764818A205.90012810658274,205.90012810658274 0 0,1 -2.4512941075076837e-13,-205.90012810658274L-1.447027499136664e-13,-121.5452468691798A121.5452468691798,121.5452468691798 0 0,0 -121.51973789653103,2.490047800388538Z" fill-rule="evenodd" style="fill: #dadaeb;"><title>class name: wt_int
+member_name: wavelet_tree
+ size: 46629.93MB</title></path><path id="path-38" d="M-299.2166928449053,6.13121687682029A299.27950330323876,299.27950330323876 0 0,1 -299.21669284570345,6.131216837868491L-205.85691538700053,4.218191751966523A205.90012810658274,205.90012810658274 0 0,0 -205.85691538645142,4.218191778764818Z" fill-rule="evenodd" style="fill: #969696;"><title>class name: unsigned int
+member_name: max_level
+ size: 0.00MB</title></path><path id="path-39" d="M-299.21669284570345,6.131216837868491A299.27950330323876,299.27950330323876 0 0,1 -299.21669284570345,6.131216837868491L-205.85691538700053,4.218191751966523A205.90012810658274,205.90012810658274 0 0,0 -205.85691538700053,4.218191751966523Z" fill-rule="evenodd" style="fill: #3182bd;"><title>class name: select_support_rrr
+member_name: tree_select_1
+ size: 0.00MB</title></path><path id="path-40" d="M-299.21669284570345,6.131216837868491A299.27950330323876,299.27950330323876 0 0,1 -299.21669284570345,6.131216837868491L-205.85691538700053,4.218191751966523A205.90012810658274,205.90012810658274 0 0,0 -205.85691538700053,4.218191751966523Z" fill-rule="evenodd" style="fill: #dadaeb;"><title>class name: rank_support_rrr
+member_name: tree_rank
+ size: 0.00MB</title></path><path id="path-41" d="M-299.21669284570345,6.131216837868491A299.27950330323876,299.27950330323876 0 0,1 -299.2166928472998,6.1312167599644765L-205.85691538809877,4.218191698369647A205.90012810658274,205.90012810658274 0 0,0 -205.85691538700053,4.218191751966523Z" fill-rule="evenodd" style="fill: #d9d9d9;"><title>class name: unsigned long
+member_name: sigma
+ size: 0.00MB</title></path><path id="path-42" d="M-299.2166928472998,6.1312167599644765A299.27950330323876,299.27950330323876 0 0,1 -299.2166928472998,6.1312167599644765L-205.85691538809877,4.218191698369647A205.90012810658274,205.90012810658274 0 0,0 -205.85691538809877,4.218191698369647Z" fill-rule="evenodd" style="fill: #bcbddc;"><title>class name: select_support_rrr
+member_name: tree_select_0
+ size: 0.00MB</title></path><path id="path-43" d="M-299.2166928472998,6.1312167599644765A299.27950330323876,299.27950330323876 0 0,1 -7.79206643934364e-8,-299.27950330323876L-5.360833135472853e-8,-205.90012810658274A205.90012810658274,205.90012810658274 0 0,0 -205.85691538809877,4.218191698369647Z" fill-rule="evenodd" style="fill: #bdbdbd;"><title>class name: rrr_vector
+member_name: tree
+ size: 46629.93MB</title></path><path id="path-44" d="M-399.9160511090861,8.194636374749859A400,400 0 0,1 -399.9331915114374,7.310425943536892L-299.2295172750551,5.469651613292078A299.27950330323876,299.27950330323876 0 0,0 -299.2166928472998,6.1312167599644765Z" fill-rule="evenodd" style="fill: #fdd0a2;"><title>class name: bit_vector
+member_name: invert
+ size: 64.79MB</title></path><path id="path-45" d="M-399.9331915114374,7.310425943536892A400,400 0 0,1 -399.1359959870391,-26.2765429125286L-298.6330565736114,-19.660076778469495A299.27950330323876,299.27950330323876 0 0,0 -299.2295172750551,5.469651613292078Z" fill-rule="evenodd" style="fill: #31a354;"><title>class name: int_vector
+member_name: btnrp
+ size: 2461.94MB</title></path><path id="path-46" d="M-399.1359959870391,-26.2765429125286A400,400 0 0,1 -194.75281601898095,-349.3870928535807L-145.71381511266915,-261.4109890244555A299.27950330323876,299.27950330323876 0 0,0 -298.6330565736114,-19.660076778469495Z" fill-rule="evenodd" style="fill: #74c476;"><title>class name: bit_vector
+member_name: btnr
+ size: 29201.97MB</title></path><path id="path-47" d="M-194.75281601898095,-349.3870928535807A400,400 0 0,1 -164.74636663096888,-364.4977841933938L-123.26302694082409,-272.71678952132504A299.27950330323876,299.27950330323876 0 0,0 -145.71381511266915,-261.4109890244555Z" fill-rule="evenodd" style="fill: #a1d99b;"><title>class name: int_vector
+member_name: rank_samples
+ size: 2461.94MB</title></path><path id="path-48" d="M-164.74636663096888,-364.4977841933938A400,400 0 0,1 -2.0828788237555526e-7,-400L-1.5584073495359897e-7,-299.27950330323876A299.27950330323876,299.27950330323876 0 0,0 -123.26302694082409,-272.71678952132504Z" fill-rule="evenodd" style="fill: #c7e9c0;"><title>class name: int_vector
+member_name: bt
+ size: 12439.29MB</title></path><path id="path-49" d="M-2.0828788237555526e-7,-400A400,400 0 0,1 -1.04144020556163e-7,-400L-7.792042686012688e-8,-299.27950330323876A299.27950330323876,299.27950330323876 0 0,0 -1.5584073495359897e-7,-299.27950330323876Z" fill-rule="evenodd" style="fill: #756bb1;"><title>class name: unsigned long
+member_name: size
+ size: 0.00MB</title></path><path id="path-50" d="M-7.79206643934364e-8,-299.27950330323876A299.27950330323876,299.27950330323876 0 0,1 -3.562999643037139e-13,-299.27950330323876L-2.4512941075076837e-13,-205.90012810658274A205.90012810658274,205.90012810658274 0 0,0 -5.360833135472853e-8,-205.90012810658274Z" fill-rule="evenodd" style="fill: #756bb1;"><title>class name: unsigned long
+member_name: size
+ size: 0.00MB</title></path><text text-anchor="start" dy=".2em" transform="rotate(90)translate(5)rotate(0)" style="opacity: 1; fill: #eeeeee;"><title>class name: surf::idx_d
+member_name: 
+ size: 184118.25MB</title><tspan x="0"></tspan><tspan x="0" dy="1em"></tspan></text><text text-anchor="start" dy=".2em" transform="rotate(-89.69565266129405)translate(54.362709017600764)rotate(0)" style="opacity: 1; fill: #000000;"><title>class name: surf::doc_perm
+member_name: docperm
+ size: 311.31MB</title><tspan x="0"></tspan><tspan x="0" dy="1em"></tspan></text><text text-anchor="start" dy=".2em" transform="rotate(-89.84782633064702)translate(126.5452468691798)rotate(0)" style="opacity: 1; fill: #000000;"><title>class name: int_vector
+member_name: len2id
+ size: 155.66MB</title><tspan x="0"></tspan><tspan x="0" dy="1em"></tspan></text><text text-anchor="start" dy=".2em" transform="rotate(-89.54347899194107)translate(126.5452468691798)rotate(0)" style="opacity: 1; fill: #000000;"><title>class name: int_vector
+member_name: id2len
+ size: 155.66MB</title><tspan x="0"></tspan><tspan x="0" dy="1em"></tspan></text><text text-anchor="start" dy=".2em" transform="rotate(-86.30910834896318)translate(54.362709017600764)rotate(0)" style="opacity: 1; fill: #eeeeee;"><title>class name: surf::df_sada
+member_name: df
+ size: 3152.72MB</title><tspan x="0">df</tspan><tspan x="0" dy="1em"></tspan></text><text text-anchor="start" dy=".2em" transform="rotate(-89.3913053225881)translate(126.5452468691798)rotate(0)" style="opacity: 1; fill: #000000;"><title>class name: select_support_rrr
+member_name: m_sel
+ size: 0.00MB</title><tspan x="0"></tspan><tspan x="0" dy="1em"></tspan></text><text text-anchor="start" dy=".2em" transform="rotate(-86.30910834896318)translate(126.5452468691798)rotate(0)" style="opacity: 1; fill: #000000;"><title>class name: rrr_vector
+member_name: m_bv
+ size: 3152.72MB</title><tspan x="0">m_bv</tspan><tspan x="0" dy="1em"></tspan></text><text text-anchor="start" dy=".2em" transform="rotate(-89.38661644982935)translate(210.90012810658274)rotate(0)" style="opacity: 1; fill: #000000;"><title>class name: bit_vector
+member_name: invert
+ size: 4.80MB</title><tspan x="0"></tspan><tspan x="0" dy="1em"></tspan></text><text text-anchor="start" dy=".2em" transform="rotate(-89.22250630511348)translate(210.90012810658274)rotate(0)" style="opacity: 1; fill: #eeeeee;"><title>class name: int_vector
+member_name: btnrp
+ size: 163.07MB</title><tspan x="0"></tspan><tspan x="0" dy="1em"></tspan></text><text text-anchor="start" dy=".2em" transform="rotate(-87.21405842790939)translate(210.90012810658274)rotate(0)" style="opacity: 1; fill: #000000;"><title>class name: bit_vector
+member_name: btnr
+ size: 1891.33MB</title><tspan x="0">btnr</tspan><tspan x="0" dy="1em"></tspan></text><text text-anchor="start" dy=".2em" transform="rotate(-85.19623282756407)translate(210.90012810658274)rotate(0)" style="opacity: 1; fill: #000000;"><title>class name: int_vector
+member_name: rank_samples
+ size: 172.66MB</title><tspan x="0"></tspan><tspan x="0" dy="1em"></tspan></text><text text-anchor="start" dy=".2em" transform="rotate(-84.12717261136072)translate(210.90012810658274)rotate(0)" style="opacity: 1; fill: #000000;"><title>class name: int_vector
+member_name: bt
+ size: 920.86MB</title><tspan x="0"></tspan><tspan x="0" dy="1em"></tspan></text><text text-anchor="start" dy=".2em" transform="rotate(-83.226911382797)translate(210.90012810658274)rotate(0)" style="opacity: 1; fill: #eeeeee;"><title>class name: unsigned long
+member_name: size
+ size: 0.00MB</title><tspan x="0"></tspan><tspan x="0" dy="1em"></tspan></text><text text-anchor="start" dy=".2em" transform="rotate(47.41993904492233)translate(54.362709017600764)rotate(0)" style="opacity: 1; fill: #000000;"><title>class name: wt_int
+member_name: wtd
+ size: 133635.94MB</title><tspan x="0">wtd</tspan><tspan x="0" dy="1em"></tspan></text><text text-anchor="start" dy=".2em" transform="rotate(-83.22691137533825)translate(126.5452468691798)rotate(0)" style="opacity: 1; fill: #000000;"><title>class name: select_support_scan
+member_name: tree_select_0
+ size: 0.00MB</title><tspan x="0"></tspan><tspan x="0" dy="1em"></tspan></text><text text-anchor="start" dy=".2em" transform="rotate(-75.54180251546076)translate(126.5452468691798)rotate(0)" style="opacity: 1; fill: #000000;"><title>class name: rank_support_v5
+member_name: tree_rank
+ size: 7860.94MB</title><tspan x="0">tree_rank</tspan><tspan x="0" dy="1em"></tspan></text><text text-anchor="start" dy=".2em" transform="rotate(-75.54180251546076)translate(210.90012810658274)rotate(0)" style="opacity: 1; fill: #eeeeee;"><title>class name: int_vector
+member_name: cumulative_counts
+ size: 7860.94MB</title><tspan x="0">cumulative_counts</tspan><tspan x="0" dy="1em"></tspan></text><text text-anchor="start" dy=".2em" transform="rotate(-67.8566936518539)translate(126.5452468691798)rotate(0)" style="opacity: 1; fill: #000000;"><title>class name: unsigned int
+member_name: max_level
+ size: 0.00MB</title><tspan x="0"></tspan><tspan x="0" dy="1em"></tspan></text><text text-anchor="start" dy=".2em" transform="rotate(55.1050478936117)translate(126.5452468691798)rotate(0)" style="opacity: 1; fill: #000000;"><title>class name: bit_vector
+member_name: tree
+ size: 125775.00MB</title><tspan x="0">tree</tspan><tspan x="0" dy="1em"></tspan></text><text text-anchor="end" dy=".2em" transform="rotate(178.06678944280674)translate(126.5452468691798)rotate(-180)" style="opacity: 1; fill: #000000;"><title>class name: unsigned long
+member_name: sigma
+ size: 0.00MB</title><tspan x="0"></tspan><tspan x="0" dy="1em"></tspan></text><text text-anchor="end" dy=".2em" transform="rotate(178.0667894502655)translate(126.5452468691798)rotate(-180)" style="opacity: 1; fill: #eeeeee;"><title>class name: select_support_scan
+member_name: tree_select_1
+ size: 0.00MB</title><tspan x="0"></tspan><tspan x="0" dy="1em"></tspan></text><text text-anchor="end" dy=".2em" transform="rotate(178.0667894577242)translate(126.5452468691798)rotate(-180)" style="opacity: 1; fill: #eeeeee;"><title>class name: unsigned long
+member_name: size
+ size: 0.00MB</title><tspan x="0"></tspan><tspan x="0" dy="1em"></tspan></text><text text-anchor="end" dy=".2em" transform="rotate(224.0333947325915)translate(54.362709017600764)rotate(-180)" style="opacity: 1; fill: #000000;"><title>class name: csa_wt
+member_name: csa
+ size: 47018.28MB</title><tspan x="0">csa</tspan><tspan x="0" dy="1em"></tspan></text><text text-anchor="end" dy=".2em" transform="rotate(178.44611552315894)translate(126.5452468691798)rotate(-180)" style="opacity: 1; fill: #000000;"><title>class name: int_alphabet
+member_name: alphabet
+ size: 388.00MB</title><tspan x="0"></tspan><tspan x="0" dy="1em"></tspan></text><text text-anchor="end" dy=".2em" transform="rotate(178.06678947264163)translate(210.90012810658274)rotate(-180)" style="opacity: 1; fill: #000000;"><title>class name: unsigned long
+member_name: m_sigma
+ size: 0.00MB</title><tspan x="0"></tspan><tspan x="0" dy="1em"></tspan></text><text text-anchor="end" dy=".2em" transform="rotate(178.4461154914593)translate(210.90012810658274)rotate(-180)" style="opacity: 1; fill: #eeeeee;"><title>class name: int_vector
+member_name: m_C
+ size: 388.00MB</title><tspan x="0"></tspan><tspan x="0" dy="1em"></tspan></text><text text-anchor="end" dy=".2em" transform="rotate(178.82544150281808)translate(210.90012810658274)rotate(-180)" style="opacity: 1; fill: #000000;"><title>class name: rank_support_sd
+member_name: m_char_rank
+ size: 0.00MB</title><tspan x="0"></tspan><tspan x="0" dy="1em"></tspan></text><text text-anchor="end" dy=".2em" transform="rotate(178.82544150281808)translate(210.90012810658274)rotate(-180)" style="opacity: 1; fill: #000000;"><title>class name: select_support_sd
+member_name: m_char_select
+ size: 0.00MB</title><tspan x="0"></tspan><tspan x="0" dy="1em"></tspan></text><text text-anchor="end" dy=".2em" transform="rotate(178.82544154197655)translate(210.90012810658274)rotate(-180)" style="opacity: 1; fill: #000000;"><title>class name: sd_vector
+member_name: m_char
+ size: 0.00MB</title><tspan x="0"></tspan><tspan x="0" dy="1em"></tspan></text><text text-anchor="end" dy=".2em" transform="rotate(178.82544151027685)translate(304.27950330323876)rotate(-180)" style="opacity: 1; fill: #eeeeee;"><title>class name: select_support_mcl
+member_name: high_1_select
+ size: 0.00MB</title><tspan x="0"></tspan><tspan x="0" dy="1em"></tspan></text><text text-anchor="end" dy=".2em" transform="rotate(178.82544152519438)translate(304.27950330323876)rotate(-180)" style="opacity: 1; fill: #000000;"><title>class name: bit_vector
+member_name: high
+ size: 0.00MB</title><tspan x="0"></tspan><tspan x="0" dy="1em"></tspan></text><text text-anchor="end" dy=".2em" transform="rotate(178.8254415410442)translate(304.27950330323876)rotate(-180)" style="opacity: 1; fill: #000000;"><title>class name: int_vector
+member_name: low
+ size: 0.00MB</title><tspan x="0"></tspan><tspan x="0" dy="1em"></tspan></text><text text-anchor="end" dy=".2em" transform="rotate(178.82544155689402)translate(304.27950330323876)rotate(-180)" style="opacity: 1; fill: #000000;"><title>class name: select_support_mcl
+member_name: high_0_select
+ size: 0.00MB</title><tspan x="0"></tspan><tspan x="0" dy="1em"></tspan></text><text text-anchor="end" dy=".2em" transform="rotate(178.8254415652852)translate(304.27950330323876)rotate(-180)" style="opacity: 1; fill: #eeeeee;"><title>class name: unsigned char
+member_name: wl
+ size: 0.00MB</title><tspan x="0"></tspan><tspan x="0" dy="1em"></tspan></text><text text-anchor="end" dy=".2em" transform="rotate(178.8254415736762)translate(304.27950330323876)rotate(-180)" style="opacity: 1; fill: #eeeeee;"><title>class name: unsigned long
+member_name: size
+ size: 0.00MB</title><tspan x="0"></tspan><tspan x="0" dy="1em"></tspan></text><text text-anchor="end" dy=".2em" transform="rotate(178.82561185029243)translate(126.5452468691798)rotate(-180)" style="opacity: 1; fill: #000000;"><title>class name: int_vector
+member_name: isa_samples
+ size: 0.17MB</title><tspan x="0"></tspan><tspan x="0" dy="1em"></tspan></text><text text-anchor="end" dy=".2em" transform="rotate(178.82595238860745)translate(126.5452468691798)rotate(-180)" style="opacity: 1; fill: #000000;"><title>class name: int_vector
+member_name: sa_samples
+ size: 0.17MB</title><tspan x="0"></tspan><tspan x="0" dy="1em"></tspan></text><text text-anchor="end" dy=".2em" transform="rotate(224.41306132888246)translate(126.5452468691798)rotate(-180)" style="opacity: 1; fill: #000000;"><title>class name: wt_int
+member_name: wavelet_tree
+ size: 46629.93MB</title><tspan x="0">wavelet_tree</tspan><tspan x="0" dy="1em"></tspan></text><text text-anchor="end" dy=".2em" transform="rotate(178.8261226614943)translate(210.90012810658274)rotate(-180)" style="opacity: 1; fill: #000000;"><title>class name: unsigned int
+member_name: max_level
+ size: 0.00MB</title><tspan x="0"></tspan><tspan x="0" dy="1em"></tspan></text><text text-anchor="end" dy=".2em" transform="rotate(178.82612266522364)translate(210.90012810658274)rotate(-180)" style="opacity: 1; fill: #eeeeee;"><title>class name: select_support_rrr
+member_name: tree_select_1
+ size: 0.00MB</title><tspan x="0"></tspan><tspan x="0" dy="1em"></tspan></text><text text-anchor="end" dy=".2em" transform="rotate(178.82612266522364)translate(210.90012810658274)rotate(-180)" style="opacity: 1; fill: #000000;"><title>class name: rank_support_rrr
+member_name: tree_rank
+ size: 0.00MB</title><tspan x="0"></tspan><tspan x="0" dy="1em"></tspan></text><text text-anchor="end" dy=".2em" transform="rotate(178.8261226726824)translate(210.90012810658274)rotate(-180)" style="opacity: 1; fill: #000000;"><title>class name: unsigned long
+member_name: sigma
+ size: 0.00MB</title><tspan x="0"></tspan><tspan x="0" dy="1em"></tspan></text><text text-anchor="end" dy=".2em" transform="rotate(178.82612268014117)translate(210.90012810658274)rotate(-180)" style="opacity: 1; fill: #000000;"><title>class name: select_support_rrr
+member_name: tree_select_0
+ size: 0.00MB</title><tspan x="0"></tspan><tspan x="0" dy="1em"></tspan></text><text text-anchor="end" dy=".2em" transform="rotate(224.41306133261185)translate(210.90012810658274)rotate(-180)" style="opacity: 1; fill: #000000;"><title>class name: rrr_vector
+member_name: tree
+ size: 46629.93MB</title><tspan x="0">tree</tspan><tspan x="0" dy="1em"></tspan></text><text text-anchor="end" dy=".2em" transform="rotate(178.8894614977247)translate(304.27950330323876)rotate(-180)" style="opacity: 1; fill: #000000;"><title>class name: bit_vector
+member_name: invert
+ size: 64.79MB</title><tspan x="0"></tspan><tspan x="0" dy="1em"></tspan></text><text text-anchor="end" dy=".2em" transform="rotate(181.3596750786083)translate(304.27950330323876)rotate(-180)" style="opacity: 1; fill: #eeeeee;"><title>class name: int_vector
+member_name: btnrp
+ size: 2461.94MB</title><tspan x="0">btnrp</tspan><tspan x="0" dy="1em"></tspan></text><text text-anchor="end" dy=".2em" transform="rotate(212.31534876938656)translate(304.27950330323876)rotate(-180)" style="opacity: 1; fill: #000000;"><title>class name: bit_vector
+member_name: btnr
+ size: 29201.97MB</title><tspan x="0">btnr</tspan><tspan x="0" dy="1em"></tspan></text><text text-anchor="end" dy=".2em" transform="rotate(243.27102246016483)translate(304.27950330323876)rotate(-180)" style="opacity: 1; fill: #000000;"><title>class name: int_vector
+member_name: rank_samples
+ size: 2461.94MB</title><tspan x="0">rank_samples</tspan><tspan x="0" dy="1em"></tspan></text><text text-anchor="end" dy=".2em" transform="rotate(257.83894859681493)translate(304.27950330323876)rotate(-180)" style="opacity: 1; fill: #000000;"><title>class name: int_vector
+member_name: bt
+ size: 12439.29MB</title><tspan x="0">bt</tspan><tspan x="0" dy="1em"></tspan></text><text text-anchor="end" dy=".2em" transform="rotate(269.99999997762365)translate(304.27950330323876)rotate(-180)" style="opacity: 1; fill: #eeeeee;"><title>class name: unsigned long
+member_name: size
+ size: 0.00MB</title><tspan x="0"></tspan><tspan x="0" dy="1em"></tspan></text><text text-anchor="end" dy=".2em" transform="rotate(269.9999999925412)translate(210.90012810658274)rotate(-180)" style="opacity: 1; fill: #eeeeee;"><title>class name: unsigned long
+member_name: size
+ size: 0.00MB</title><tspan x="0"></tspan><tspan x="0" dy="1em"></tspan></text></g></svg>
